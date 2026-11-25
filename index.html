@@ -1,0 +1,2075 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Thread</title>
+<meta name="description" content="A writing notebook that keeps each project's writing, inspiration and characters together, in order.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Thread">
+<meta name="theme-color" content="#ECEFE8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#13171D" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#ECEFE8; --surface:#F7F8F4; --ink:#1D2633; --muted:#5D6672; --faint:#858D97; --line:#D2D8CE;
+  --thread:#3B4FA0; --thread-ink:#F7F8F4; --note:#E1E6F3; --mat:#FFFFFF; --danger:#A3302B;
+  --scrim:rgba(20,26,34,.38); --flash:rgba(59,79,160,.12);
+  --k-family:#2F7A5F; --k-romance:#B0416A; --k-friends:#2F6FB0; --k-rivals:#A0621A;
+  --k-enemies:#9E2F3A; --k-mentor:#6B4FA3; --k-work:#56606C; --k-other:#77702F;
+  --band:#3B4FA0;
+  --serif:"Literata", Georgia, "Times New Roman", serif;
+  --sans:"Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#13171D; --surface:#1B2028; --ink:#E2E5E9; --muted:#9AA2AD; --faint:#727A85; --line:#2C333D;
+    --thread:#8FA1E8; --thread-ink:#13171D; --note:#1F2638; --mat:#222832; --danger:#E27A72;
+    --scrim:rgba(0,0,0,.55); --flash:rgba(143,161,232,.14); --band:#13171D;
+    --k-family:#6FC3A0; --k-romance:#E58BAA; --k-friends:#7FAEE6; --k-rivals:#E2A85A;
+    --k-enemies:#EC8A90; --k-mentor:#B39DE6; --k-work:#A7B0BC; --k-other:#C9BE7A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#13171D; --surface:#1B2028; --ink:#E2E5E9; --muted:#9AA2AD; --faint:#727A85; --line:#2C333D;
+  --thread:#8FA1E8; --thread-ink:#13171D; --note:#1F2638; --mat:#222832; --danger:#E27A72;
+  --scrim:rgba(0,0,0,.55); --flash:rgba(143,161,232,.14); --band:#13171D;
+    --k-family:#6FC3A0; --k-romance:#E58BAA; --k-friends:#7FAEE6; --k-rivals:#E2A85A;
+    --k-enemies:#EC8A90; --k-mentor:#B39DE6; --k-work:#A7B0BC; --k-other:#C9BE7A;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+[hidden]{display:none !important}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+img,video{max-width:100%}
+:focus-visible{outline:2px solid var(--thread);outline-offset:2px;border-radius:4px}
+
+/* ---------- shell ---------- */
+.app{min-height:100vh}
+.sidebar{position:fixed;top:0;bottom:0;left:0;z-index:40;width:min(84vw,320px);background:var(--surface);
+  border-right:1px solid var(--line);display:flex;flex-direction:column;gap:14px;
+  padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(16px + env(safe-area-inset-bottom,0px));
+  transform:translateX(-102%);transition:transform .24s ease;overflow-y:auto}
+.app.nav-open .sidebar{transform:none}
+.scrim{position:fixed;inset:0;background:var(--scrim);z-index:35;opacity:0;pointer-events:none;transition:opacity .2s}
+.app.nav-open .scrim{opacity:1;pointer-events:auto}
+.brand{display:flex;align-items:center;gap:11px;margin:0 10px;align-self:flex-start}
+.brand-mark{flex:none;width:32px;height:32px;border-radius:8px;display:block}
+.brand span{font-family:var(--serif);font-style:italic;font-size:1.45rem;line-height:1.2;padding:0 0 6px;
+  background:repeating-linear-gradient(90deg,var(--thread) 0 7px,transparent 7px 12px) left bottom/64px 2px no-repeat}
+.proj-list{display:flex;flex-direction:column;gap:2px;flex:1}
+.proj{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;border:0;background:transparent;
+  padding:9px 10px 9px 12px;border-radius:8px;position:relative}
+.proj:hover{background:var(--paper)}
+.proj.active{background:var(--note)}
+.proj.active::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:2px;background:var(--thread)}
+.proj-title{font-family:var(--serif);font-size:1rem;line-height:1.35;overflow-wrap:anywhere}
+.proj-sub{font-size:12.5px;color:var(--faint)}
+.sync-note{font-size:12.5px;color:var(--muted);margin:0;padding:10px 10px 0;border-top:1px solid var(--line)}
+.sync-note.local{color:var(--danger)}
+
+.main{min-width:0;display:flex;flex-direction:column;min-height:100vh}
+.topbar{min-width:0;position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--paper);display:flex;align-items:center;gap:8px;
+  padding:10px 16px;border-bottom:1px solid var(--line)}
+.spacer{flex:1}
+.nav-btn{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;padding:6px 8px 6px 4px;border-radius:8px;font-weight:500}
+.save-status{font-size:12.5px;color:var(--faint);white-space:nowrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:2px;background:var(--surface)}
+.seg button{border:0;background:transparent;padding:5px 13px;border-radius:999px;font-size:13.5px;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.icon-btn{width:34px;height:34px;display:inline-grid;place-items:center;border:0;background:transparent;border-radius:8px;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--surface);color:var(--ink)}
+body:not([data-view="project"]) .proj-only{display:none !important}
+body:not([data-view="project"]) .topbar{border-bottom-color:transparent}
+
+@media (min-width:900px){
+  .app{display:grid;grid-template-columns:272px minmax(0,1fr)}
+  .sidebar{position:sticky;top:env(safe-area-inset-top,0px);height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));
+    transform:none;width:auto;z-index:1;background:transparent;transition:none}
+  .scrim,.nav-btn{display:none}
+}
+
+.column{width:100%;max-width:46rem;margin:0 auto;padding:0 20px}
+.loading{padding:80px 20px;text-align:center;color:var(--muted);font-family:var(--serif);font-style:italic}
+
+/* ---------- buttons ---------- */
+.btn{border:1px solid var(--line);background:var(--surface);padding:9px 16px;border-radius:10px;font-weight:500;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--thread);border-color:var(--thread);color:var(--thread-ink)}
+.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.new-proj{margin:0 2px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  padding:7px 13px;border-radius:999px;font-size:14px;font-weight:500;white-space:nowrap}
+.chip:hover{border-color:var(--thread);color:var(--thread)}
+.chip svg{flex:none}
+
+/* ---------- welcome ---------- */
+.welcome{padding-top:min(14vh,110px);padding-bottom:60px}
+.welcome-mark{display:block;width:76px;height:76px;border-radius:18px;margin:0 0 26px}
+.welcome h1{font-family:var(--serif);font-weight:600;font-size:clamp(2rem,6vw,2.8rem);line-height:1.1;margin:0 0 16px;letter-spacing:-.01em}
+.welcome p{font-family:var(--serif);font-size:1.0625rem;line-height:1.7;color:var(--muted);max-width:34rem;margin:0 0 28px}
+.welcome label{display:block;font-weight:500;font-size:14px;margin-bottom:6px}
+.create-row{display:flex;gap:10px;flex-wrap:wrap}
+.create-row input{flex:1 1 220px;min-width:0;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:10px 12px;font-family:var(--serif);font-size:1.0625rem}
+.create-row input:focus{outline:none;border-color:var(--thread)}
+
+/* ---------- project head ---------- */
+.project-head{padding:26px 0 6px}
+.project-title{width:100%;border:0;background:transparent;padding:0;font-family:var(--serif);font-weight:600;
+  font-size:clamp(1.6rem,4.6vw,2.2rem);line-height:1.2;letter-spacing:-.01em}
+.project-title:focus{outline:none;box-shadow:0 2px 0 var(--thread)}
+.meta-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:6px}
+.meta{margin:0;font-size:14px;color:var(--muted)}
+
+/* ---------- the thread ---------- */
+.thread{list-style:none;margin:18px 0 0;padding:0;position:relative}
+.thread::before{content:"";position:absolute;left:15px;top:14px;bottom:28px;width:2px;
+  background:repeating-linear-gradient(to bottom,var(--thread) 0 9px,transparent 9px 15px);opacity:.55}
+.item{display:grid;grid-template-columns:32px minmax(0,1fr);column-gap:16px;position:relative;border-radius:10px}
+.item.flash{animation:flash 1.3s ease-out}
+@keyframes flash{from{background:var(--flash)}to{background:transparent}}
+.gap{grid-column:1/-1;display:flex;align-items:center;gap:16px;min-height:30px}
+.thread .item:first-child .gap{min-height:18px}
+.gap-plus{width:32px;height:26px;border:0;background:transparent;padding:0;display:grid;place-items:center;color:var(--thread);opacity:0;transition:opacity .15s}
+.gap-plus span{width:22px;height:22px;border-radius:50%;background:var(--paper);border:1px solid var(--thread);display:grid;place-items:center}
+.gap-plus svg{width:14px;height:14px}
+.item:hover .gap-plus,.gap-plus:focus-visible,.gap.open .gap-plus{opacity:1}
+@media (hover:none){.gap-plus{opacity:.6}}
+.gap-choices{display:none;flex:1;min-width:0;gap:6px;flex-wrap:wrap;padding:4px 0}
+.gap.open .gap-choices{display:flex}
+.chip.small{padding:5px 11px;font-size:13px}
+.chip.small svg{width:16px;height:16px}
+
+.stitch{grid-column:1;display:flex;justify-content:center;padding-top:3px}
+.num{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;position:relative;z-index:1;
+  font-family:var(--serif);font-size:13px;font-variant-numeric:oldstyle-nums;line-height:1;
+  background:var(--paper);border:1.5px solid var(--thread);color:var(--thread)}
+.item[data-type="writing"] .num{background:var(--thread);color:var(--thread-ink)}
+.item[data-type="image"] .num,.item[data-type="video"] .num,.item[data-type="file"] .num{border-radius:7px}
+.content{grid-column:2;min-width:0;padding-bottom:10px}
+.head{display:flex;align-items:center;gap:8px;min-height:34px}
+.kind{font-size:13px;color:var(--muted);font-weight:500}
+.item-menu{margin-left:auto}
+
+.w-title{flex:1;min-width:0;border:0;background:transparent;padding:2px 0;font-family:var(--serif);font-weight:600;font-size:1.25rem;line-height:1.3}
+.w-title::placeholder{color:var(--faint);font-weight:400;font-style:italic}
+.w-title:focus,.w-body:focus,.n-body:focus,.caption:focus{outline:none}
+.w-body{display:block;width:100%;border:0;background:transparent;resize:none;overflow:hidden;padding:4px 0 2px;
+  font-family:var(--serif);font-size:1.0625rem;line-height:1.75;min-height:3.6em}
+.w-body::placeholder,.n-body::placeholder,.caption::placeholder{color:var(--faint)}
+.wc{font-size:12.5px;color:var(--faint);min-height:1.2em}
+
+.note-card{background:var(--note);border-left:3px solid var(--thread);border-radius:3px 12px 12px 3px;padding:10px 14px;margin-top:2px}
+.n-body{display:block;width:100%;border:0;background:transparent;resize:none;overflow:hidden;padding:0;
+  font-family:var(--serif);font-style:italic;font-size:1rem;line-height:1.65;min-height:1.7em}
+
+.photo{margin:2px 0 0;background:var(--mat);border:1px solid var(--line);border-radius:3px;padding:10px 10px 2px}
+.photo-btn{display:block;width:100%;border:0;padding:0;background:var(--paper);cursor:zoom-in}
+.photo img,.photo video{display:block;width:100%;height:auto;max-height:72vh;object-fit:contain;background:var(--paper)}
+.photo.missing .photo-btn::after{content:"This photo is no longer available.";display:block;padding:28px 12px;color:var(--muted);font-size:14px}
+.photo.missing img{display:none}
+.caption{display:block;width:100%;border:0;background:transparent;padding:9px 2px 8px;font-family:var(--serif);font-style:italic;font-size:1rem}
+.file-row{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.file-icon{color:var(--thread);flex:none}
+.file-info{flex:1;min-width:0}
+.file-name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file-sub{font-size:12.5px;color:var(--muted)}
+.file-row a.chip{text-decoration:none}
+.file-cap{border-bottom:1px solid transparent}
+
+.empty-thread{font-family:var(--serif);font-size:1.0625rem;line-height:1.7;color:var(--muted);margin:22px 0 40px;
+  padding-left:48px;position:relative}
+.empty-thread::before{content:"";position:absolute;left:15px;top:4px;height:56px;width:2px;
+  background:repeating-linear-gradient(to bottom,var(--thread) 0 9px,transparent 9px 15px);opacity:.55}
+.thread-end{height:40px}
+
+/* ---------- add bar ---------- */
+.addbar{position:sticky;bottom:0;z-index:15;margin-top:auto;background:var(--paper);border-top:1px solid var(--line);
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.addbar-inner{max-width:46rem;margin:0 auto;display:flex;gap:8px;align-items:center;padding:0 4px}
+.addbar-label{font-size:13.5px;color:var(--muted);margin-right:4px}
+body[data-mode="read"] .addbar,body[data-tab="chars"] .addbar,body[data-tab="chars"] #modeSeg{display:none}
+@media (max-width:560px){
+  .addbar-label{display:none}
+  .addbar-inner{padding:0}
+  .addbar .chip{flex:1;flex-direction:column;gap:2px;padding:7px 4px;border-radius:12px;font-size:12.5px}
+  body.typing .addbar{display:none}
+  .topbar{padding:8px 12px}
+  .column{padding-left:16px;padding-right:16px}
+  .item{column-gap:12px}
+}
+
+/* ---------- reader ---------- */
+.reader{font-family:var(--serif);font-size:1.125rem;line-height:1.8;max-width:36rem;margin:0 auto;padding:30px 0 90px}
+.reader h1{font-size:clamp(1.8rem,5vw,2.3rem);line-height:1.15;margin:0 0 6px;font-weight:600;letter-spacing:-.01em}
+.reader-note{font-family:var(--sans);font-size:13.5px;color:var(--muted);margin:0 0 36px}
+.reader h2{font-size:1.3rem;line-height:1.3;margin:2.2em 0 .7em;font-weight:600}
+.reader p{margin:0 0 1em;white-space:pre-line;overflow-wrap:break-word}
+.reader .break{width:48px;height:2px;margin:2.2em auto;background:repeating-linear-gradient(90deg,var(--thread) 0 7px,transparent 7px 12px);opacity:.7}
+
+/* ---------- overlays ---------- */
+.menu{position:fixed;z-index:70;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:5px;min-width:190px;
+  box-shadow:0 14px 34px -14px rgba(0,0,0,.4)}
+.menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:9px 11px;border-radius:7px;font-size:14.5px}
+.menu button:hover:not([disabled]){background:var(--paper)}
+.menu button[disabled]{color:var(--faint);cursor:default}
+.menu button.danger{color:var(--danger)}
+.toast{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);opacity:0;z-index:60;
+  background:var(--ink);color:var(--paper);padding:10px 14px;border-radius:10px;display:flex;align-items:center;gap:14px;
+  max-width:calc(100% - 32px);width:max-content;font-size:14px;transition:opacity .18s,transform .18s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast-act{border:0;background:transparent;color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:2px 0}
+.modal-scrim{position:fixed;inset:0;z-index:80;background:var(--scrim);display:grid;place-items:center;padding:16px}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;max-width:390px;width:100%}
+.modal h2{font-family:var(--serif);font-size:1.25rem;margin:0 0 8px;font-weight:600}
+.modal p{margin:0 0 18px;color:var(--muted);overflow-wrap:anywhere}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end}
+.lightbox{position:fixed;inset:0;z-index:90;background:rgba(10,12,16,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:calc(56px + env(safe-area-inset-top,0px)) 16px calc(24px + env(safe-area-inset-bottom,0px))}
+.lightbox img{max-width:100%;max-height:100%;object-fit:contain;min-height:0}
+.lightbox p{color:#e6e8ec;font-family:var(--serif);font-style:italic;margin:12px 0 0;text-align:center}
+.lightbox .close{position:absolute;top:calc(10px + env(safe-area-inset-top,0px));right:12px;color:#e6e8ec;background:rgba(255,255,255,.08)}
+.drop{position:fixed;inset:12px;z-index:50;border:2px dashed var(--thread);border-radius:16px;background:var(--note);opacity:.94;
+  display:grid;place-items:center;pointer-events:none;font-family:var(--serif);font-size:1.25rem;color:var(--thread)}
+
+/* ---------- project tabs ---------- */
+.tabs{display:flex;gap:24px;margin-top:20px;border-bottom:1px solid var(--line)}
+.tab{border:0;background:transparent;padding:8px 0 11px;font-weight:500;font-size:15px;color:var(--muted);position:relative;display:inline-flex;gap:7px;align-items:baseline}
+.tab:hover{color:var(--ink)}
+.tab .count{font-size:12.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+.tab[aria-selected="true"]{color:var(--ink)}
+.tab[aria-selected="true"]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;
+  background:repeating-linear-gradient(90deg,var(--thread) 0 7px,transparent 7px 12px)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.btn.small{padding:7px 13px;font-size:14px}
+.seg.small button{padding:4px 12px;font-size:13px}
+
+/* ---------- relationship tags ---------- */
+.k-family{--k:var(--k-family)} .k-romance{--k:var(--k-romance)} .k-friends{--k:var(--k-friends)} .k-rivals{--k:var(--k-rivals)}
+.k-enemies{--k:var(--k-enemies)} .k-mentor{--k:var(--k-mentor)} .k-work{--k:var(--k-work)} .k-other{--k:var(--k-other)}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:500;line-height:1.25;padding:3px 9px 3px 8px;border-radius:999px;
+  color:var(--k,var(--muted));background:var(--note);background:color-mix(in srgb,var(--k,var(--muted)) 13%,transparent);white-space:nowrap}
+.tag::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ---------- character list ---------- */
+.chars{padding:20px 0 64px}
+.chars-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.chars-empty{font-family:var(--serif);font-size:1.0625rem;line-height:1.7;color:var(--muted);max-width:32rem;margin:8px 0 0}
+.cgrid{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.cgrid li{display:flex;min-width:0}
+.ccard{flex:1;min-width:0;display:flex;gap:14px;align-items:flex-start;text-align:left;background:var(--mat);border:1px solid var(--line);border-radius:4px;padding:18px 14px 14px;position:relative}
+.ccard::before{content:"";position:absolute;left:14px;right:14px;top:7px;height:2px;background:repeating-linear-gradient(90deg,var(--thread) 0 7px,transparent 7px 12px);opacity:.4}
+.ccard:hover{border-color:var(--muted)}
+.portrait{flex:none;width:52px;height:52px;border-radius:50%;overflow:hidden;background:var(--note);color:var(--thread);display:grid;place-items:center;
+  font-family:var(--serif);font-size:1.1rem;line-height:1;letter-spacing:.02em}
+.portrait img{width:100%;height:100%;object-fit:cover;display:block}
+.cc-body{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px}
+.cc-name{font-family:var(--serif);font-weight:600;font-size:1.1rem;line-height:1.3;overflow-wrap:anywhere}
+.cc-role{font-size:13.5px;color:var(--muted);overflow-wrap:anywhere}
+.cc-snip{font-family:var(--serif);font-size:.95rem;line-height:1.55;color:var(--muted);margin-top:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.cc-tags .more{font-size:12.5px;color:var(--faint);align-self:center}
+
+/* ---------- character detail ---------- */
+.cdetail{padding:14px 0 72px}
+.cd-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.back{border:0;background:transparent;display:inline-flex;align-items:center;gap:6px;padding:6px 10px 6px 2px;color:var(--muted);font-weight:500;border-radius:8px}
+.back:hover{color:var(--ink)}
+.cd-head{display:flex;gap:18px;align-items:flex-start}
+.cd-portrait{width:88px;height:88px;border:1px solid var(--line);padding:0;font-size:1.6rem;cursor:pointer}
+.cd-portrait:hover{border-color:var(--thread)}
+.cd-id{flex:1;min-width:0}
+.cd-name{width:100%;border:0;background:transparent;padding:4px 0 6px;font-family:var(--serif);font-weight:600;font-size:clamp(1.45rem,4.2vw,1.85rem);line-height:1.2}
+.cd-name::placeholder{color:var(--faint);font-weight:400;font-style:italic}
+.cd-name:focus{outline:none;box-shadow:0 2px 0 var(--thread)}
+.cd-line{display:flex;gap:10px;margin-top:6px}
+.cd-line .field{margin-bottom:0}
+.field{margin-bottom:18px}
+.field.grow{flex:1;min-width:0}
+.field.age{flex:0 0 88px}
+.field > label,.flabel{display:block;font-size:13.5px;font-weight:500;color:var(--muted);margin-bottom:6px}
+.inp{display:block;width:100%;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:8px 11px;font-size:16px}
+.inp:focus{outline:none;border-color:var(--thread);box-shadow:0 0 0 3px var(--flash)}
+.inp::placeholder{color:var(--faint)}
+textarea.inp{font-family:var(--serif);font-size:1rem;line-height:1.65;resize:none;overflow:hidden;min-height:4.4em}
+textarea.inp.big{min-height:9em}
+.cd-fields{margin-top:4px}
+
+.conn-sec{margin:28px 0 30px}
+.conn-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.conn-head h3{margin:0;font-family:var(--serif);font-size:1.2rem;font-weight:600}
+.conn-head h3 .count{font-family:var(--sans);font-size:13px;font-weight:500;color:var(--faint);margin-left:4px}
+.conns{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.conn{display:flex;gap:8px;align-items:flex-start;padding:10px 6px 10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.conn.editing{border-color:var(--thread)}
+.conn-main{flex:1;min-width:0}
+.conn-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-height:34px}
+.conn-who{border:0;background:transparent;padding:0;font-family:var(--serif);font-weight:600;font-size:1.05rem;color:var(--ink);text-align:left;
+  text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:4px;overflow-wrap:anywhere}
+.conn-who:hover{text-decoration-color:var(--thread)}
+.conn-label{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+.conn-note{margin:4px 0 2px;font-family:var(--serif);font-style:italic;font-size:.975rem;line-height:1.6;white-space:pre-line;overflow-wrap:break-word}
+.conn-empty{font-family:var(--serif);color:var(--muted);line-height:1.65}
+
+.cform{margin-top:12px;padding:16px;border:1px solid var(--thread);border-radius:12px;background:var(--surface)}
+.cform .inp{background:var(--paper)}
+.kinds{display:flex;flex-wrap:wrap;gap:6px}
+.kind-opt{position:relative;cursor:pointer}
+.kind-opt input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.kind-opt span{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;font-size:14px;font-weight:500;color:var(--muted);background:var(--paper)}
+.kind-opt span::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--k)}
+.kind-opt input:checked + span{color:var(--k);border-color:var(--k);background:var(--note);background:color-mix(in srgb,var(--k) 13%,var(--surface))}
+.kind-opt input:focus-visible + span{outline:2px solid var(--thread);outline-offset:2px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
+.two .field{min-width:0}
+.form-err{color:var(--danger);font-size:14px;margin:0 0 12px}
+.form-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;align-items:center}
+.form-actions .remove{margin-right:auto;border:0;background:transparent;color:var(--danger);font-weight:500;padding:8px 2px}
+
+/* ---------- connection map ---------- */
+.map-box{background:var(--mat);border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.map-box svg{display:block;width:100%;height:auto}
+.map .edge{fill:none;stroke-width:2;stroke-linecap:round;opacity:.85}
+.map .edge.on{stroke-width:3;opacity:1}
+.map .dim{opacity:.3}
+.map .node{cursor:pointer;outline:none}
+.map .node .disc{fill:var(--note);stroke:var(--faint);stroke-width:1.5}
+.map .node:hover .disc{stroke:var(--thread)}
+.map .node.on .disc,.map .node:focus-visible .disc{stroke:var(--thread);stroke-width:3}
+.map .ini{fill:var(--thread);font-family:var(--serif);font-size:15px;text-anchor:middle}
+.map .nm{fill:var(--ink);font-family:var(--serif);font-size:14px;paint-order:stroke;stroke:var(--mat);stroke-width:4px;stroke-linejoin:round}
+.map .node.on .nm{font-weight:600}
+.map .edge-label{font-family:var(--sans);font-size:12px;font-weight:600;text-anchor:middle;paint-order:stroke;stroke:var(--mat);stroke-width:4px;stroke-linejoin:round}
+.map-panel{margin-top:14px}
+.mp-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.mp-name{font-family:var(--serif);font-weight:600;font-size:1.15rem;overflow-wrap:anywhere}
+.mp-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.mp-list li{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mp-hint{margin:10px 0 0;color:var(--muted);font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+
+@media (max-width:560px){
+  .two{grid-template-columns:1fr}
+  .cd-head{gap:14px}
+  .cd-portrait{width:68px;height:68px;font-size:1.3rem}
+  .field.age{flex-basis:72px}
+  .cgrid{grid-template-columns:1fr}
+}
+
+/* ---------- Home Screen app ---------- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--band);z-index:45}
+.backup{border-top:1px solid var(--line);padding:12px 10px 0;display:flex;flex-direction:column;gap:10px}
+.backup .sync-note{border:0;padding:0}
+.backup-actions{display:flex;gap:8px;flex-wrap:wrap}
+.install-hint{display:flex;gap:12px;align-items:flex-start;margin:12px 16px -24px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:14px;line-height:1.5}
+.install-hint p{margin:0;flex:1;min-width:0}
+.install-hint strong{font-weight:600}
+@media (min-width:900px){.install-hint{margin:16px auto 0;max-width:calc(46rem - 40px)}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none !important;animation:none !important}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar" aria-label="Projects">
+    <div class="brand"><img class="brand-mark" src="logo.svg" alt="" width="32" height="32"><span>Thread</span></div>
+    <button class="btn new-proj" id="newProject" type="button"></button>
+    <nav class="proj-list" id="projectList"></nav>
+    <div class="backup">
+      <p class="sync-note" id="syncNote"></p>
+      <div class="backup-actions">
+        <button class="btn small" id="backupBtn" type="button">Back up</button>
+        <button class="btn small" id="restoreBtn" type="button">Restore</button>
+      </div>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="nav-btn" id="navBtn" type="button" aria-controls="sidebar" aria-expanded="false"></button>
+      <span class="spacer"></span>
+      <div class="seg proj-only" id="modeSeg" role="group" aria-label="View">
+        <button type="button" data-mode="edit" aria-pressed="true">Edit</button>
+        <button type="button" data-mode="read" aria-pressed="false">Read</button>
+      </div>
+      <button class="icon-btn proj-only" id="projMore" type="button" aria-label="Project options" aria-haspopup="menu" aria-expanded="false"></button>
+    </header>
+
+    <div class="install-hint" id="installHint" hidden>
+      <p><strong>Add Thread to your Home Screen.</strong> In Safari, tap the Share button, then Add to Home Screen. Do this before you start writing: the Home Screen app keeps its own copy of your notebook, separate from Safari.</p>
+      <button class="btn small" id="installOk" type="button">Got it</button>
+    </div>
+    <div class="loading" id="loading">Opening your notebook…</div>
+
+    <section class="welcome column" id="welcome" hidden>
+      <img class="welcome-mark" src="logo.svg" alt="" width="76" height="76">
+      <h1>Start a thread</h1>
+      <p>Keep a project’s writing and everything that sparks it — notes, photos, files — together, in the order it belongs. <span id="welcomeSync"></span></p>
+      <label for="firstTitle">Project name</label>
+      <div class="create-row">
+        <input id="firstTitle" type="text" maxlength="120" placeholder="The lighthouse novel" autocomplete="off">
+        <button class="btn primary" id="firstCreate" type="button">Create project</button>
+      </div>
+    </section>
+
+    <section id="projectView" hidden>
+      <div class="column">
+        <div class="project-head" id="projectHead">
+          <input class="project-title" id="projectTitle" type="text" maxlength="120" aria-label="Project name" autocomplete="off">
+          <div class="meta-row"><p class="meta" id="meta"></p><span class="save-status" id="saveStatus" aria-live="polite"></span></div>
+          <div class="tabs" role="tablist" aria-label="Project sections">
+            <button class="tab" id="tabThread" role="tab" type="button" data-tab="thread" aria-selected="true" aria-controls="threadView">Thread <span class="count" id="tcThread"></span></button>
+            <button class="tab" id="tabChars" role="tab" type="button" data-tab="chars" aria-selected="false" aria-controls="charView" tabindex="-1">Characters <span class="count" id="tcChars"></span></button>
+          </div>
+        </div>
+        <div id="threadView" role="tabpanel" aria-labelledby="tabThread">
+          <ol class="thread" id="items"></ol>
+          <p class="empty-thread" id="emptyThread" hidden>This thread is empty. Add a piece of writing, a note, a photo or a file below, and each one takes its place in order.</p>
+          <div class="thread-end"></div>
+        </div>
+        <article class="reader" id="readView" hidden></article>
+        <section id="charView" role="tabpanel" aria-labelledby="tabChars" hidden></section>
+      </div>
+      <div class="addbar" id="addbar">
+        <div class="addbar-inner" id="addbarInner"><span class="addbar-label">Add to the end</span></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Photo">
+  <button class="icon-btn close" id="lbClose" type="button" aria-label="Close photo"></button>
+  <img id="lbImg" alt="">
+  <p id="lbCap"></p>
+</div>
+<div class="drop" id="drop" hidden>Drop to add to the end of this thread</div>
+<input type="file" id="fileInput" multiple hidden>
+<input type="file" id="portraitInput" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+<input type="file" id="restoreInput" accept=".json,application/json" hidden>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------------- helpers ---------------- */
+const $ = (s, r = document) => r.querySelector(s);
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') n.className = v;
+    else if (k === 'text') n.textContent = v;
+    else if (k === 'html') n.innerHTML = v;            // static icon markup only
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else n.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids) if (c != null) n.append(c);
+  return n;
+}
+const PATHS = {
+  menu: '<path d="M4 7h16M4 12h16M4 17h10"/>',
+  more: '<circle cx="5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="19" cy="12" r="1.3" fill="currentColor"/>',
+  pen: '<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
+  note: '<path d="M5 4h14v10l-6 6H5z"/><path d="M13 20v-6h6"/>',
+  photo: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/>',
+  clip: '<path d="M20 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1L13 4.3a3.3 3.3 0 0 1 4.7 4.7l-8.3 8.3a1.7 1.7 0 0 1-2.4-2.4l7.6-7.6"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  back: '<path d="M14.5 5.5L8 12l6.5 6.5"/>',
+  person: '<circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20c1.1-3.7 3.9-5.6 7.2-5.6s6.1 1.9 7.2 5.6"/>'
+};
+const ICON = (n, size = 20) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PATHS[n]}</svg>`;
+const ADD_KINDS = [['writing', 'Writing', 'pen'], ['note', 'Note', 'note'], ['image', 'Photo', 'photo'], ['file', 'File', 'clip']];
+const KIND_LABEL = { note: 'Note', image: 'Photo', video: 'Video', file: 'File' };
+const EXT_TYPES = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml',
+  mp4: 'video/mp4', webm: 'video/webm', pdf: 'application/pdf', txt: 'text/plain', md: 'text/markdown', markdown: 'text/markdown',
+  csv: 'text/csv', json: 'application/json' };
+const OK_TYPES = new Set(Object.values(EXT_TYPES));
+const TYPE_NAME = { 'application/pdf': 'PDF', 'text/plain': 'Text', 'text/markdown': 'Markdown', 'text/csv': 'CSV', 'application/json': 'JSON', 'image/svg+xml': 'SVG' };
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const countWords = s => ((s || '').match(/\S+/g) || []).length;
+const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`;
+const wordLabel = n => n ? plural(n, 'word', 'words') : '';
+function fmtSize(b) { if (!b) return ''; if (b < 1024) return b + ' B'; if (b < 1048576) return Math.round(b / 1024) + ' KB'; return (b / 1048576).toFixed(1) + ' MB'; }
+function ago(ts) {
+  const s = (Date.now() - ts) / 1000;
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + ' min ago';
+  if (s < 86400) return Math.floor(s / 3600) + ' h ago';
+  const d = Math.floor(s / 86400);
+  if (d === 1) return 'yesterday';
+  if (d < 7) return d + ' days ago';
+  return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+function resolveType(f) {
+  let t = (f.type || '').split(';')[0].trim().toLowerCase();
+  if (t === 'image/jpg') t = 'image/jpeg';
+  if (OK_TYPES.has(t)) return t;
+  const ext = (f.name || '').split('.').pop().toLowerCase();
+  return EXT_TYPES[ext] || null;
+}
+function slug(s) { return ((s || 'project').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60)) || 'project'; }
+
+/* ---------------- stores ---------------- */
+function addItemAliases(st) {
+  st.subscribeItems = (pid, cb, err) => st.subscribe(pid, 'items', cb, err);
+  st.setItem = (pid, id, d) => st.set(pid, 'items', id, d);
+  st.updateItem = (pid, id, p) => st.update(pid, 'items', id, p);
+  st.deleteItem = (pid, id) => st.del(pid, 'items', id);
+  st.listItems = pid => st.list(pid, 'items');
+  return st;
+}
+function makeDbStore(db, assets, userId) {
+  const base = db.collection('data/users/' + userId);
+  const queues = new Map();
+  const enqueue = (key, fn) => {
+    const prev = queues.get(key) || Promise.resolve();
+    const next = prev.catch(() => {}).then(fn);
+    queues.set(key, next);
+    next.catch(() => {}).finally(() => { if (queues.get(key) === next) queues.delete(key); });
+    return next;
+  };
+  const col = (pid, name) => base.doc(pid).collection(name);
+  const rows = s => s.docs.map(d => Object.assign({ id: d.id }, d.data()));
+  const k = (name, pid, id) => name + '/' + pid + '/' + id;
+  return addItemAliases({
+    synced: true,
+    canUpload: !!assets,
+    subscribeProjects: (cb, err) => base.onSnapshot(s => cb(rows(s), s.metadata), err),
+    subscribe: (pid, name, cb, err) => (name === 'items' ? col(pid, name).orderBy('pos') : col(pid, name)).limit(1000).onSnapshot(s => cb(rows(s), s.metadata), err),
+    setProject: (pid, d) => enqueue('p/' + pid, () => base.doc(pid).set(d)),
+    updateProject: (pid, p) => enqueue('p/' + pid, () => base.doc(pid).update(p)),
+    deleteProject: pid => enqueue('p/' + pid, () => base.doc(pid).delete()),
+    set: (pid, name, id, d) => enqueue(k(name, pid, id), () => col(pid, name).doc(id).set(d)),
+    update: (pid, name, id, p) => enqueue(k(name, pid, id), () => col(pid, name).doc(id).update(p)),
+    del: (pid, name, id) => enqueue(k(name, pid, id), () => col(pid, name).doc(id).delete()),
+    list: async (pid, name) => rows(await col(pid, name).limit(1000).get()),
+    upload: (blob, type) => assets.upload(blob, { type }),
+    deleteAsset: id => assets ? assets.delete(id).catch(() => {}) : Promise.resolve(),
+    assetUrl: id => '/_blob/' + id
+  });
+}
+
+function makeLocalStore() {
+  const KEY = 'thread-notebook-local-v1';
+  let data = { projects: {}, items: {} };
+  try { const raw = localStorage.getItem(KEY); if (raw) { const p = JSON.parse(raw); if (p && p.projects) data = p; } } catch {}
+  const pl = new Set(), subs = new Map();
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch {} };
+  const rowsOf = (name, pid) => Object.entries((data[name] || {})[pid] || {}).map(([id, v]) => Object.assign({ id }, v));
+  const emitP = () => { const a = Object.entries(data.projects).map(([id, v]) => Object.assign({ id }, v)); pl.forEach(f => f(a, { fromCache: false })); };
+  const emitS = (name, pid) => { const set = subs.get(name + '/' + pid); if (set) { const a = rowsOf(name, pid); set.forEach(f => f(a, { fromCache: false })); } };
+  return addItemAliases({
+    synced: false,
+    canUpload: false,
+    subscribeProjects(cb) { pl.add(cb); setTimeout(emitP, 0); return () => pl.delete(cb); },
+    subscribe(pid, name, cb) {
+      const key = name + '/' + pid;
+      if (!subs.has(key)) subs.set(key, new Set());
+      subs.get(key).add(cb);
+      setTimeout(() => emitS(name, pid), 0);
+      return () => { const set = subs.get(key); if (set) set.delete(cb); };
+    },
+    async setProject(pid, d) { data.projects[pid] = Object.assign({}, d); persist(); emitP(); },
+    async updateProject(pid, p) { if (!data.projects[pid]) return; Object.assign(data.projects[pid], p); persist(); emitP(); },
+    async deleteProject(pid) { delete data.projects[pid]; for (const n of ['items', 'characters', 'links']) if (data[n]) delete data[n][pid]; persist(); emitP(); },
+    async set(pid, name, id, d) { const m = (data[name] = data[name] || {}); (m[pid] = m[pid] || {})[id] = Object.assign({}, d); persist(); emitS(name, pid); },
+    async update(pid, name, id, p) { const m = (data[name] || {})[pid]; if (!m || !m[id]) throw { code: 'invalid_argument' }; Object.assign(m[id], p); persist(); emitS(name, pid); },
+    async del(pid, name, id) { const m = (data[name] || {})[pid]; if (m) delete m[id]; persist(); emitS(name, pid); },
+    async list(pid, name) { return rowsOf(name, pid); },
+    async upload() { throw { code: 'local' }; },
+    async deleteAsset() {},
+    assetUrl: id => '/_blob/' + id
+  });
+}
+
+/* on-device store: IndexedDB, photos and files kept as Blobs */
+const SUBS = ['items', 'characters', 'links'];
+function idbOpen() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('thread-notebook', 1);
+    r.onupgradeneeded = () => { const d = r.result; for (const n of ['docs', 'files']) if (!d.objectStoreNames.contains(n)) d.createObjectStore(n); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); r.onblocked = () => rej(new Error('blocked'));
+  });
+}
+function idbAll(idb, store) {
+  return new Promise((res, rej) => {
+    const out = [], req = idb.transaction(store, 'readonly').objectStore(store).openCursor();
+    req.onsuccess = () => { const c = req.result; if (c) { out.push([c.key, c.value]); c.continue(); } else res(out); };
+    req.onerror = () => rej(req.error);
+  });
+}
+function idbWrite(idb, store, fn) {
+  return new Promise((res, rej) => {
+    const tx = idb.transaction(store, 'readwrite');
+    fn(tx.objectStore(store));
+    tx.oncomplete = () => res();
+    tx.onerror = () => rej(tx.error);
+    tx.onabort = () => rej(tx.error || new Error('aborted'));
+  }).catch(e => { throw (e && e.name === 'QuotaExceededError') ? { code: 'quota_exceeded' } : { code: 'write_failed', message: String(e && e.message || e) }; });
+}
+function blobToB64(blob) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = () => rej(r.error); r.readAsDataURL(blob); });
+}
+function b64ToBlob(b64, type) {
+  const bin = atob(b64), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: type || 'application/octet-stream' });
+}
+async function makeIdbStore() {
+  const idb = await idbOpen();
+  const data = { projects: {} };
+  for (const [k, v] of await idbAll(idb, 'docs')) {
+    const parts = String(k).split('/');
+    if (parts[0] === 'projects' && parts.length === 2) data.projects[parts[1]] = v;
+    else if (parts.length === 3) { const [name, pid, id] = parts; const m = (data[name] = data[name] || {}); (m[pid] = m[pid] || {})[id] = v; }
+  }
+  const urls = new Map();
+  for (const [id, blob] of await idbAll(idb, 'files')) { try { urls.set(id, URL.createObjectURL(blob)); } catch {} }
+  const put = (k, v) => idbWrite(idb, 'docs', st => st.put(v, k));
+  const drop = k => idbWrite(idb, 'docs', st => st.delete(k));
+  const pl = new Set(), subs = new Map();
+  const rowsOf = (name, pid) => Object.entries((data[name] || {})[pid] || {}).map(([id, v]) => Object.assign({ id }, v));
+  const emitP = () => { const a = Object.entries(data.projects).map(([id, v]) => Object.assign({ id }, v)); pl.forEach(f => f(a, { fromCache: false })); };
+  const emitS = (name, pid) => { const set = subs.get(name + '/' + pid); if (set) { const a = rowsOf(name, pid); set.forEach(f => f(a, { fromCache: false })); } };
+  return addItemAliases({
+    synced: false,
+    canUpload: true,
+    subscribeProjects(cb) { pl.add(cb); setTimeout(emitP, 0); return () => pl.delete(cb); },
+    subscribe(pid, name, cb) {
+      const key = name + '/' + pid;
+      if (!subs.has(key)) subs.set(key, new Set());
+      subs.get(key).add(cb);
+      setTimeout(() => emitS(name, pid), 0);
+      return () => { const set = subs.get(key); if (set) set.delete(cb); };
+    },
+    async setProject(pid, d) { const v = Object.assign({}, d); await put('projects/' + pid, v); data.projects[pid] = v; emitP(); },
+    async updateProject(pid, p) { if (!data.projects[pid]) return; const v = Object.assign({}, data.projects[pid], p); await put('projects/' + pid, v); data.projects[pid] = v; emitP(); },
+    async deleteProject(pid) {
+      await drop('projects/' + pid); delete data.projects[pid];
+      for (const n of SUBS) if (data[n]) delete data[n][pid];
+      emitP();
+    },
+    async set(pid, name, id, d) { const v = Object.assign({}, d); await put(`${name}/${pid}/${id}`, v); const m = (data[name] = data[name] || {}); (m[pid] = m[pid] || {})[id] = v; emitS(name, pid); },
+    async update(pid, name, id, p) {
+      const m = (data[name] || {})[pid];
+      if (!m || !m[id]) throw { code: 'invalid_argument' };
+      const v = Object.assign({}, m[id], p); await put(`${name}/${pid}/${id}`, v); m[id] = v; emitS(name, pid);
+    },
+    async del(pid, name, id) { await drop(`${name}/${pid}/${id}`); const m = (data[name] || {})[pid]; if (m) delete m[id]; emitS(name, pid); },
+    async list(pid, name) { return rowsOf(name, pid); },
+    async upload(blob, type) {
+      const id = 'f' + uid(), b = blob.type === type ? blob : new Blob([blob], { type });
+      await idbWrite(idb, 'files', st => st.put(b, id));
+      const url = URL.createObjectURL(b); urls.set(id, url);
+      return { id, url, sizeBytes: b.size, contentType: type };
+    },
+    async deleteAsset(id) {
+      try { await idbWrite(idb, 'files', st => st.delete(id)); } catch {}
+      const u = urls.get(id); if (u) { URL.revokeObjectURL(u); urls.delete(id); }
+    },
+    assetUrl: id => urls.get(id) || '',
+    async dump() {
+      const out = { app: 'thread', format: 1, exportedAt: new Date().toISOString(), projects: {}, items: {}, characters: {}, links: {}, files: {} };
+      const want = new Set();
+      for (const [pid, v] of Object.entries(data.projects)) out.projects[pid] = v;
+      for (const n of SUBS) for (const [pid, rows] of Object.entries(data[n] || {})) {
+        if (!data.projects[pid]) continue;
+        out[n][pid] = rows;
+        for (const r of Object.values(rows)) { if (r.assetId) want.add(r.assetId); if (r.portraitId) want.add(r.portraitId); }
+      }
+      for (const [id, blob] of await idbAll(idb, 'files')) if (want.has(id)) out.files[id] = { type: blob.type, data: await blobToB64(blob) };
+      return out;
+    },
+    async replaceAll(b) {
+      const blobs = Object.entries(b.files || {}).map(([id, f]) => [id, b64ToBlob(f.data, f.type)]);
+      await idbWrite(idb, 'docs', st => {
+        st.clear();
+        for (const [pid, v] of Object.entries(b.projects || {})) st.put(v, 'projects/' + pid);
+        for (const n of SUBS) for (const [pid, rows] of Object.entries(b[n] || {})) for (const [id, v] of Object.entries(rows || {})) st.put(v, `${n}/${pid}/${id}`);
+      });
+      await idbWrite(idb, 'files', st => { st.clear(); for (const [id, blob] of blobs) st.put(blob, id); });
+    }
+  });
+}
+
+/* ---------------- state ---------------- */
+const S = { store: null, downloads: null, projects: [], currentId: null, items: [], itemsReady: false, unsubItems: null, mode: 'edit', justCreated: new Set(), insertBefore: null,
+  tab: 'thread', chars: [], links: [], charsReady: false, linksReady: false, unsubChars: null, unsubLinks: null,
+  charOpen: null, linkForm: null, mapFocus: null, newChars: new Set(), charLayout: lsGet('thread:charLayout') === 'map' ? 'map' : 'cards' };
+const els = new Map();       // item id -> li
+const pending = new Map();   // item id -> {pid, patch, tries}
+const timers = new Map();
+const lastTouch = new Map();
+let pendingFocus = null, flashId = null, scrollToId = null, saving = 0, lastError = null;
+
+const currentProject = () => S.projects.find(p => p.id === S.currentId) || null;
+const viewOf = (sub, it) => { const p = pending.get(sub + '/' + it.id); return p ? Object.assign({}, it, p.patch) : it; };
+const view = it => viewOf('items', it);
+
+function showView(v) {
+  document.body.dataset.view = v;
+  $('#loading').hidden = v !== 'loading';
+  $('#welcome').hidden = v !== 'welcome';
+  $('#projectView').hidden = v !== 'project';
+}
+
+/* ---------------- toast ---------------- */
+let toastTimer;
+function toast(msg, actionLabel, action, ms = 6000) {
+  const t = $('#toast');
+  t.textContent = '';
+  t.append(el('span', { text: msg }));
+  if (actionLabel) t.append(el('button', { type: 'button', class: 'toast-act', text: actionLabel, onclick: () => { hideToast(); action(); } }));
+  t.hidden = false;
+  requestAnimationFrame(() => t.classList.add('show'));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, ms);
+}
+function hideToast() { const t = $('#toast'); t.classList.remove('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 200); }
+
+function dbErrMsg(e) {
+  const c = e && e.code;
+  if (c === 'quota_exceeded') return 'This device is out of space for Thread. Free up some storage, then try again.';
+  if (c === 'resource_exhausted') return 'Too many changes at once. Wait a moment and try again.';
+  if (c === 'revoked') return 'This notebook is no longer available in this view.';
+  return 'That change wasn’t saved on this device. Try again.';
+}
+function uploadErrMsg(e, name) {
+  const c = e && e.code;
+  if (c === 'quota_exceeded') return `There isn’t enough space on this device for ${name}.`;
+  if (c === 'too_large') return `${name} is too large. Files can be up to 20 MB.`;
+  if (c === 'unsupported_type') return `${name} isn’t a supported file type.`;
+  if (c === 'quota_or_state') return 'Storage for this notebook is full. Delete some photos or files to add more.';
+  if (c === 'rate_limited') return 'Too many uploads at once. Wait a moment and try again.';
+  if (c === 'upstream_auth') return 'Your session expired. Reload the page and try again.';
+  return `${name} wasn’t added. Try again.`;
+}
+function onDbError(e) {
+  if (e && e.code === 'revoked') { showView('loading'); $('#loading').textContent = 'This notebook isn’t available in this view.'; return; }
+  toast(dbErrMsg(e));
+}
+
+/* ---------------- menu / dialogs ---------------- */
+let menuEl = null, menuAnchor = null;
+function openMenu(anchor, entries) {
+  if (menuEl && menuAnchor === anchor) { closeMenu(); return; }
+  closeMenu();
+  const m = el('div', { class: 'menu', role: 'menu' });
+  for (const e of entries) {
+    m.append(el('button', { type: 'button', role: 'menuitem', class: e.danger ? 'danger' : null, disabled: e.disabled || null, text: e.label,
+      onclick: () => { closeMenu(); e.onClick(); } }));
+  }
+  document.body.append(m);
+  menuEl = m; menuAnchor = anchor; anchor.setAttribute('aria-expanded', 'true');
+  const r = anchor.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+  const left = Math.min(Math.max(8, r.right - mw), window.innerWidth - mw - 8);
+  let top = r.bottom + 6;
+  if (top + mh > window.innerHeight - 8) top = Math.max(8, r.top - mh - 6);
+  m.style.left = left + 'px'; m.style.top = top + 'px';
+  const first = m.querySelector('button:not([disabled])');
+  if (first) first.focus({ preventScroll: true });
+}
+function closeMenu() {
+  if (!menuEl) return;
+  menuEl.remove();
+  if (menuAnchor) menuAnchor.setAttribute('aria-expanded', 'false');
+  menuEl = null; menuAnchor = null;
+}
+function confirmDialog(title, text, okLabel, tone = 'danger') {
+  return new Promise(resolve => {
+    const scrim = el('div', { class: 'modal-scrim' });
+    const box = el('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'modalTitle' });
+    const onKey = e => { if (e.key === 'Escape') { e.stopPropagation(); done(false); } };
+    const done = v => { scrim.remove(); document.removeEventListener('keydown', onKey, true); resolve(v); };
+    const cancel = el('button', { type: 'button', class: 'btn', text: 'Cancel', onclick: () => done(false) });
+    box.append(el('h2', { id: 'modalTitle', text: title }), el('p', { text }),
+      el('div', { class: 'modal-actions' }, cancel, el('button', { type: 'button', class: 'btn ' + tone, text: okLabel, onclick: () => done(true) })));
+    scrim.append(box);
+    scrim.addEventListener('click', e => { if (e.target === scrim) done(false); });
+    document.body.append(scrim);
+    document.addEventListener('keydown', onKey, true);
+    cancel.focus();
+  });
+}
+function openLightbox(src, cap) {
+  const lb = $('#lightbox');
+  $('#lbImg').src = src; $('#lbImg').alt = cap || 'Photo';
+  $('#lbCap').textContent = cap || '';
+  lb.hidden = false;
+  $('#lbClose').focus();
+}
+function closeLightbox() { $('#lightbox').hidden = true; $('#lbImg').removeAttribute('src'); }
+
+/* ---------------- nav ---------------- */
+function openNav() { $('#app').classList.add('nav-open'); $('#navBtn').setAttribute('aria-expanded', 'true'); }
+function closeNav() { $('#app').classList.remove('nav-open'); $('#navBtn').setAttribute('aria-expanded', 'false'); }
+
+/* ---------------- projects ---------------- */
+let backupReminded = false;
+function onProjects(list, meta) {
+  if (!list.length && meta && meta.fromCache) return;   // wait for the server's answer before showing "empty"
+  if (!backupReminded) {
+    backupReminded = true;
+    const last = +lsGet('thread:lastBackup') || 0;
+    if (list.length && Date.now() - last > 14 * 86400000) setTimeout(() => toast(last ? `Your last backup was ${ago(last)}.` : 'Your notebook hasn’t been backed up yet.', 'Back up', backupFlow, 9000), 1200);
+  }
+  S.projects = list.slice().sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  const ids = new Set(list.map(p => p.id));
+  for (const id of [...S.justCreated]) if (ids.has(id)) S.justCreated.delete(id);
+  if (S.currentId && !ids.has(S.currentId) && !S.justCreated.has(S.currentId)) closeProject();
+  if (!S.currentId) {
+    const last = lsGet('thread:last');
+    const pick = S.projects.find(p => p.id === last) || S.projects[0];
+    if (pick) openProject(pick.id);
+  }
+  renderProjectList();
+  if (S.currentId) { renderHeader(); showView('project'); }
+  else { showView('welcome'); }
+}
+function renderProjectList() {
+  const nav = $('#projectList');
+  nav.textContent = '';
+  for (const p of S.projects) {
+    const active = p.id === S.currentId;
+    nav.append(el('button', { type: 'button', class: 'proj' + (active ? ' active' : ''), 'aria-current': active ? 'page' : null,
+      onclick: () => { openProject(p.id); closeNav(); } },
+      el('span', { class: 'proj-title', text: p.title || 'Untitled project' }),
+      el('span', { class: 'proj-sub', text: p.updatedAt ? 'Edited ' + ago(p.updatedAt) : '' })));
+  }
+}
+let titleTimer = null, titleDirty = false;
+function renderHeader() {
+  const p = currentProject();
+  const t = $('#projectTitle');
+  if (p && document.activeElement !== t && !titleDirty) t.value = p.title || '';
+  updateMeta();
+}
+function updateMeta() {
+  const items = S.items.map(view);
+  $('#tcThread').textContent = S.itemsReady && items.length ? String(items.length) : '';
+  $('#tcChars').textContent = S.charsReady && S.chars.length ? String(S.chars.length) : '';
+  if (S.tab === 'chars') {
+    $('#meta').textContent = !S.charsReady ? '' : S.chars.length
+      ? `${plural(S.chars.length, 'character', 'characters')}, ${plural(liveLinks().length, 'connection', 'connections')}`
+      : 'No characters yet';
+    return;
+  }
+  const words = items.filter(i => i.type === 'writing').reduce((n, i) => n + countWords(i.body), 0);
+  $('#meta').textContent = !S.itemsReady ? '' : items.length
+    ? `${plural(items.length, 'piece', 'pieces')}, ${plural(words, 'word', 'words')} of writing`
+    : 'Nothing added yet';
+}
+function flushTitle() {
+  clearTimeout(titleTimer);
+  if (!titleDirty) return;
+  titleDirty = false;
+  const pid = S.currentId; if (!pid) return;
+  const v = $('#projectTitle').value.trim() || 'Untitled project';
+  S.store.updateProject(pid, { title: v, updatedAt: Date.now() }).catch(e => toast(dbErrMsg(e)));
+}
+async function createProject(title) {
+  const pid = 'p' + uid(), now = Date.now();
+  S.justCreated.add(pid);
+  try { await S.store.setProject(pid, { title: title || 'Untitled project', createdAt: now, updatedAt: now }); }
+  catch (e) { S.justCreated.delete(pid); toast(dbErrMsg(e)); return; }
+  openProject(pid);
+  closeNav();
+  if (!title) { const t = $('#projectTitle'); t.focus(); t.select(); }
+}
+function closeProject() {
+  flushAll();
+  if (S.unsubItems) { S.unsubItems(); S.unsubItems = null; }
+  if (S.unsubChars) { S.unsubChars(); S.unsubChars = null; }
+  if (S.unsubLinks) { S.unsubLinks(); S.unsubLinks = null; }
+  S.currentId = null; S.items = []; S.itemsReady = false;
+  S.chars = []; S.links = []; S.charsReady = false; S.linksReady = false;
+  S.charOpen = null; S.linkForm = null; S.mapFocus = null;
+  els.forEach(n => n.remove()); els.clear();
+  cd = null; $('#charView').textContent = '';
+}
+function openProject(pid) {
+  if (S.currentId === pid) return;
+  flushTitle();
+  closeProject();
+  S.currentId = pid;
+  lsSet('thread:last', pid);
+  S.unsubItems = S.store.subscribeItems(pid, (items, meta) => {
+    if (S.currentId !== pid) return;
+    if (!items.length && meta && meta.fromCache && !S.itemsReady) return;
+    S.items = items; S.itemsReady = true;
+    renderItems();
+  }, onDbError);
+  S.unsubChars = S.store.subscribe(pid, 'characters', (rows, meta) => {
+    if (S.currentId !== pid) return;
+    if (!rows.length && meta && meta.fromCache && !S.charsReady) return;
+    S.chars = rows.sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0)); S.charsReady = true;
+    renderChars();
+  }, onDbError);
+  S.unsubLinks = S.store.subscribe(pid, 'links', (rows, meta) => {
+    if (S.currentId !== pid) return;
+    if (!rows.length && meta && meta.fromCache && !S.linksReady) return;
+    S.links = rows; S.linksReady = true;
+    renderChars();
+  }, onDbError);
+  if (S.mode === 'read') setMode('edit');
+  setTab(lsGet('thread:tab:' + pid) === 'chars' ? 'chars' : 'thread');
+  renderHeader(); renderProjectList(); showView('project'); renderItems();
+  window.scrollTo(0, 0);
+}
+async function deleteProjectFlow() {
+  const p = currentProject(); if (!p) return;
+  const ok = await confirmDialog('Delete this project?', `“${p.title || 'Untitled project'}” will be deleted, with its whole thread and every character card. This can’t be undone.`, 'Delete project');
+  if (!ok) return;
+  const pid = p.id;
+  flushAll();
+  toast('Deleting project…', null, null, 60000);
+  try {
+    const items = await S.store.listItems(pid);
+    for (const it of items) {
+      await S.store.deleteItem(pid, it.id);
+      if (it.assetId) await S.store.deleteAsset(it.assetId);
+    }
+    for (const name of ['links', 'characters']) {
+      const rows = await S.store.list(pid, name);
+      for (const r of rows) { await S.store.del(pid, name, r.id); if (r.portraitId) await S.store.deleteAsset(r.portraitId); }
+    }
+    await S.store.deleteProject(pid);
+    toast('Project deleted');
+  } catch (e) { toast(dbErrMsg(e)); }
+}
+async function exportProject() {
+  if (!S.downloads) return;
+  flushAll();
+  const p = currentProject();
+  let md = `# ${(p && p.title) || 'Untitled project'}\n\n`;
+  for (const it of S.items.map(view)) {
+    if (it.type === 'writing') {
+      if ((it.title || '').trim()) md += `## ${it.title.trim()}\n\n`;
+      if ((it.body || '').trim()) md += it.body.trim() + '\n\n';
+    } else if (it.type === 'note') {
+      if ((it.body || '').trim()) md += it.body.trim().split('\n').map(l => '> ' + l).join('\n') + '\n\n';
+    } else {
+      md += `*[${KIND_LABEL[it.type] || 'File'}: ${it.fileName || 'untitled'}${it.caption ? ' — ' + it.caption : ''}]*\n\n`;
+    }
+  }
+  if (S.chars.length) {
+    md += `---\n\n## Characters\n\n`;
+    for (const c of S.chars) {
+      const v = charView(c);
+      md += `### ${charName(c)}\n\n`;
+      const facts = [(v.role || '').trim() && `**Role:** ${v.role.trim()}`, (v.age || '').trim() && `**Age:** ${v.age.trim()}`].filter(Boolean);
+      if (facts.length) md += facts.join('  \n') + '\n\n';
+      for (const [f, label] of CHAR_FIELDS) if ((v[f] || '').trim()) md += `**${label}**\n\n${v[f].trim()}\n\n`;
+      const conns = linksOf(c.id);
+      if (conns.length) md += '**Connections**\n\n' + conns.map(x => `- ${charName(charById(x.other))}${(x.otherIs || '').trim() ? ` (${x.otherIs.trim()})` : ''}, ${kindName(x.link.kind).toLowerCase()}${(x.link.note || '').trim() ? `: ${x.link.note.trim()}` : ''}`).join('\n') + '\n\n';
+    }
+  }
+  saveFile(new File([md], slug(p && p.title) + '.md', { type: 'text/markdown' }));
+}
+
+/* ---------------- items: render ---------------- */
+function autosize(t) {
+  if (!t.isConnected || t.offsetParent === null) return;
+  const y = window.scrollY;
+  t.style.height = 'auto';
+  t.style.height = t.scrollHeight + 'px';
+  if (window.scrollY !== y) window.scrollTo(0, y);
+}
+function closeGaps(except) {
+  document.querySelectorAll('.gap.open').forEach(g => {
+    if (g === except) return;
+    g.classList.remove('open');
+    const b = g.querySelector('.gap-plus'); if (b) b.setAttribute('aria-expanded', 'false');
+  });
+}
+function textarea(cls, placeholder, label, id, field, onInput) {
+  const t = el('textarea', { class: cls, rows: '2', placeholder, 'aria-label': label });
+  t.addEventListener('input', () => { autosize(t); queueSave(id, field, t.value); if (onInput) onInput(); });
+  t.addEventListener('blur', () => flush(id));
+  return t;
+}
+function lineInput(cls, placeholder, label, id, field) {
+  const i = el('input', { class: cls, type: 'text', placeholder, 'aria-label': label, maxlength: '300', autocomplete: 'off' });
+  i.addEventListener('input', () => queueSave(id, field, i.value));
+  i.addEventListener('blur', () => flush(id));
+  return i;
+}
+function buildItem(item) {
+  const id = item.id, key = 'items/' + id;
+  const li = el('li', { class: 'item', 'data-id': id, 'data-type': item.type });
+  const gap = el('div', { class: 'gap' });
+  const plus = el('button', { class: 'gap-plus', type: 'button', 'aria-label': 'Add something here', 'aria-expanded': 'false', html: '<span>' + ICON('plus', 14) + '</span>' });
+  const choices = el('div', { class: 'gap-choices' });
+  for (const [t, label, icon] of ADD_KINDS) {
+    choices.append(el('button', { class: 'chip small', type: 'button', html: ICON(icon, 16) + '<span>' + label + '</span>',
+      onclick: e => { e.stopPropagation(); closeGaps(); startAdd(t, id); } }));
+  }
+  plus.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = !gap.classList.contains('open');
+    closeGaps();
+    if (open) { gap.classList.add('open'); plus.setAttribute('aria-expanded', 'true'); }
+  });
+  gap.append(plus, choices);
+
+  const stitch = el('div', { class: 'stitch', 'aria-hidden': 'true' }, el('span', { class: 'num' }));
+  const content = el('div', { class: 'content' });
+  const head = el('div', { class: 'head' });
+  const menuBtn = el('button', { class: 'icon-btn item-menu', type: 'button', 'aria-label': 'Options for this piece', 'aria-haspopup': 'menu', 'aria-expanded': 'false', html: ICON('more'),
+    onclick: e => { e.stopPropagation(); openItemMenu(e.currentTarget, id); } });
+  const f = {};
+
+  if (item.type === 'writing') {
+    f.title = lineInput('w-title', 'Untitled passage', 'Passage title', key, 'title');
+    f.wc = el('div', { class: 'wc' });
+    f.body = textarea('w-body', 'Start writing…', 'Passage text', key, 'body', () => { f.wc.textContent = wordLabel(countWords(f.body.value)); updateMeta(); });
+    f.title.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); f.body.focus(); } });
+    head.append(f.title, menuBtn);
+    content.append(head, f.body, f.wc);
+  } else if (item.type === 'note') {
+    f.body = textarea('n-body', 'An idea, a line, a what-if…', 'Note', key, 'body');
+    head.append(el('span', { class: 'kind', text: 'Note' }), menuBtn);
+    content.append(head, el('div', { class: 'note-card' }, f.body));
+  } else if (item.type === 'image' || item.type === 'video') {
+    head.append(el('span', { class: 'kind', text: KIND_LABEL[item.type] }), menuBtn);
+    const fig = el('figure', { class: 'photo' });
+    f.caption = lineInput('caption', 'Add a caption', 'Caption', key, 'caption');
+    if (item.type === 'image') {
+      f.media = el('img', { alt: '', loading: 'lazy', decoding: 'async' });
+      f.media.addEventListener('error', () => fig.classList.add('missing'));
+      const btn = el('button', { class: 'photo-btn', type: 'button', 'aria-label': 'View photo full size', onclick: () => openLightbox(f.media.src, f.caption.value) }, f.media);
+      fig.append(btn, f.caption);
+    } else {
+      f.media = el('video', { controls: true, playsinline: true, preload: 'metadata' });
+      fig.append(f.media, f.caption);
+    }
+    content.append(head, fig);
+  } else {
+    head.append(el('span', { class: 'kind', text: 'File' }), menuBtn);
+    f.name = el('div', { class: 'file-name' });
+    f.sub = el('div', { class: 'file-sub' });
+    f.link = el('a', { class: 'chip', target: '_blank', rel: 'noopener', text: 'Open' });
+    f.caption = lineInput('caption file-cap', 'Add a note about this file', 'Note about this file', key, 'caption');
+    content.append(head, el('div', { class: 'file-row' }, el('span', { class: 'file-icon', html: ICON('doc', 30) }), el('div', { class: 'file-info' }, f.name, f.sub), f.link), f.caption);
+  }
+  li._f = f;
+  li.append(gap, stitch, content);
+  return li;
+}
+function applyItem(li, item, idx) {
+  li.querySelector('.num').textContent = String(idx + 1);
+  const f = li._f;
+  const p = (pending.get('items/' + item.id) || {}).patch || {};
+  const set = (input, field) => {
+    if (!input || document.activeElement === input || field in p) return;
+    const v = item[field] || '';
+    if (input.value !== v) { input.value = v; if (input.tagName === 'TEXTAREA') autosize(input); }
+  };
+  set(f.title, 'title'); set(f.body, 'body'); set(f.caption, 'caption');
+  if (f.wc) f.wc.textContent = wordLabel(countWords(f.body.value));
+  if (item.assetId) {
+    const url = S.store.assetUrl(item.assetId);
+    if (f.media && f.media.dataset.asset !== item.assetId) { f.media.dataset.asset = item.assetId; f.media.src = url; }
+    if (f.link) f.link.href = url;
+  }
+  if (f.media && f.media.tagName === 'IMG') f.media.alt = item.caption || item.fileName || 'Photo';
+  if (f.name) {
+    f.name.textContent = item.fileName || 'File';
+    f.name.title = item.fileName || '';
+    f.sub.textContent = [TYPE_NAME[item.contentType] || (item.contentType || '').split('/').pop().toUpperCase(), fmtSize(item.size)].filter(Boolean).join(', ');
+  }
+}
+function renderItems() {
+  const list = $('#items');
+  const items = S.items.slice().sort((a, b) => (a.pos - b.pos) || ((a.createdAt || 0) - (b.createdAt || 0)));
+  S.items = items;
+  const ids = new Set(items.map(i => i.id));
+  for (const [id, node] of els) if (!ids.has(id)) { node.remove(); els.delete(id); }
+  const fresh = [];
+  items.forEach((it, idx) => {
+    let node = els.get(it.id);
+    if (!node || node.dataset.type !== it.type) {
+      if (node) node.remove();
+      node = buildItem(it); els.set(it.id, node); fresh.push(node);
+    }
+    applyItem(node, it, idx);
+    const at = list.children[idx];
+    if (at !== node) list.insertBefore(node, at || null);
+  });
+  $('#emptyThread').hidden = !S.itemsReady || items.length > 0;
+  updateMeta();
+  if (S.mode === 'read') renderRead();
+  requestAnimationFrame(() => {
+    fresh.forEach(n => n.querySelectorAll('textarea').forEach(autosize));
+    const behavior = reduceMotion() ? 'auto' : 'smooth';
+    if (pendingFocus && els.has(pendingFocus)) {
+      const n = els.get(pendingFocus); pendingFocus = null;
+      const t = n.querySelector('textarea');
+      n.scrollIntoView({ block: 'center', behavior });
+      if (t) t.focus({ preventScroll: true });
+    }
+    if (scrollToId && els.has(scrollToId)) {
+      const n = els.get(scrollToId); scrollToId = null;
+      n.scrollIntoView({ block: 'nearest', behavior });
+    }
+    if (flashId && els.has(flashId)) {
+      const n = els.get(flashId); flashId = null;
+      n.classList.remove('flash'); void n.offsetWidth; n.classList.add('flash');
+      n.scrollIntoView({ block: 'nearest', behavior });
+      const b = n.querySelector('.item-menu'); if (b) b.focus({ preventScroll: true });
+    }
+  });
+}
+function renderRead() {
+  const r = $('#readView');
+  r.textContent = '';
+  const p = currentProject();
+  r.append(el('h1', { text: (p && p.title) || 'Untitled project' }));
+  const writing = S.items.map(view).filter(i => i.type === 'writing' && ((i.body || '').trim() || (i.title || '').trim()));
+  r.append(el('p', { class: 'reader-note', text: writing.length
+    ? 'Your writing, in thread order. Notes, photos and files are hidden while you read.'
+    : 'There’s no writing in this thread yet. Switch to Edit and add a piece of writing to read it here.' }));
+  writing.forEach((w, i) => {
+    if ((w.title || '').trim()) r.append(el('h2', { text: w.title.trim() }));
+    else if (i > 0) r.append(el('div', { class: 'break', 'aria-hidden': 'true' }));
+    for (const para of (w.body || '').trim().split(/\n\s*\n/)) if (para.trim()) r.append(el('p', { text: para }));
+  });
+}
+function setMode(m) {
+  S.mode = m;
+  flushAll();
+  document.body.dataset.mode = m;
+  document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
+  $('#threadView').hidden = m !== 'edit' || S.tab !== 'thread';
+  $('#projectHead').hidden = m !== 'edit';
+  $('#readView').hidden = m !== 'read';
+  if (m === 'read') renderRead();
+  else requestAnimationFrame(() => document.querySelectorAll('#items textarea').forEach(autosize));
+  window.scrollTo(0, 0);
+}
+
+/* ---------------- items: saving ---------------- */
+function setStatus() {
+  const s = $('#saveStatus');
+  if (saving > 0 || pending.size) s.textContent = lastError ? 'Not saved yet, retrying' : 'Saving…';
+  else s.textContent = lastError ? 'Not saved. Check your connection' : (S.store && S.store.synced ? 'Saved' : 'Saved on this device');
+}
+function queueSave(key, field, value) {
+  const pid = S.currentId; if (!pid) return;
+  const [sub, id] = key.split('/');
+  const pend = pending.get(key) || { pid, sub, id, patch: {}, tries: 0 };
+  pend.patch[field] = value;
+  pend.tries = 0;
+  pending.set(key, pend);
+  clearTimeout(timers.get(key));
+  timers.set(key, setTimeout(() => flush(key), 700));
+  setStatus();
+}
+async function flush(key) {
+  clearTimeout(timers.get(key)); timers.delete(key);
+  const pend = pending.get(key); if (!pend) return;
+  pending.delete(key);
+  const patch = Object.assign({}, pend.patch, { updatedAt: Date.now() });
+  saving++; setStatus();
+  try {
+    await S.store.update(pend.pid, pend.sub, pend.id, patch);
+    lastError = null;
+    touchProject(pend.pid);
+  } catch (e) {
+    if (!(e && e.code === 'invalid_argument')) {
+      const cur = pending.get(key);
+      const tries = (pend.tries || 0) + 1;
+      pending.set(key, { pid: pend.pid, sub: pend.sub, id: pend.id, patch: Object.assign({}, pend.patch, cur ? cur.patch : {}), tries });
+      lastError = e;
+      if (tries < 4) timers.set(key, setTimeout(() => flush(key), 2500 * tries));
+    }
+  } finally { saving--; setStatus(); }
+}
+function flushAll() { for (const id of [...pending.keys()]) flush(id); flushTitle(); }
+function touchProject(pid, force) {
+  const now = Date.now(), last = lastTouch.get(pid) || 0;
+  if (now - last < (force ? 3000 : 60000)) return;
+  lastTouch.set(pid, now);
+  S.store.updateProject(pid, { updatedAt: now }).catch(() => {});
+}
+
+/* ---------------- items: add / move / delete ---------------- */
+async function renumber() {
+  const pid = S.currentId, items = S.items.slice();
+  for (let i = 0; i < items.length; i++) {
+    const pos = (i + 1) * 1024;
+    if (items[i].pos !== pos) await S.store.updateItem(pid, items[i].id, { pos });
+  }
+  return items.map((it, i) => ({ id: it.id, pos: (i + 1) * 1024 }));
+}
+async function positionsFor(beforeId, n) {
+  let items = S.items.map(i => ({ id: i.id, pos: i.pos }));
+  const range = k => Array.from({ length: n }, (_, i) => k(i));
+  const compute = () => {
+    if (!items.length) return range(i => 1024 * (i + 1));
+    const idx = beforeId ? items.findIndex(i => i.id === beforeId) : -1;
+    if (idx < 0) { const last = items[items.length - 1].pos; return range(i => last + 1024 * (i + 1)); }
+    if (idx === 0) { const first = items[0].pos; return range(i => first - 1024 * (n - i)); }
+    const lo = items[idx - 1].pos, hi = items[idx].pos, step = (hi - lo) / (n + 1);
+    if (!(step > 1e-6)) return null;
+    return range(i => lo + step * (i + 1));
+  };
+  let r = compute();
+  if (!r) { items = await renumber(); r = compute(); }
+  return r;
+}
+function startAdd(type, beforeId) {
+  if (!S.currentId) return;
+  if (type === 'writing' || type === 'note') { addText(type, beforeId); return; }
+  if (!S.store.canUpload) { toast('Photos and files need sync. Open this page in claude.ai while signed in to add them.', null, null, 8000); return; }
+  S.insertBefore = beforeId;
+  const input = $('#fileInput');
+  input.accept = type === 'image'
+    ? 'image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm'
+    : '.pdf,.txt,.md,.markdown,.csv,.json,.png,.jpg,.jpeg,.gif,.webp,.svg,.mp4,.webm';
+  input.value = '';
+  input.click();
+}
+async function addText(type, beforeId) {
+  const pid = S.currentId; if (!pid) return;
+  const [pos] = await positionsFor(beforeId, 1);
+  const iid = 'i' + uid(), now = Date.now();
+  pendingFocus = iid;
+  try {
+    await S.store.setItem(pid, iid, { type, pos, title: '', body: '', caption: '', createdAt: now, updatedAt: now });
+    touchProject(pid, true);
+  } catch (e) { pendingFocus = null; toast(dbErrMsg(e)); }
+}
+async function downscale(file, type, max = 2400) {
+  try {
+    if (typeof createImageBitmap !== 'function') return null;
+    const bmp = await createImageBitmap(file);
+    const s = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(bmp.width * s); c.height = Math.round(bmp.height * s);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    if (bmp.close) bmp.close();
+    const outType = type === 'image/png' ? 'image/png' : 'image/jpeg';
+    const blob = await new Promise(res => c.toBlob(res, outType, 0.86));
+    if (!blob || blob.size >= file.size) return null;
+    return { blob, type: outType };
+  } catch { return null; }
+}
+async function uploadWithRetry(blob, type) {
+  try { return await S.store.upload(blob, type); }
+  catch (e) {
+    if (e && e.code === 'store_unavailable') { await new Promise(r => setTimeout(r, 1200)); return S.store.upload(blob, type); }
+    throw e;
+  }
+}
+async function handleFiles(fileList, beforeId) {
+  const files = Array.from(fileList || []);
+  if (!files.length || !S.currentId) return;
+  if (!S.store.canUpload) { toast('Photos and files need sync. Open this page in claude.ai while signed in to add them.', null, null, 8000); return; }
+  const pid = S.currentId;
+  const ok = [], problems = [];
+  for (const f of files) { const t = resolveType(f); if (t) ok.push([f, t]); else problems.push(`${f.name} isn’t a supported type (use photos, MP4, PDF, text, Markdown, CSV or JSON).`); }
+  if (ok.length) {
+    const positions = await positionsFor(beforeId, ok.length);
+    let added = 0;
+    for (let k = 0; k < ok.length; k++) {
+      const [f, t] = ok[k];
+      toast(ok.length > 1 ? `Adding ${k + 1} of ${ok.length}…` : `Adding ${f.name}…`, null, null, 120000);
+      try {
+        let blob = f, type = t;
+        if ((t === 'image/jpeg' || t === 'image/png' || t === 'image/webp') && f.size > 2.5e6) {
+          const r = await downscale(f, t); if (r) { blob = r.blob; type = r.type; }
+        }
+        const res = await uploadWithRetry(blob, type);
+        const kind = type.startsWith('image/') ? 'image' : type.startsWith('video/') ? 'video' : 'file';
+        const now = Date.now(), newId = 'i' + uid();
+        if (k === 0) scrollToId = newId;
+        await S.store.setItem(pid, newId, { type: kind, pos: positions[k], title: '', body: '', caption: '', assetId: res.id,
+          fileName: f.name, contentType: res.contentType || type, size: res.sizeBytes || blob.size, createdAt: now, updatedAt: now });
+        added++;
+      } catch (e) { problems.push(e && e.code ? uploadErrMsg(e, f.name) : dbErrMsg(e)); }
+    }
+    if (added) touchProject(pid, true);
+    if (!problems.length) { toast(added === 1 ? 'Added to the thread' : `Added ${added} to the thread`); return; }
+  }
+  if (problems.length) toast(problems.join(' '), null, null, 10000);
+}
+async function moveItem(iid, dir) {
+  const pid = S.currentId;
+  const idx = S.items.findIndex(i => i.id === iid), j = idx + dir;
+  if (idx < 0 || j < 0 || j >= S.items.length) return;
+  let a = S.items[idx], b = S.items[j];
+  try {
+    if (a.pos === b.pos) {
+      const fresh = await renumber();
+      a = fresh[idx]; b = fresh[j];
+    }
+    flashId = iid;
+    await Promise.all([S.store.updateItem(pid, a.id, { pos: b.pos }), S.store.updateItem(pid, b.id, { pos: a.pos })]);
+  } catch (e) { toast(dbErrMsg(e)); }
+}
+async function deleteItem(iid) {
+  const pid = S.currentId;
+  const item = S.items.find(i => i.id === iid); if (!item) return;
+  const data = Object.assign({}, view(item)); delete data.id;
+  const pkey = 'items/' + iid;
+  clearTimeout(timers.get(pkey)); timers.delete(pkey); pending.delete(pkey); setStatus();
+  try { await S.store.deleteItem(pid, iid); } catch (e) { toast(dbErrMsg(e)); return; }
+  let undone = false;
+  const label = item.type === 'writing' ? 'Passage' : (KIND_LABEL[item.type] || 'Piece');
+  toast(`${label} deleted`, 'Undo', async () => {
+    undone = true;
+    try { await S.store.setItem(pid, iid, data); } catch (e) { toast(dbErrMsg(e)); }
+  }, 8000);
+  if (data.assetId) setTimeout(() => { if (!undone) S.store.deleteAsset(data.assetId); }, 9000);
+}
+function openItemMenu(anchor, iid) {
+  const idx = S.items.findIndex(i => i.id === iid);
+  openMenu(anchor, [
+    { label: 'Move up', disabled: idx <= 0, onClick: () => moveItem(iid, -1) },
+    { label: 'Move down', disabled: idx < 0 || idx >= S.items.length - 1, onClick: () => moveItem(iid, 1) },
+    { label: 'Delete', danger: true, onClick: () => deleteItem(iid) }
+  ]);
+}
+
+/* ---------------- characters ---------------- */
+const KINDS = [['family', 'Family'], ['romance', 'Romance'], ['friends', 'Friends'], ['rivals', 'Rivals'], ['enemies', 'Enemies'], ['mentor', 'Mentor'], ['work', 'Work'], ['other', 'Other']];
+const KIND_NAME = Object.fromEntries(KINDS);
+const kindKey = k => KIND_NAME[k] ? k : 'other';
+const kindName = k => KIND_NAME[kindKey(k)];
+const CHAR_FIELDS = [
+  ['appearance', 'Appearance', 'What people notice first, how they dress, how they move'],
+  ['personality', 'Personality', 'Temperament, habits, the way they talk'],
+  ['wants', 'What they want', 'Their goal, and what stands in the way'],
+  ['backstory', 'Backstory', 'Where they come from and what shaped them', true],
+  ['notes', 'Notes', 'Quirks, secrets, scenes to write']
+];
+const CHAR_LINES = ['name', 'role', 'age'];
+const SVGNS = 'http://www.w3.org/2000/svg';
+function svgEl(tag, attrs = {}, ...kids) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v == null) continue;
+    if (k === 'text') n.textContent = v; else n.setAttribute(k, v);
+  }
+  for (const c of kids) if (c != null) n.append(c);
+  return n;
+}
+let cd = null, restoreKey = null, portraitTarget = null;
+
+const charById = id => S.chars.find(c => c.id === id);
+const charView = c => c ? viewOf('characters', c) : {};
+const charName = c => (charView(c).name || '').trim() || 'Unnamed character';
+const clipText = (t, n) => t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t;
+const strip = o => { const d = Object.assign({}, o); delete d.id; return d; };
+const focusByKey = (root, k) => { if (!k) return; const n = root.querySelector(`[data-focus-key="${CSS.escape(k)}"]`); if (n) n.focus({ preventScroll: true }); };
+function blankChar(name, now) {
+  return { name, role: '', age: '', appearance: '', personality: '', wants: '', backstory: '', notes: '', portraitId: '', createdAt: now, updatedAt: now };
+}
+function liveLinks() { return S.links.filter(l => l.a !== l.b && charById(l.a) && charById(l.b)); }
+// Each link stores a, b, aIs (what A is to B) and bIs (what B is to A).
+function linksOf(cid) {
+  return liveLinks().filter(l => l.a === cid || l.b === cid)
+    .sort((x, y) => (x.createdAt || 0) - (y.createdAt || 0))
+    .map(l => { const mine = l.a === cid; return { link: l, other: mine ? l.b : l.a, otherIs: (mine ? l.bIs : l.aIs) || '', selfIs: (mine ? l.aIs : l.bIs) || '' }; });
+}
+function initialsOf(c) {
+  const n = (charView(c).name || '').trim();
+  if (!n) return '';
+  const w = n.split(/\s+/);
+  return (Array.from(w[0])[0] + (w.length > 1 ? Array.from(w[w.length - 1])[0] : '')).toUpperCase();
+}
+function tagEl(kind, text, sr = true) {
+  const k = kindKey(kind);
+  return el('span', { class: 'tag k-' + k, title: sr ? kindName(k) : null }, text, sr ? el('span', { class: 'sr', text: ' (' + kindName(k) + ')' }) : null);
+}
+function fillInitials(node, c) {
+  const ini = initialsOf(c);
+  node.textContent = '';
+  if (ini) node.textContent = ini; else node.innerHTML = ICON('person', 26);
+}
+function fillPortrait(node, c) {
+  const asset = charView(c).portraitId || '';
+  if (asset) {
+    if (node.dataset.asset === asset && node.querySelector('img')) return;
+    node.dataset.asset = asset; node.textContent = '';
+    const img = el('img', { alt: '', src: S.store.assetUrl(asset), decoding: 'async' });
+    img.addEventListener('error', () => { node.dataset.asset = ''; fillInitials(node, c); });
+    node.append(img);
+  } else { node.dataset.asset = ''; fillInitials(node, c); }
+}
+
+function setTab(t) {
+  if (t === S.tab && t === 'chars' && S.charOpen) { closeChar(); return; }
+  flushAll();
+  S.tab = t;
+  document.body.dataset.tab = t;
+  if (S.currentId) lsSet('thread:tab:' + S.currentId, t);
+  document.querySelectorAll('.tab').forEach(b => { const on = b.dataset.tab === t; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
+  $('#threadView').hidden = t !== 'thread' || S.mode !== 'edit';
+  $('#readView').hidden = t !== 'thread' || S.mode !== 'read';
+  $('#charView').hidden = t !== 'chars';
+  if (t === 'thread') requestAnimationFrame(() => document.querySelectorAll('#items textarea').forEach(autosize));
+  renderChars();
+}
+
+function renderChars() {
+  updateMeta();
+  if (S.tab !== 'chars' || !S.currentId) return;
+  if (S.charOpen) {
+    if (charById(S.charOpen)) S.newChars.delete(S.charOpen);
+    else if (!S.newChars.has(S.charOpen) && S.charsReady) { S.charOpen = null; S.linkForm = null; }
+  }
+  if (S.charOpen) renderCharDetail(); else renderCharList();
+}
+
+/* list + map */
+function renderCharList() {
+  const root = $('#charView'), act = document.activeElement;
+  const fk = restoreKey || (act && root.contains(act) && act.dataset ? act.dataset.focusKey : null);
+  restoreKey = null; cd = null;
+  root.textContent = '';
+  const wrap = el('div', { class: 'chars' });
+  const bar = el('div', { class: 'chars-bar' });
+  if (S.chars.length > 1) {
+    const seg = el('div', { class: 'seg small', role: 'group', 'aria-label': 'Show characters as' });
+    for (const [v, label] of [['cards', 'Cards'], ['map', 'Map']]) {
+      seg.append(el('button', { type: 'button', 'aria-pressed': String(S.charLayout === v), 'data-focus-key': 'layout-' + v, text: label,
+        onclick: () => { if (S.charLayout === v) return; S.charLayout = v; lsSet('thread:charLayout', v); restoreKey = 'layout-' + v; renderChars(); } }));
+    }
+    bar.append(seg);
+  }
+  bar.append(el('span', { class: 'spacer' }),
+    el('button', { type: 'button', class: 'btn primary small', 'data-focus-key': 'newchar', html: ICON('plus', 18) + '<span>New character</span>', onclick: () => createCharacter() }));
+  wrap.append(bar);
+  let map = null;
+  if (!S.charsReady) wrap.append(el('p', { class: 'chars-empty', text: 'Opening characters…' }));
+  else if (!S.chars.length) wrap.append(el('p', { class: 'chars-empty', text: 'No characters yet. Give each one a card for their details and backstory, then connect them to show who they’re tied to and how.' }));
+  else if (S.charLayout === 'map' && S.chars.length > 1) { map = el('div', { class: 'map' }); wrap.append(map); }
+  else wrap.append(buildCardGrid());
+  root.append(wrap);
+  if (map) drawMap(map);
+  focusByKey(root, fk);
+}
+
+function buildCardGrid() {
+  const ul = el('ul', { class: 'cgrid' });
+  for (const c of S.chars) {
+    const v = charView(c), conns = linksOf(c.id);
+    const tags = el('span', { class: 'cc-tags' });
+    conns.slice(0, 4).forEach(x => tags.append(tagEl(x.link.kind, clipText(`${charName(charById(x.other))}, ${x.otherIs.trim() || kindName(x.link.kind).toLowerCase()}`, 32))));
+    if (conns.length > 4) tags.append(el('span', { class: 'more', text: `+${conns.length - 4} more` }));
+    const snip = (v.backstory || v.personality || v.wants || v.appearance || '').trim();
+    const face = el('span', { class: 'portrait', 'aria-hidden': 'true' });
+    fillPortrait(face, c);
+    ul.append(el('li', {}, el('button', { type: 'button', class: 'ccard', 'data-focus-key': 'card-' + c.id, onclick: () => openChar(c.id) },
+      face,
+      el('span', { class: 'cc-body' },
+        el('span', { class: 'cc-name', text: charName(c) }),
+        (v.role || '').trim() ? el('span', { class: 'cc-role', text: v.role.trim() }) : null,
+        snip ? el('span', { class: 'cc-snip', text: snip }) : null,
+        conns.length ? tags : null))));
+  }
+  return ul;
+}
+
+function drawMap(wrap) {
+  const chars = S.chars, n = chars.length;
+  if (S.mapFocus && !charById(S.mapFocus)) S.mapFocus = null;
+  const focus = S.mapFocus;
+  const W = Math.max(300, Math.round(wrap.clientWidth || 600));
+  const narrow = W < 540;
+  const H = Math.round(Math.min(Math.max(W * (narrow ? 0.95 : 0.7), 320), 600));
+  const rx = W / 2 - (narrow ? 58 : 140), ry = H / 2 - (narrow ? 46 : 50);
+  const cx = W / 2, cy = H / 2, nr = narrow ? 20 : 24;
+  const pos = new Map();
+  chars.forEach((c, i) => { const a = -Math.PI / 2 + (2 * Math.PI * i) / n; pos.set(c.id, { x: cx + rx * Math.cos(a), y: cy + ry * Math.sin(a), a }); });
+  const links = liveLinks();
+  const near = new Set();
+  if (focus) links.forEach(l => { if (l.a === focus) near.add(l.b); if (l.b === focus) near.add(l.a); });
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: 'group', 'aria-label': 'Map of character connections' });
+  const bg = svgEl('rect', { x: 0, y: 0, width: W, height: H, fill: 'transparent' });
+  bg.addEventListener('click', () => { if (S.mapFocus) { S.mapFocus = null; renderChars(); } });
+  const edges = svgEl('g'), nodes = svgEl('g'), labels = svgEl('g');
+  const pk = l => (l.a < l.b ? l.a + '|' + l.b : l.b + '|' + l.a);
+  const count = new Map(), seen = new Map();
+  links.forEach(l => count.set(pk(l), (count.get(pk(l)) || 0) + 1));
+  for (const l of links) {
+    const k = pk(l), i = seen.get(k) || 0; seen.set(k, i + 1);
+    const [s0, t0] = l.a < l.b ? [pos.get(l.a), pos.get(l.b)] : [pos.get(l.b), pos.get(l.a)];
+    const dx = t0.x - s0.x, dy = t0.y - s0.y, len = Math.hypot(dx, dy) || 1;
+    const off = (i - (count.get(k) - 1) / 2) * 30;
+    const qx = (s0.x + t0.x) / 2 - (dy / len) * off, qy = (s0.y + t0.y) / 2 + (dx / len) * off;
+    const involved = !!focus && (l.a === focus || l.b === focus);
+    const kk = kindKey(l.kind);
+    edges.append(svgEl('path', {
+      d: `M${s0.x.toFixed(1)},${s0.y.toFixed(1)} Q${qx.toFixed(1)},${qy.toFixed(1)} ${t0.x.toFixed(1)},${t0.y.toFixed(1)}`,
+      class: 'edge' + (involved ? ' on' : '') + (focus && !involved ? ' dim' : ''), style: `stroke:var(--k-${kk})`
+    }));
+    if (involved) {
+      const lx = 0.25 * s0.x + 0.5 * qx + 0.25 * t0.x, ly = 0.25 * s0.y + 0.5 * qy + 0.25 * t0.y;
+      const lab = ((l.a === focus ? l.bIs : l.aIs) || '').trim() || kindName(kk);
+      labels.append(svgEl('text', { x: lx.toFixed(1), y: ly.toFixed(1), dy: '0.35em', class: 'edge-label', style: `fill:var(--k-${kk})`, text: clipText(lab, 22) }));
+    }
+  }
+  for (const c of chars) {
+    const p = pos.get(c.id), on = focus === c.id, dim = !!focus && !on && !near.has(c.id);
+    const g = svgEl('g', {
+      class: 'node' + (on ? ' on' : '') + (dim ? ' dim' : ''), transform: `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`,
+      tabindex: '0', role: 'button', 'aria-pressed': String(on), 'data-focus-key': 'node-' + c.id,
+      'aria-label': `${charName(c)}, ${plural(linksOf(c.id).length, 'connection', 'connections')}`
+    });
+    g.append(svgEl('circle', { r: nr, class: 'disc' }));
+    const v = charView(c);
+    if (v.portraitId) {
+      const clipId = 'clip-' + c.id, r2 = nr - 2;
+      g.append(svgEl('clipPath', { id: clipId }, svgEl('circle', { r: r2 })),
+        svgEl('image', { href: S.store.assetUrl(v.portraitId), x: -r2, y: -r2, width: r2 * 2, height: r2 * 2, preserveAspectRatio: 'xMidYMid slice', 'clip-path': `url(#${clipId})` }));
+    } else {
+      g.append(svgEl('text', { class: 'ini', dy: '0.35em', text: initialsOf(c) || '?' }));
+    }
+    const name = clipText(charName(c), narrow ? 12 : 18);
+    const cos = Math.cos(p.a), sin = Math.sin(p.a);
+    let tx = 0, ty = nr + 17, anchor = 'middle', dyv = null;
+    if (!narrow && Math.abs(cos) > 0.35) { anchor = cos > 0 ? 'start' : 'end'; tx = (nr + 9) * Math.sign(cos); ty = 0; dyv = '0.35em'; }
+    else if (sin < -0.5) ty = -(nr + 9);
+    g.append(svgEl('text', { class: 'nm', x: tx, y: ty, dy: dyv, 'text-anchor': anchor, text: name }));
+    const toggle = () => { S.mapFocus = on ? null : c.id; restoreKey = 'node-' + c.id; renderChars(); };
+    g.addEventListener('click', e => { e.stopPropagation(); toggle(); });
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+    nodes.append(g);
+  }
+  svg.append(bg, edges, nodes, labels);
+
+  const panel = el('div', { class: 'map-panel', 'aria-live': 'polite' });
+  if (focus) {
+    const c = charById(focus), conns = linksOf(focus);
+    panel.append(el('div', { class: 'mp-head' },
+      el('span', { class: 'mp-name', text: charName(c) }),
+      el('button', { type: 'button', class: 'btn small', 'data-focus-key': 'open-' + focus, text: 'Open card', onclick: () => openChar(focus) })));
+    if (conns.length) {
+      const ul = el('ul', { class: 'mp-list' });
+      conns.forEach(x => ul.append(el('li', {}, tagEl(x.link.kind, kindName(x.link.kind), false),
+        el('span', { text: charName(charById(x.other)) + (x.otherIs.trim() ? ', ' + x.otherIs.trim() : '') }))));
+      panel.append(ul);
+    } else panel.append(el('p', { class: 'mp-hint', text: `${charName(c)} isn’t connected to anyone yet. Open the card to add a connection.` }));
+  } else {
+    const used = new Set(links.map(l => kindKey(l.kind)));
+    if (used.size) { const lg = el('div', { class: 'legend' }); KINDS.filter(([k]) => used.has(k)).forEach(([k, label]) => lg.append(tagEl(k, label, false))); panel.append(lg); }
+    panel.append(el('p', { class: 'mp-hint', text: links.length ? 'Select a character to highlight who they’re connected to and how.' : 'No connections yet. Open a character card and add one to see it drawn here.' }));
+  }
+  wrap.append(el('div', { class: 'map-box' }, svg), panel);
+}
+
+/* open / create / delete */
+function openChar(id) {
+  flushAll();
+  S.charOpen = id; S.linkForm = null;
+  if (S.tab !== 'chars') setTab('chars'); else renderChars();
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => { const b = cd && cd.root.querySelector('.back'); if (b) b.focus({ preventScroll: true }); });
+}
+function closeChar() {
+  const id = S.charOpen;
+  flushAll();
+  S.charOpen = null; S.linkForm = null;
+  const onMap = S.charLayout === 'map' && S.chars.length > 1;
+  if (onMap && id) S.mapFocus = id;
+  restoreKey = (onMap ? 'node-' : 'card-') + id;
+  renderChars();
+}
+async function createCharacter() {
+  const pid = S.currentId; if (!pid) return;
+  const id = 'c' + uid(), now = Date.now();
+  S.newChars.add(id);
+  try { await S.store.set(pid, 'characters', id, blankChar('', now)); }
+  catch (e) { S.newChars.delete(id); toast(dbErrMsg(e)); return; }
+  touchProject(pid, true);
+  S.charOpen = id; S.linkForm = null;
+  if (S.tab !== 'chars') setTab('chars'); else renderChars();
+  window.scrollTo(0, 0);
+  requestAnimationFrame(() => { if (cd && cd.id === id) cd.f.name.focus(); });
+}
+async function deleteCharacter(id) {
+  const pid = S.currentId, c = charById(id); if (!c) return;
+  const key = 'characters/' + id;
+  clearTimeout(timers.get(key)); timers.delete(key);
+  const data = strip(charView(c));
+  pending.delete(key); setStatus();
+  const links = S.links.filter(l => l.a === id || l.b === id).map(l => [l.id, strip(l)]);
+  const name = charName(c);
+  if (S.charOpen === id) { S.charOpen = null; S.linkForm = null; }
+  if (S.mapFocus === id) S.mapFocus = null;
+  try {
+    for (const [lid] of links) await S.store.del(pid, 'links', lid);
+    await S.store.del(pid, 'characters', id);
+  } catch (e) { toast(dbErrMsg(e)); renderChars(); return; }
+  renderChars();
+  let undone = false;
+  toast(links.length ? `${name} and ${plural(links.length, 'connection', 'connections')} deleted` : `${name} deleted`, 'Undo', async () => {
+    undone = true;
+    try {
+      await S.store.set(pid, 'characters', id, data);
+      for (const [lid, d] of links) await S.store.set(pid, 'links', lid, d);
+    } catch (e) { toast(dbErrMsg(e)); }
+  }, 8000);
+  if (data.portraitId) setTimeout(() => { if (!undone) S.store.deleteAsset(data.portraitId); }, 9000);
+}
+
+/* portrait */
+function portraitAction(anchor, id) {
+  if (!charView(charById(id)).portraitId) { pickPortrait(id); return; }
+  openMenu(anchor, [
+    { label: 'Change photo', onClick: () => pickPortrait(id) },
+    { label: 'Remove photo', danger: true, onClick: () => removePortrait(id) }
+  ]);
+}
+function pickPortrait(id) {
+  if (!S.store.canUpload) { toast('Photos need sync. Open this page in claude.ai while signed in to add them.', null, null, 8000); return; }
+  portraitTarget = id;
+  const inp = $('#portraitInput'); inp.value = ''; inp.click();
+}
+async function setPortrait(file) {
+  const id = portraitTarget, pid = S.currentId; portraitTarget = null;
+  if (!file || !id || !pid) return;
+  const t = resolveType(file);
+  if (!t || !t.startsWith('image/') || t === 'image/svg+xml') { toast(`${file.name} isn’t a photo. Use a PNG, JPEG, GIF or WebP image.`); return; }
+  toast('Adding photo…', null, null, 60000);
+  try {
+    let blob = file, type = t;
+    if (t !== 'image/gif') { const r = await downscale(file, t, 900); if (r) { blob = r.blob; type = r.type; } }
+    const res = await uploadWithRetry(blob, type);
+    const c = charById(id), old = c && c.portraitId;
+    await S.store.update(pid, 'characters', id, { portraitId: res.id, updatedAt: Date.now() });
+    if (old && old !== res.id) S.store.deleteAsset(old);
+    toast('Photo added');
+  } catch (e) { toast(uploadErrMsg(e, file.name)); }
+}
+async function removePortrait(id) {
+  const pid = S.currentId, c = charById(id), old = c && c.portraitId;
+  if (!old) return;
+  try { await S.store.update(pid, 'characters', id, { portraitId: '', updatedAt: Date.now() }); }
+  catch (e) { toast(dbErrMsg(e)); return; }
+  let undone = false;
+  toast('Photo removed', 'Undo', async () => {
+    undone = true;
+    try { await S.store.update(pid, 'characters', id, { portraitId: old }); } catch (e) { toast(dbErrMsg(e)); }
+  }, 8000);
+  setTimeout(() => { if (!undone) S.store.deleteAsset(old); }, 9000);
+}
+
+/* detail */
+function renderCharDetail() {
+  const root = $('#charView');
+  if (!cd || cd.id !== S.charOpen || !root.contains(cd.root)) {
+    root.textContent = '';
+    cd = buildCharDetail(S.charOpen);
+    root.append(cd.root);
+  }
+  applyChar();
+}
+function buildCharDetail(id) {
+  const key = 'characters/' + id, f = {};
+  const me = () => charById(id) || { id };
+  const bind = (input, field, after) => {
+    input.addEventListener('input', () => { if (input.tagName === 'TEXTAREA') autosize(input); queueSave(key, field, input.value); if (after) after(); });
+    input.addEventListener('blur', () => flush(key));
+  };
+  const more = el('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Character options', 'aria-haspopup': 'menu', 'aria-expanded': 'false', html: ICON('more'),
+    onclick: e => { e.stopPropagation(); openMenu(e.currentTarget, [{ label: 'Delete character', danger: true, onClick: () => deleteCharacter(id) }]); } });
+  const top = el('div', { class: 'cd-top' },
+    el('button', { type: 'button', class: 'back', html: ICON('back', 18) + '<span>All characters</span>', onclick: closeChar }),
+    el('span', { class: 'spacer' }), more);
+
+  f.portrait = el('button', { type: 'button', class: 'portrait cd-portrait', onclick: e => { e.stopPropagation(); portraitAction(e.currentTarget, id); } });
+  f.name = el('input', { class: 'cd-name', id: 'cf-name', type: 'text', maxlength: '120', placeholder: 'Character name', 'aria-label': 'Character name', autocomplete: 'off' });
+  f.role = el('input', { class: 'inp', id: 'cf-role', type: 'text', maxlength: '200', placeholder: 'e.g. narrator, the keeper’s daughter', autocomplete: 'off' });
+  f.age = el('input', { class: 'inp', id: 'cf-age', type: 'text', maxlength: '60', placeholder: 'e.g. 34', autocomplete: 'off' });
+  bind(f.name, 'name', () => { if (!charView(me()).portraitId) fillInitials(f.portrait, me()); if (cd && cd.syncForm) cd.syncForm(); });
+  bind(f.role, 'role'); bind(f.age, 'age');
+  f.name.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); f.role.focus(); } });
+  const head = el('div', { class: 'cd-head' }, f.portrait,
+    el('div', { class: 'cd-id' }, f.name,
+      el('div', { class: 'cd-line' },
+        el('div', { class: 'field grow' }, el('label', { for: 'cf-role', text: 'Role in the story' }), f.role),
+        el('div', { class: 'field age' }, el('label', { for: 'cf-age', text: 'Age' }), f.age))));
+
+  f.connCount = el('span', { class: 'count' });
+  f.addConn = el('button', { type: 'button', class: 'chip', 'data-focus-key': 'addconn', html: ICON('plus', 16) + '<span>Add connection</span>', onclick: () => openLinkForm(null) });
+  f.conns = el('ul', { class: 'conns' });
+  f.formHost = el('div');
+  const connSec = el('section', { class: 'conn-sec', 'aria-labelledby': 'connTitle' },
+    el('div', { class: 'conn-head' }, el('h3', { id: 'connTitle' }, 'Connections', f.connCount), f.addConn),
+    f.conns, f.formHost);
+
+  const fields = el('div', { class: 'cd-fields' });
+  for (const [field, label, ph, big] of CHAR_FIELDS) {
+    const t = el('textarea', { class: 'inp' + (big ? ' big' : ''), id: 'cf-' + field, rows: big ? '5' : '2', placeholder: ph });
+    bind(t, field); f[field] = t;
+    fields.append(el('div', { class: 'field' }, el('label', { for: 'cf-' + field, text: label }), t));
+  }
+  return { id, key, f, syncForm: null, root: el('div', { class: 'cdetail' }, top, head, connSec, fields) };
+}
+function applyChar() {
+  if (!cd) return;
+  const c = charById(cd.id) || { id: cd.id }, v = charView(c), f = cd.f;
+  const p = (pending.get(cd.key) || {}).patch || {};
+  for (const field of CHAR_LINES.concat(CHAR_FIELDS.map(x => x[0]))) {
+    const inp = f[field];
+    if (!inp || document.activeElement === inp || field in p) continue;
+    const val = c[field] || '';
+    if (inp.value !== val || inp.dataset.sized !== '1') {
+      inp.value = val;
+      if (inp.tagName === 'TEXTAREA') { autosize(inp); inp.dataset.sized = '1'; }
+    }
+  }
+  fillPortrait(f.portrait, c);
+  const nm = charName(c);
+  f.portrait.setAttribute('aria-label', v.portraitId ? `Photo of ${nm}: change or remove` : `Add a photo of ${nm}`);
+  if (v.portraitId) f.portrait.setAttribute('aria-haspopup', 'menu'); else f.portrait.removeAttribute('aria-haspopup');
+  renderConns();
+  if (cd.syncForm) cd.syncForm();
+}
+function renderConns() {
+  if (!cd) return;
+  const list = cd.f.conns, act = document.activeElement;
+  const fk = act && list.contains(act) ? act.dataset.focusKey : null;
+  list.textContent = '';
+  const conns = linksOf(cd.id);
+  cd.f.connCount.textContent = conns.length ? String(conns.length) : '';
+  cd.f.addConn.hidden = !!S.linkForm;
+  if (!conns.length && !S.linkForm) list.append(el('li', { class: 'conn-empty', text: 'Not connected to anyone yet. Add a connection to note who they’re tied to and how. You can create the other character as you go.' }));
+  for (const x of conns) {
+    const o = charById(x.other);
+    list.append(el('li', { class: 'conn' + (S.linkForm && S.linkForm.id === x.link.id ? ' editing' : '') },
+      el('div', { class: 'conn-main' },
+        el('div', { class: 'conn-row' },
+          tagEl(x.link.kind, kindName(x.link.kind), false),
+          el('button', { type: 'button', class: 'conn-who', 'data-focus-key': 'who-' + x.link.id, text: charName(o), onclick: () => openChar(o.id) }),
+          x.otherIs.trim() ? el('span', { class: 'conn-label', text: x.otherIs.trim() }) : null),
+        (x.link.note || '').trim() ? el('p', { class: 'conn-note', text: x.link.note.trim() }) : null),
+      el('button', { type: 'button', class: 'icon-btn', 'data-focus-key': 'edit-' + x.link.id, 'aria-label': 'Edit connection with ' + charName(o), html: ICON('pen', 18), onclick: () => openLinkForm(x.link.id) })));
+  }
+  focusByKey(list, fk);
+}
+
+/* connection form */
+function openLinkForm(linkId) {
+  if (!cd) return;
+  S.linkForm = { id: linkId };
+  buildLinkForm();
+  renderConns();
+  requestAnimationFrame(() => {
+    const fm = cd && cd.f.formHost.querySelector('form'); if (!fm) return;
+    fm.scrollIntoView({ block: 'nearest', behavior: reduceMotion() ? 'auto' : 'smooth' });
+    const first = fm.querySelector('#lf-who'); if (first) first.focus({ preventScroll: true });
+  });
+}
+function closeLinkForm(focusKey) {
+  S.linkForm = null;
+  if (!cd) return;
+  cd.f.formHost.textContent = ''; cd.syncForm = null;
+  renderConns();
+  const n = focusKey && cd.root.querySelector(`[data-focus-key="${CSS.escape(focusKey)}"]`);
+  (n || cd.f.addConn).focus({ preventScroll: true });
+}
+async function removeLink(linkId) {
+  const pid = S.currentId, l = S.links.find(x => x.id === linkId); if (!l) return;
+  const data = strip(l);
+  try { await S.store.del(pid, 'links', linkId); } catch (e) { toast(dbErrMsg(e)); return; }
+  closeLinkForm(null);
+  toast('Connection removed', 'Undo', async () => { try { await S.store.set(pid, 'links', linkId, data); } catch (e) { toast(dbErrMsg(e)); } }, 8000);
+}
+function buildLinkForm() {
+  const host = cd.f.formHost, selfId = cd.id;
+  host.textContent = '';
+  const link = S.linkForm.id ? S.links.find(l => l.id === S.linkForm.id) : null;
+  if (S.linkForm.id && !link) { S.linkForm = null; cd.syncForm = null; return; }
+  const mine = !link || link.a === selfId;
+  const init = link
+    ? { other: mine ? link.b : link.a, kind: kindKey(link.kind), otherIs: (mine ? link.bIs : link.aIs) || '', selfIs: (mine ? link.aIs : link.bIs) || '', note: link.note || '' }
+    : { other: '', kind: 'family', otherIs: '', selfIs: '', note: '' };
+  const others = S.chars.filter(c => c.id !== selfId);
+  const doneKey = link ? 'edit-' + link.id : 'addconn';
+
+  const who = el('select', { class: 'inp', id: 'lf-who' });
+  who.append(el('option', { value: '', text: 'Choose a character' }));
+  others.forEach(o => who.append(el('option', { value: o.id, text: charName(o) })));
+  who.append(el('option', { value: '__new', text: 'New character…' }));
+  who.value = init.other || (others.length ? '' : '__new');
+  const newName = el('input', { class: 'inp', id: 'lf-new', type: 'text', maxlength: '120', placeholder: 'Their name', autocomplete: 'off' });
+  const newWrap = el('div', { class: 'field' }, el('label', { for: 'lf-new', text: 'New character’s name' }), newName);
+  const kinds = el('div', { class: 'kinds', role: 'radiogroup', 'aria-labelledby': 'lf-kind' });
+  for (const [k, label] of KINDS) {
+    const r = el('input', { type: 'radio', name: 'lf-kind', value: k, id: 'lf-k-' + k });
+    r.checked = k === init.kind;
+    kinds.append(el('label', { class: 'kind-opt k-' + k, for: 'lf-k-' + k }, r, el('span', { text: label })));
+  }
+  const otherIs = el('input', { class: 'inp', id: 'lf-otheris', type: 'text', maxlength: '80', placeholder: 'e.g. older brother', autocomplete: 'off' });
+  const selfIs = el('input', { class: 'inp', id: 'lf-selfis', type: 'text', maxlength: '80', placeholder: 'e.g. younger sister', autocomplete: 'off' });
+  otherIs.value = init.otherIs; selfIs.value = init.selfIs;
+  const lOther = el('label', { for: 'lf-otheris' }), lSelf = el('label', { for: 'lf-selfis' });
+  const note = el('textarea', { class: 'inp', id: 'lf-note', rows: '2', placeholder: 'e.g. They haven’t spoken since the funeral.' });
+  note.value = init.note;
+  note.addEventListener('input', () => autosize(note));
+  const err = el('p', { class: 'form-err', role: 'alert', hidden: true });
+  const save = el('button', { type: 'submit', class: 'btn primary', text: link ? 'Save connection' : 'Add connection' });
+
+  const sync = () => {
+    newWrap.hidden = who.value !== '__new';
+    const selfName = (charView(charById(selfId) || { id: selfId }).name || '').trim();
+    const other = who.value === '__new' ? newName.value.trim() : who.value ? charName(charById(who.value)) : '';
+    lOther.textContent = `${other || 'They'} ${other ? 'is' : 'are'} ${selfName ? selfName + '’s' : 'this character’s'}…`;
+    lSelf.textContent = `${selfName || 'This character'} is ${other ? other + '’s' : 'their'}…`;
+    for (const o of who.options) if (o.value && o.value !== '__new') { const c = charById(o.value); if (c) o.textContent = charName(c); }
+  };
+  who.addEventListener('change', () => { err.hidden = true; sync(); if (who.value === '__new') newName.focus(); });
+  newName.addEventListener('input', () => { err.hidden = true; sync(); });
+
+  const form = el('form', { class: 'cform', novalidate: true, 'aria-label': link ? 'Edit connection' : 'Add a connection' },
+    el('div', { class: 'field' }, el('label', { for: 'lf-who', text: 'Connected to' }), who),
+    newWrap,
+    el('div', { class: 'field' }, el('span', { class: 'flabel', id: 'lf-kind', text: 'Kind of connection' }), kinds),
+    el('div', { class: 'two' }, el('div', { class: 'field' }, lOther, otherIs), el('div', { class: 'field' }, lSelf, selfIs)),
+    el('div', { class: 'field' }, el('label', { for: 'lf-note', text: 'How they’re connected (optional)' }), note),
+    err,
+    el('div', { class: 'form-actions' },
+      link ? el('button', { type: 'button', class: 'remove', text: 'Remove connection', onclick: () => removeLink(link.id) }) : null,
+      el('button', { type: 'button', class: 'btn', text: 'Cancel', onclick: () => closeLinkForm(doneKey) }),
+      save));
+  form.addEventListener('keydown', e => { if (e.key === 'Escape') { e.stopPropagation(); closeLinkForm(doneKey); } });
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const showErr = (msg, target) => { err.textContent = msg; err.hidden = false; target.focus(); };
+    let other = who.value;
+    if (!other) return showErr('Choose who this character is connected to.', who);
+    const nm = newName.value.trim();
+    if (other === '__new' && !nm) return showErr('Give the new character a name.', newName);
+    const kind = (form.querySelector('input[name="lf-kind"]:checked') || {}).value || 'other';
+    const pid = S.currentId, now = Date.now();
+    save.disabled = true;
+    try {
+      if (other === '__new') { other = 'c' + uid(); await S.store.set(pid, 'characters', other, blankChar(nm, now)); }
+      const doc = link && !mine
+        ? { a: other, b: selfId, aIs: otherIs.value.trim(), bIs: selfIs.value.trim() }
+        : { a: selfId, b: other, aIs: selfIs.value.trim(), bIs: otherIs.value.trim() };
+      Object.assign(doc, { kind, note: note.value.trim(), createdAt: (link && link.createdAt) || now, updatedAt: now });
+      const lid = link ? link.id : 'l' + uid();
+      await S.store.set(pid, 'links', lid, doc);
+      touchProject(pid, true);
+      closeLinkForm(link ? 'edit-' + lid : 'addconn');
+      toast(link ? 'Connection saved' : 'Connection added');
+    } catch (e2) { save.disabled = false; toast(dbErrMsg(e2)); }
+  });
+  host.append(form);
+  cd.syncForm = sync;
+  sync();
+  requestAnimationFrame(() => autosize(note));
+}
+
+/* ---------------- saving files, backup and restore ---------------- */
+const isTouch = () => window.matchMedia && matchMedia('(pointer: coarse)').matches;
+const isIOS = () => /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = () => navigator.standalone === true || (window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+async function saveFile(file) {
+  if (isTouch() && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file] }); return true; }
+    catch (e) { if (e && e.name === 'AbortError') return false; }
+  }
+  const url = URL.createObjectURL(file);
+  const a = el('a', { href: url, download: file.name });
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return true;
+}
+function updateBackupNote() {
+  const last = +lsGet('thread:lastBackup') || 0;
+  $('#syncNote').textContent = 'Your notebook is saved on this device. ' + (last ? `Last backup ${ago(last)}.` : 'Not backed up yet.');
+}
+async function backupFlow() {
+  closeNav(); flushAll();
+  toast('Preparing your backup…', null, null, 120000);
+  let file, np = 0;
+  try {
+    const b = await S.store.dump();
+    np = Object.keys(b.projects).length;
+    file = new File([JSON.stringify(b)], `Thread backup ${new Date().toISOString().slice(0, 10)}.json`, { type: 'application/json' });
+  } catch (e) { toast('The backup couldn’t be made. Try again.'); return; }
+  hideToast();
+  const how = isTouch()
+    ? 'Tap Save, then choose Save to Files and pick a folder in iCloud Drive.'
+    : 'Save downloads the file. Keep it somewhere safe, such as your iCloud Drive folder.';
+  const ok = await confirmDialog('Your backup is ready', `${plural(np, 'project', 'projects')}, ${fmtSize(file.size)}. ${how}`, 'Save', 'primary');
+  if (!ok) return;
+  if (await saveFile(file)) { lsSet('thread:lastBackup', String(Date.now())); updateBackupNote(); toast('Backup saved'); }
+}
+function restoreFlow() { closeNav(); const i = $('#restoreInput'); i.value = ''; i.click(); }
+async function onRestoreFile(f) {
+  let b = null;
+  try { b = JSON.parse(await f.text()); } catch {}
+  if (!b || b.app !== 'thread' || !b.projects || typeof b.projects !== 'object') { toast(`${f.name} isn’t a Thread backup.`); return; }
+  const np = Object.keys(b.projects).length;
+  const when = b.exportedAt ? new Date(b.exportedAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  const hasData = S.projects.length > 0;
+  const ok = await confirmDialog('Restore this backup?',
+    `It has ${plural(np, 'project', 'projects')}${when ? `, saved ${when}` : ''}.` + (hasData ? ' Restoring replaces everything in Thread on this device.' : ''),
+    'Restore', hasData ? 'danger' : 'primary');
+  if (!ok) return;
+  flushAll();
+  toast('Restoring…', null, null, 120000);
+  try {
+    await S.store.replaceAll(b);
+    lsSet('thread:last', '');
+    location.reload();
+  } catch (e) { toast(e && e.code === 'quota_exceeded' ? 'There isn’t enough space on this device for this backup.' : 'The backup couldn’t be restored. Try again.'); }
+}
+
+/* ---------------- wiring ---------------- */
+function wire() {
+  $('#navBtn').innerHTML = ICON('menu') + '<span>Projects</span>';
+  $('#newProject').innerHTML = ICON('plus', 18) + '<span>New project</span>';
+  $('#projMore').innerHTML = ICON('more');
+  $('#lbClose').innerHTML = ICON('close');
+  const bar = $('#addbarInner');
+  for (const [t, label, icon] of ADD_KINDS) bar.append(el('button', { class: 'chip', type: 'button', html: ICON(icon, 18) + '<span>' + label + '</span>', onclick: () => startAdd(t, null) }));
+
+  $('#navBtn').addEventListener('click', () => $('#app').classList.contains('nav-open') ? closeNav() : openNav());
+  $('#scrim').addEventListener('click', closeNav);
+  $('#newProject').addEventListener('click', () => createProject(''));
+  const firstCreate = () => { const v = $('#firstTitle').value.trim(); createProject(v); $('#firstTitle').value = ''; };
+  $('#firstCreate').addEventListener('click', firstCreate);
+  $('#firstTitle').addEventListener('keydown', e => { if (e.key === 'Enter') firstCreate(); });
+
+  const t = $('#projectTitle');
+  t.addEventListener('input', () => { titleDirty = true; clearTimeout(titleTimer); titleTimer = setTimeout(flushTitle, 600); });
+  t.addEventListener('blur', flushTitle);
+  t.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); t.blur(); } });
+
+  document.querySelectorAll('#modeSeg button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+  document.querySelectorAll('.tab').forEach(b => {
+    b.addEventListener('click', () => setTab(b.dataset.tab));
+    b.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+      e.preventDefault();
+      const t = b.dataset.tab === 'thread' ? 'chars' : 'thread';
+      setTab(t); document.querySelector(`.tab[data-tab="${t}"]`).focus();
+    });
+  });
+  $('#portraitInput').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) setPortrait(f); else portraitTarget = null; });
+  $('#projMore').addEventListener('click', e => {
+    e.stopPropagation();
+    openMenu(e.currentTarget, [
+      { label: 'Export as Markdown', onClick: exportProject },
+      { label: 'Back up all projects', onClick: backupFlow },
+      { label: 'Restore from a backup', onClick: restoreFlow },
+      { label: 'Delete project', danger: true, onClick: deleteProjectFlow }
+    ].filter(Boolean));
+  });
+
+  $('#backupBtn').addEventListener('click', backupFlow);
+  $('#restoreBtn').addEventListener('click', restoreFlow);
+  $('#restoreInput').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) onRestoreFile(f); });
+  $('#installOk').addEventListener('click', () => { $('#installHint').hidden = true; lsSet('thread:installHint', 'seen'); });
+  $('#fileInput').addEventListener('change', e => { const files = e.target.files; handleFiles(files, S.insertBefore); S.insertBefore = null; });
+
+  $('#lbClose').addEventListener('click', closeLightbox);
+  $('#lightbox').addEventListener('click', e => { if (e.target.id === 'lightbox' || e.target.id === 'lbImg') closeLightbox(); });
+
+  document.addEventListener('click', e => {
+    if (menuEl && !menuEl.contains(e.target) && !(menuAnchor && menuAnchor.contains(e.target))) closeMenu();
+    if (!e.target.closest('.gap')) closeGaps();
+  });
+  window.addEventListener('scroll', () => { if (menuEl) closeMenu(); }, { passive: true });
+  let lastW = window.innerWidth;
+  window.addEventListener('resize', () => {
+    closeMenu(); clearTimeout(window.__rs);
+    window.__rs = setTimeout(() => {
+      document.querySelectorAll('#items textarea, #charView textarea').forEach(autosize);
+      if (window.innerWidth !== lastW && S.tab === 'chars' && !S.charOpen && S.charLayout === 'map') renderChars();
+      lastW = window.innerWidth;
+    }, 150);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (menuEl) { const a = menuAnchor; closeMenu(); if (a) a.focus(); return; }
+    if (!$('#lightbox').hidden) { closeLightbox(); return; }
+    if (document.querySelector('.gap.open')) { closeGaps(); return; }
+    if ($('#app').classList.contains('nav-open')) closeNav();
+  });
+  document.addEventListener('focusin', e => { if (e.target.matches('textarea, input[type="text"]')) document.body.classList.add('typing'); });
+  document.addEventListener('focusout', () => setTimeout(() => { const a = document.activeElement; if (!a || !a.matches('textarea, input[type="text"]')) document.body.classList.remove('typing'); }, 60));
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flushAll(); });
+  window.addEventListener('pagehide', flushAll);
+
+  // drag & drop and paste for photos/files
+  let dragDepth = 0;
+  const hasFiles = e => e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
+  const canDrop = () => S.currentId && S.mode === 'edit' && S.tab === 'thread';
+  window.addEventListener('dragenter', e => { if (!hasFiles(e) || !canDrop()) return; e.preventDefault(); dragDepth++; $('#drop').hidden = false; });
+  window.addEventListener('dragover', e => { if (!hasFiles(e) || !canDrop()) return; e.preventDefault(); });
+  window.addEventListener('dragleave', e => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $('#drop').hidden = true; });
+  window.addEventListener('drop', e => {
+    if (!hasFiles(e)) return;
+    e.preventDefault(); dragDepth = 0; $('#drop').hidden = true;
+    if (canDrop()) handleFiles(e.dataTransfer.files, null);
+  });
+  document.addEventListener('paste', e => {
+    const files = e.clipboardData && e.clipboardData.files;
+    if (!files || !files.length || !canDrop()) return;
+    e.preventDefault();
+    handleFiles(files, null);
+  });
+  setInterval(() => { if (document.visibilityState === 'visible') renderProjectList(); }, 60000);
+}
+
+async function start() {
+  document.body.dataset.view = 'loading'; document.body.dataset.mode = 'edit'; document.body.dataset.tab = 'thread';
+  wire();
+  showView('loading');
+  if (isIOS() && !isStandalone() && lsGet('thread:installHint') !== 'seen') $('#installHint').hidden = false;
+  try { S.store = await makeIdbStore(); }
+  catch (e) {
+    $('#loading').textContent = 'Thread can’t open its storage in this browser. If you’re in a private window, open Thread in a normal one.';
+    return;
+  }
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+  S.downloads = true;
+  updateBackupNote();
+  setInterval(updateBackupNote, 60000);
+  $('#welcomeSync').textContent = 'Everything stays on this device, and you can back it up to iCloud Drive.';
+  setStatus();
+  S.store.subscribeProjects(onProjects, onDbError);
+}
+
+start();
+})();
+</script>
+</body>
+</html>
