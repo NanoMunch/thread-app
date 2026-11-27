@@ -28,6 +28,6 @@ Back up and restore
 
 Updating the app later
 1. Replace the files in this folder with the new ones.
-2. In sw.js, change VERSION (for example thread-v6 to thread-v7).
+2. In sw.js, change VERSION (for example thread-v8 to thread-v9).
 3. In Netlify, open the site and drag the folder onto Production deploys.
    Phones pick up the new version the next time Thread opens.

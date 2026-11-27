@@ -490,6 +490,37 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .beat-st.done{color:var(--thread);font-weight:600}
 .beat.done{border-color:var(--thread)}
 
+.ep-label{color:var(--ink)}
+.item[data-el="episode"] .num{border-radius:6px;background:var(--thread);color:var(--thread-ink)}
+.item[data-el="episode"] .w-title{font-size:1.35rem}
+.item[data-el="episode"]{margin-top:8px}
+.sp .sp-ep{text-align:center;font-weight:700;margin-top:3em;font-size:1.1em}
+.ep-pick{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:12px}
+.ep-pick .lab{font-size:13px;color:var(--muted);margin-right:2px}
+.ep-pick .chip[aria-pressed="true"]{background:var(--thread);border-color:var(--thread);color:var(--thread-ink)}
+.eps-box{overflow-x:auto;margin:8px 0 4px}
+.eps{list-style:none;margin:0;padding:0;display:flex;gap:6px}
+.ep{flex:1 0 44px;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:44px}
+.ep-n{font-size:12.5px;font-weight:600;color:var(--muted)}
+.ep-fill{width:100%;height:48px;border:1px dashed var(--line);border-radius:8px;display:flex;align-items:flex-end;overflow:hidden}
+.ep.has .ep-fill{border-style:solid;border-color:var(--thread)}
+.ep-fill span{display:block;width:100%;background:var(--thread);opacity:.55}
+.ep.over .ep-fill{border-color:var(--danger)}
+.ep-b{font-size:10.5px;line-height:1.2;color:var(--thread);text-align:center;min-height:2.4em}
+#emptyThread .btn{display:flex}
+
+.cast-box{margin-top:6px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.cast{list-style:none;margin:0;padding:0;display:grid;gap:8px;width:100%;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.cast-card{width:100%;display:flex;gap:10px;align-items:flex-start;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px}
+.cast-card:hover{border-color:var(--thread)}
+.cast-card .portrait{width:44px;height:44px;flex:none}
+.cast-body{display:flex;flex-direction:column;min-width:0}
+.cast-name{font-family:var(--serif);font-weight:600}
+.cast-sub{font-size:12.5px;color:var(--muted)}
+.cast-snip{font-size:13px;color:var(--muted);margin-top:2px;font-family:var(--serif)}
+.cast-empty{margin:0;color:var(--muted);font-family:var(--serif)}
+.reader h3{font-family:var(--serif);font-size:1.1rem;margin:1.4em 0 .3em}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none !important;animation:none !important}
 }
@@ -540,6 +571,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
           <div class="proj-extra" id="projExtra"></div>
           <div class="tabs" role="tablist" aria-label="Project sections">
             <button class="tab" id="tabThread" role="tab" type="button" data-tab="thread" aria-selected="true" aria-controls="threadView">Thread <span class="count" id="tcThread"></span></button>
+            <button class="tab" id="tabBible" role="tab" type="button" data-tab="bible" aria-selected="false" aria-controls="threadView" tabindex="-1" hidden>Bible <span class="count" id="tcBible"></span></button>
             <button class="tab" id="tabChars" role="tab" type="button" data-tab="chars" aria-selected="false" aria-controls="charView" tabindex="-1">Characters <span class="count" id="tcChars"></span></button>
             <button class="tab" id="tabStory" role="tab" type="button" data-tab="story" aria-selected="false" aria-controls="structView" tabindex="-1" hidden>Structure <span class="count" id="tcStory"></span></button>
           </div>
@@ -601,6 +633,7 @@ const PATHS = {
   doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>',
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
   back: '<path d="M14.5 5.5L8 12l6.5 6.5"/>',
+  tv: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 21h8M9 3l3 3 3-3"/>',
   scene: '<rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M3 9l2.5-5 15 2.6L20 9"/><path d="M8 4.6l1.6 4.2M13 5.5l1.6 3.5"/>',
   act: '<path d="M4 4h16v4H4zM4 12h16M4 16h10M4 20h12"/>',
   person: '<circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20c1.1-3.7 3.9-5.6 7.2-5.6s6.1 1.9 7.2 5.6"/>'
@@ -850,8 +883,9 @@ const TRANSITIONS = ['CUT TO:', 'DISSOLVE TO:', 'SMASH CUT TO:', 'MATCH CUT TO:'
 const NUMWORDS = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TEN', 'ELEVEN', 'TWELVE'];
 function addKinds() {
   const k = curKind(), base = [['note', 'Note', 'note'], ['image', 'Photo', 'photo'], ['file', 'File', 'clip']];
+  if (curZone() === 'bible') return [['section', 'Section', 'pen'], ['cast', 'Cast', 'person'], ...base];
   if (k === 'film') return [['scene', 'Scene', 'scene'], ...base];
-  if (k === 'tv') return [['scene', 'Scene', 'scene'], ['act', 'Act', 'act'], ...base];
+  if (k === 'tv') return [['episode', 'Episode', 'tv'], ['scene', 'Scene', 'scene'], ['act', 'Act', 'act'], ...base];
   if (k === 'novel') return [['chapter', 'Chapter', 'pen'], ...base];
   return [['writing', 'Writing', 'pen'], ...base];
 }
@@ -996,13 +1030,22 @@ function layoutScript(proj, items, pdf) {
   const pushB = b => blocks.push(Object.assign(b, { sid: curSid, act: curAct }));
   const tv = proj.kind === 'tv';
   let actN = 0, firstAct = true, lastAct = null;
+  let epN = 0;
   for (const it of items) {
+    if (it.el === 'episode') {
+      epN++; curSid = null; curAct = null;
+      if (lastAct) pushB({ kind: 'center', lines: ['END OF ' + lastAct], before: 2 });
+      lastAct = null; actN = 0; firstAct = true;
+      pushB({ kind: 'act', lines: ['EPISODE ' + (epN + (proj.epBase || 0))], before: 0, newPage: blocks.length > 0 });
+      if ((it.title || '').trim()) pushB({ kind: 'center', lines: wrapChars('“' + it.title.trim() + '”', 60), before: 1 });
+      continue;
+    }
     if (it.el === 'act' && tv) {
       actN++; curSid = null;
       if (lastAct) pushB({ kind: 'center', lines: ['END OF ' + lastAct], before: 2 });
       lastAct = actName(it, actN).toUpperCase();
       curAct = { name: actName(it, actN).replace(/^ACT/i, 'Act').replace(/\b([A-Z])([A-Z]+)\b/g, (m, a, b) => a + b.toLowerCase()), start: null, end: 0, lastScene: null }; acts.push(curAct);
-      pushB({ kind: 'act', lines: [lastAct], before: 0, newPage: !firstAct || blocks.length > 0 });
+      pushB({ kind: 'act', lines: [lastAct], before: firstAct && blocks.length ? 2 : 0, newPage: !firstAct });
       firstAct = false;
       continue;
     }
@@ -1125,6 +1168,7 @@ function layoutProse(proj, items, pdf, wordsTotal) {
   for (const it of items) {
     if (it.type !== 'writing') continue;
     const paras = paragraphs(it.body);
+    if (it.el === 'cast') for (const c of S.chars) { const v = charView(c); paras.push(charName(c) + ((v.role || '').trim() ? ', ' + v.role.trim() : '') + '. ' + [v.backstory, v.personality, v.wants].filter(t => (t || '').trim()).map(t => t.trim()).join(' ')); }
     if (it.el === 'chapter' || (novel && !first && (it.title || '').trim())) {
       chap += it.el === 'chapter' ? 1 : 0;
       newPage(); y = H - M - SIZE - 2.5 * 72 + 72;
@@ -1148,11 +1192,14 @@ function layoutProse(proj, items, pdf, wordsTotal) {
   return pageNo;
 }
 
-function exportPdf() {
+function exportPdf(only, suffix, epBase) {
   flushAll();
   const p = currentProject(); if (!p) return;
-  const proj = Object.assign({}, p, { title: $('#projectTitle').value.trim() || p.title });
-  const items = S.items.map(view);
+  let proj = Object.assign({}, p, { title: $('#projectTitle').value.trim() || p.title });
+  let items = only || threadItems().map(view);
+  if (!only && S.tab === 'bible') { items = S.items.map(view); proj = Object.assign({}, proj, { kind: 'other', title: proj.title + ' – Series bible' }); }
+  if (suffix) proj.title += suffix;
+  if (epBase) proj.epBase = epBase;
   const script = isScript(proj.kind);
   if (!items.some(i => i.type === 'writing' && ((i.body || '').trim() || i.el))) { toast('There’s no writing to export yet.'); return; }
   const words = items.filter(i => i.type === 'writing').reduce((n, i) => n + countWords(i.body), 0);
@@ -1175,12 +1222,13 @@ function updateBack() {
   const inProj = document.body.dataset.view === 'project';
   b.hidden = !inProj;
   if (!inProj) return;
-  const label = S.charOpen ? 'Characters' : S.mode === 'read' ? 'Edit' : 'Projects';
+  const label = S.charOpen ? (S.charReturn === 'bible' ? 'Bible' : 'Characters') : S.mode === 'read' ? 'Edit' : 'Projects';
   b.innerHTML = ICON('back', 20) + '<span></span>';
   b.lastChild.textContent = label;
   b.setAttribute('aria-label', 'Back to ' + label.toLowerCase());
 }
 function goBack() {
+  if (S.charOpen && S.charReturn === 'bible') { const back = S.castId; closeChar(); setTab('bible'); if (back) { scrollToId = back; renderItems(); } return; }
   if (S.charOpen) { closeChar(); updateBack(); window.scrollTo(0, 0); return; }
   if (S.mode === 'read') { setMode('edit'); return; }
   goHome();
@@ -1229,6 +1277,172 @@ function renderHome() {
     el('button', { type: 'button', class: 'btn small', text: 'Restore', onclick: restoreFlow })));
 }
 
+/* ---------------- TV: episodes, season structure, show bible ---------------- */
+const zoneOf = it => it.zone === 'bible' ? 'bible' : 'thread';
+const curZone = () => S.tab === 'bible' ? 'bible' : 'thread';
+const threadItems = () => (S.allItems || []).filter(i => zoneOf(i) === 'thread').sort((a, b) => (a.pos - b.pos) || ((a.createdAt || 0) - (b.createdAt || 0)));
+function applyZone() { S.items = (S.allItems || []).filter(i => zoneOf(i) === curZone()); }
+const plannedEps = p => Math.max(1, p.episodes || 8);
+function episodesOf(items) {
+  const eps = [];
+  let cur = null;
+  for (const it of items) {
+    if (it.el === 'episode') { cur = { ep: it, n: eps.length + 1, items: [] }; eps.push(cur); continue; }
+    if (!cur) { cur = { ep: null, n: 1, items: [] }; eps.push(cur); }
+    cur.items.push(it);
+  }
+  return eps.filter(e => e.ep || e.items.some(i => i.type === 'writing'));
+}
+const epTitle = e => `Episode ${e.n}` + (e.ep && (e.ep.title || '').trim() ? `: ${e.ep.title.trim()}` : '');
+const SEASON_BEATS = [
+  ['pilot', 'Pilot', 0, 'Set up the world, the main characters and the question the season will answer. End on a hook that promises more.'],
+  ['sinciting', 'Season inciting incident', .15, 'The event that launches this season’s main story, if the pilot didn’t already.'],
+  ['complication', 'First complication', .35, 'A new problem or player widens the story and tests early alliances.'],
+  ['midseason', 'Midseason turn', .5, 'A big reveal or reversal that changes the game for the second half.'],
+  ['escalation', 'Escalation', .7, 'Stakes rise and relationships break. Characters are forced to choose sides.'],
+  ['penultimate', 'Penultimate episode', -1, 'Often the biggest event of the season: the battle, the betrayal, the loss.'],
+  ['finale', 'Finale', 1, 'Answer the season’s main question, show what it cost, and open a door to the next season.']
+];
+const seasonTarget = (frac, N) => frac === 0 ? 1 : frac === 1 ? N : frac === -1 ? Math.max(1, N - 1) : Math.min(N, Math.max(1, Math.ceil(frac * N)));
+const BIBLE_SECTIONS = [
+  ['Logline', 'The show in one or two sentences: who, what they want, and what stands in the way.'],
+  ['Series overview', 'What the show is about, why now, and what keeps it going season after season.'],
+  ['Tone and style', 'How it feels and looks. Shows or films it sits beside, and how it’s different.'],
+  ['The world', 'Where and when it’s set, the rules of this world, and the places we keep returning to.'],
+  ['Main characters', 'Who drives the show and how they change. Full details can live in the Characters tab.'],
+  ['Season arc', 'Where the season starts, its big turns, and where it ends up.'],
+  ['Episode guide', 'A line or a paragraph for each planned episode.'],
+  ['Future seasons', 'Where the story could go next.']
+];
+const sectionHint = title => (BIBLE_SECTIONS.find(s => s[0].toLowerCase() === (title || '').trim().toLowerCase()) || [0, 'Ideas, plans, research…'])[1];
+function openCharFromBible(id, castId) {
+  S.charReturn = 'bible'; S.castId = castId;
+  openChar(id);
+  updateBack();
+}
+async function newCharFromBible(castId) {
+  S.charReturn = 'bible'; S.castId = castId;
+  await createCharacter();
+  S.charReturn = 'bible';
+  updateBack();
+}
+function fillCast(box, castId) {
+  box.textContent = '';
+  const ul = el('ul', { class: 'cast' });
+  for (const c of S.chars) {
+    const v = charView(c), face = el('span', { class: 'portrait', 'aria-hidden': 'true' });
+    fillPortrait(face, c);
+    const n = linksOf(c.id).length;
+    const sub = [(v.role || '').trim(), n ? plural(n, 'connection', 'connections') : ''].filter(Boolean).join(' · ');
+    ul.append(el('li', {}, el('button', { type: 'button', class: 'cast-card', onclick: () => openCharFromBible(c.id, castId) }, face,
+      el('span', { class: 'cast-body' }, el('span', { class: 'cast-name', text: charName(c) }), sub ? el('span', { class: 'cast-sub', text: sub }) : null,
+        (v.backstory || v.personality || '').trim() ? el('span', { class: 'cast-snip', text: clipText((v.backstory || v.personality).trim(), 110) }) : null))));
+  }
+  if (!S.chars.length) box.append(el('p', { class: 'cast-empty', text: S.charsReady ? 'No characters yet. Characters you add here also appear in the Characters tab, and the other way round.' : 'Opening characters…' }));
+  else box.append(ul);
+  box.append(el('button', { type: 'button', class: 'btn small', html: ICON('plus', 16) + '<span>New character</span>', onclick: () => newCharFromBible(castId) }));
+}
+function refreshCasts() { for (const [id, node] of els) if (node.dataset.el === 'cast' && node._f.cast) fillCast(node._f.cast, id); }
+async function addBibleSections() {
+  const pid = S.currentId; if (!pid) return;
+  const positions = await positionsFor(null, BIBLE_SECTIONS.length);
+  const now = Date.now();
+  for (let k = 0; k < BIBLE_SECTIONS.length; k++) {
+    await S.store.setItem(pid, 'i' + uid(), { type: 'writing', el: BIBLE_SECTIONS[k][0] === 'Main characters' ? 'cast' : 'section', zone: 'bible', pos: positions[k], title: BIBLE_SECTIONS[k][0], body: '', caption: '', createdAt: now + k, updatedAt: now + k });
+  }
+  touchProject(pid, true);
+}
+
+function renderSeason(root, p) {
+  const all = threadItems().map(view);
+  const eps = episodesOf(all);
+  const N = plannedEps(p), target = p.targetPages || defaultLength(p);
+  const stats = eps.map(e => {
+    const st = scriptStats(p, e.items);
+    return Object.assign(e, { pages: st.pages, scenesN: st.scenes.length, scenes: st.scenes, acts: e.items.filter(i => i.el === 'act').length });
+  });
+  const written = stats.filter(e => e.scenesN > 0).length;
+  root.append(el('p', { class: 'story-intro', text: `A ${N}-episode season of about ${target} pages an episode. You’ve started ${plural(written, 'episode', 'episodes')}. Mark the episode that carries each turn of the season, and Thread checks the spacing.` }));
+  // episode strip
+  const strip = el('ol', { class: 'eps' });
+  for (let i = 1; i <= Math.max(N, stats.length); i++) {
+    const e = stats[i - 1];
+    const sb = e && e.ep && e.ep.sbeat && SEASON_BEATS.find(b => b[0] === e.ep.sbeat);
+    const fill = e ? Math.min(1, e.pages / target) : 0;
+    strip.append(el('li', { class: 'ep' + (e ? ' has' : '') + (i > N ? ' over' : '') },
+      el('span', { class: 'ep-n', text: String(i) }),
+      el('span', { class: 'ep-fill' }, el('span', { style: `height:${Math.round(fill * 100)}%` })),
+      el('span', { class: 'ep-b', text: sb ? sb[1] : '' })));
+  }
+  root.append(el('div', { class: 'eps-box', role: 'img', 'aria-label': `${stats.length} of ${N} episodes started` }, strip));
+
+  // suggestions
+  const sug = [];
+  if (stats.length > N) sug.push({ kind: 'beat', text: `You have ${stats.length} episodes but planned ${N}.`, tip: 'Raise the planned number in the project details, or look for episodes to combine.' });
+  for (const [key, name, frac, tip] of SEASON_BEATS) {
+    const te = seasonTarget(frac, N);
+    const m = stats.find(e => e.ep && e.ep.sbeat === key);
+    if (m && N >= 4 && Math.abs(m.n - te) > 1) sug.push({ kind: 'beat', ep: m, text: `${name} is in episode ${m.n}; in a ${N}-episode season it usually falls around episode ${te}.`, tip: m.n > te ? 'The season may be slow to get there. Could earlier episodes move faster?' : 'It may arrive before the audience is invested. Could it be held back?' });
+    else if (!m && written > te && frac !== 1 && frac !== 0) { const e = stats[te - 1]; sug.push({ kind: 'beat', ep: e, text: `No episode is marked as the ${name.toLowerCase()} yet (usually episode ${te}).`, tip: tip, mark: e && e.ep ? key : null }); }
+  }
+  for (const e of stats) {
+    if (!e.scenesN) continue;
+    if (e !== stats[stats.length - 1] && (e.pages > target * 1.2 || e.pages < target * 0.8))
+      sug.push({ kind: 'pace', ep: e, text: `${epTitle(e)} is about ${Math.round(e.pages)} pages; you’re aiming for ${target}.`, tip: e.pages > target ? 'Look for scenes to trim, or a storyline to move to another episode.' : 'There may be room for a B or C story, or a scene that deepens a character.' });
+    if (p.kind === 'tv' && e.pages > 15 && !e.acts) sug.push({ kind: 'pace', ep: e, text: `${epTitle(e)} has no act breaks.`, tip: 'Add Acts so each one can end on a turn. The Structure tab can then check each act.' });
+  }
+  // characters across episodes
+  const names = new Map();
+  for (const e of stats) for (const s of e.scenes) for (const n of s.speakers) names.set(n, (names.get(n) || 0) + 1);
+  const main = [...names.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4).map(x => x[0]).filter(n => names.get(n) >= 3);
+  const done = stats.filter(e => e.scenesN >= 3);
+  for (const n of main) {
+    const re = new RegExp('\\b' + n.split(/\s+/)[0].replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+    const missing = done.filter(e => !e.scenes.some(s => s.speakers.has(n) || re.test(s.actionText)));
+    if (missing.length && done.length >= 2)
+      sug.push({ kind: 'char', ep: missing[0], text: `${n} doesn’t appear in ${missing.length === 1 ? 'episode ' + missing[0].n : 'episodes ' + missing.map(e => e.n).join(', ')}.`, tip: 'Main characters usually appear in every episode, even briefly. If the absence is deliberate, make sure someone feels it.' });
+  }
+  root.append(el('h3', { text: sug.length ? `Suggestions (${sug.length})` : 'Suggestions' }));
+  if (!stats.length) root.append(el('p', { class: 'story-empty', text: 'Add an Episode in the Thread tab, then its scenes. Season suggestions appear as episodes fill in.' }));
+  else if (!sug.length) root.append(el('p', { class: 'story-empty', text: 'Nothing to flag across the season right now.' }));
+  const ul = el('ul', { class: 'sugs' });
+  const KLAB = { beat: 'Season', char: 'Character', pace: 'Length' };
+  for (const s of sug) {
+    const acts = el('div', { class: 'sug-acts' });
+    if (s.ep && s.ep.ep) acts.append(el('button', { type: 'button', class: 'chip small', text: 'Go to episode ' + s.ep.n, onclick: () => goToItem(s.ep.ep.id) }));
+    if (s.mark) acts.append(el('button', { type: 'button', class: 'chip small', text: 'Mark it', onclick: () => setSeasonBeat(s.ep.ep.id, s.mark) }));
+    ul.append(el('li', { class: 'sug k-' + s.kind }, el('span', { class: 'sug-k', text: KLAB[s.kind] }), el('p', { class: 'sug-t', text: s.text }), el('p', { class: 'sug-tip', text: s.tip }), acts));
+  }
+  root.append(ul);
+  // season beats
+  root.append(el('h3', { text: 'The season' }));
+  const bl = el('ol', { class: 'beats' });
+  for (const [key, name, frac, tip] of SEASON_BEATS) {
+    const te = seasonTarget(frac, N);
+    const m = stats.find(e => e.ep && e.ep.sbeat === key);
+    const cand = stats[te - 1];
+    const acts = el('div', { class: 'sug-acts' });
+    if (m) acts.append(el('button', { type: 'button', class: 'chip small', text: 'Go to episode ' + m.n, onclick: () => goToItem(m.ep.id) }));
+    else if (cand && cand.ep) acts.append(el('button', { type: 'button', class: 'chip small', text: 'Mark episode ' + cand.n, onclick: () => setSeasonBeat(cand.ep.id, key) }));
+    bl.append(el('li', { class: 'beat' + (m ? ' done' : '') },
+      el('div', { class: 'beat-h' }, el('span', { class: 'beat-n', text: name }), el('span', { class: 'beat-p', text: 'episode ' + te })),
+      el('p', { class: 'beat-tip', text: tip }),
+      el('div', { class: 'beat-foot' }, el('span', { class: 'beat-st' + (m ? ' done' : ''), text: m ? epTitle(m) : (written >= te ? 'Not marked yet' : 'Coming up') }), acts)));
+  }
+  root.append(bl);
+  return sug.length;
+}
+function setSeasonBeat(iid, key) {
+  for (const o of threadItems()) if (o.id !== iid && view(o).sbeat === key) { queueSave('items/' + o.id, 'sbeat', ''); flush('items/' + o.id); }
+  queueSave('items/' + iid, 'sbeat', key); flush('items/' + iid);
+  setTimeout(renderStruct, 60);
+}
+function seasonBeatMenu(anchor, iid) {
+  const cur = view(threadItems().find(i => i.id === iid) || {}).sbeat;
+  openMenu(anchor, [{ label: cur ? 'Remove season beat' : 'No season beat', onClick: () => setSeasonBeat(iid, '') }]
+    .concat(SEASON_BEATS.map(([k, name]) => ({ label: (k === cur ? '✓ ' : '') + name, onClick: () => setSeasonBeat(iid, k) }))));
+}
+
 /* ---------------- story structure: beats and suggestions ---------------- */
 // Beat positions are fractions of the script's length. Descriptions are short summaries in our own words.
 const FRAMEWORKS = {
@@ -1269,9 +1483,11 @@ const FRAMEWORKS = {
     ['tag', 'Final act and tag', 1, 'Resolve the episode’s story, and leave a thread hanging for the next one.']
   ] }
 };
-const frameworkFor = p => FRAMEWORKS[p.framework] ? p.framework : (p.kind === 'tv' ? 'tv' : 'cat');
+const frameworkFor = p => p.kind === 'tv' ? (['season', 'tv', 'cat', 'field'].includes(p.framework) ? p.framework : 'season') : (p.framework === 'cat' || p.framework === 'field' ? p.framework : 'cat');
+const FW_LABEL = { season: 'Season', tv: 'Episode acts', cat: 'Save the Cat', field: 'Syd Field' };
 const defaultLength = p => p.kind === 'tv' ? 60 : 110;
-const beatByKey = k => { for (const f of Object.values(FRAMEWORKS)) { const b = f.beats.find(x => x[0] === k); if (b) return b; } return null; };
+const beatByKey = k => {
+  if (!k) return null; for (const f of Object.values(FRAMEWORKS)) { const b = f.beats.find(x => x[0] === k); if (b) return b; } return null; };
 
 function scriptStats(p, items) {
   const pages = layoutScript(p, items, null);
@@ -1296,7 +1512,7 @@ function suggestions(p, st, len) {
   const out = [];
   const { scenes, pages } = st;
   if (!scenes.length) return out;
-  const fw = FRAMEWORKS[frameworkFor(p)];
+  const fw = FRAMEWORKS[frameworkFor(p)] || FRAMEWORKS.tv;
   const marked = new Map(scenes.filter(s => s.it.beat).map(s => [s.it.beat, s]));
   const pg = x => 'p. ' + Math.max(1, Math.round(x));
   const at = x => 'p. ' + (Math.floor(x) + 1);
@@ -1367,21 +1583,45 @@ function suggestions(p, st, len) {
 function renderStruct() {
   const root = $('#structView'); if (!root || S.tab !== 'story') return;
   const p = currentProject(); if (!p) return;
-  const items = S.items.map(view);
-  const st = scriptStats(p, items);
-  const len = Math.max(p.targetPages || defaultLength(p), st.pages);
   const fwKey = frameworkFor(p), fw = FRAMEWORKS[fwKey];
   root.textContent = '';
   const wrap = el('div', { class: 'story' });
   const seg = el('div', { class: 'seg small', role: 'group', 'aria-label': 'Structure' });
-  for (const k of (p.kind === 'tv' ? ['tv', 'cat', 'field'] : ['cat', 'field'])) seg.append(el('button', { type: 'button', 'aria-pressed': String(k === fwKey), text: FRAMEWORKS[k].name,
+  for (const k of (p.kind === 'tv' ? ['season', 'tv', 'cat', 'field'] : ['cat', 'field'])) seg.append(el('button', { type: 'button', 'aria-pressed': String(k === fwKey), text: FW_LABEL[k],
     onclick: () => { saveProjectField('framework', k); renderStruct(); } }));
-  const lenIn = el('input', { type: 'number', inputmode: 'numeric', min: '10', max: '200', class: 'len', 'aria-label': 'Planned length in pages' });
+  const lenIn = el('input', { type: 'number', inputmode: 'numeric', min: '10', max: '200', class: 'len', 'aria-label': p.kind === 'tv' ? 'Planned pages per episode' : 'Planned length in pages' });
   lenIn.value = p.targetPages || defaultLength(p);
   let lt = null;
   lenIn.addEventListener('input', () => { clearTimeout(lt); lt = setTimeout(() => { const v = parseInt(lenIn.value, 10); if (v >= 10) { saveProjectField('targetPages', v); renderStruct(); } }, 700); });
-  wrap.append(el('div', { class: 'story-bar' }, seg, el('label', { class: 'len-label' }, 'Aiming for', lenIn, 'pages')));
-  wrap.append(el('p', { class: 'story-intro', text: `${fw.by}, placed on a ${len}-page script. You’re on page ${Math.max(1, st.pages)}. These are guides, not rules: mark the scene that does each job, and Thread checks the timing.` }));
+  const bar = el('div', { class: 'story-bar' }, seg, el('label', { class: 'len-label' }, 'Aiming for', lenIn, p.kind === 'tv' ? 'pages an episode' : 'pages'));
+  if (p.kind === 'tv') {
+    const epIn = el('input', { type: 'number', inputmode: 'numeric', min: '1', max: '40', class: 'len', 'aria-label': 'Planned episodes' });
+    epIn.value = plannedEps(p);
+    let et = null;
+    epIn.addEventListener('input', () => { clearTimeout(et); et = setTimeout(() => { const v = parseInt(epIn.value, 10); if (v >= 1) { saveProjectField('episodes', v); renderStruct(); renderExtra(true); } }, 700); });
+    bar.append(el('label', { class: 'len-label' }, epIn, 'episodes'));
+  }
+  wrap.append(bar);
+  if (fwKey === 'season') {
+    const n = renderSeason(wrap, p);
+    root.append(wrap);
+    $('#tcStory').textContent = n ? String(n) : '';
+    return;
+  }
+  let items = threadItems().map(view);
+  if (p.kind === 'tv') {
+    const eps = episodesOf(items);
+    if (eps.length > 1 || (eps[0] && eps[0].ep)) {
+      S.storyEp = Math.min(Math.max(0, S.storyEp || 0), eps.length - 1);
+      const pick = el('div', { class: 'ep-pick', role: 'group', 'aria-label': 'Episode' }, el('span', { class: 'lab', text: 'Episode' }));
+      eps.forEach((e, k) => pick.append(el('button', { type: 'button', class: 'chip small', 'aria-pressed': String(k === S.storyEp), text: String(e.n), title: epTitle(e), onclick: () => { S.storyEp = k; renderStruct(); } })));
+      wrap.append(pick);
+      items = eps[S.storyEp].items;
+    }
+  }
+  const st = scriptStats(p, items);
+  const len = Math.max(p.targetPages || defaultLength(p), st.pages);
+  wrap.append(el('p', { class: 'story-intro', text: `${fw.by.charAt(0).toUpperCase() + fw.by.slice(1)}, placed on a ${len}-page ${p.kind === 'tv' ? 'episode' : 'script'}. You’re on page ${Math.max(1, st.pages)}. These are guides, not rules: mark the scene that does each job, and Thread checks the timing.` }));
 
   // timeline
   const W = 1000, H = 64;
@@ -1448,7 +1688,7 @@ function goToItem(iid) {
 }
 function beatMenu(anchor, iid) {
   const p = currentProject(); if (!p) return;
-  const fw = FRAMEWORKS[frameworkFor(p)];
+  const fw = FRAMEWORKS[frameworkFor(p)] || FRAMEWORKS.tv;
   const cur = view(S.items.find(i => i.id === iid) || {}).beat;
   openMenu(anchor, [{ label: cur ? 'Remove beat' : 'No beat', onClick: () => setBeat(iid, '') }]
     .concat(fw.beats.map(([k, name]) => ({ label: (k === cur ? '✓ ' : '') + name, onClick: () => setBeat(iid, k) }))));
@@ -1593,13 +1833,15 @@ function saveProjectField(field, value) {
   const p = currentProject(); if (p) p[field] = value;
   S.store.updateProject(pid, { [field]: value, updatedAt: Date.now() }).catch(e => toast(dbErrMsg(e)));
 }
-function renderExtra() {
+function renderExtra(force) {
   const box = $('#projExtra'), p = currentProject();
   if (!box || !p) return;
   const k = p.kind || 'other';
   $('#tabStory').hidden = !isScript(k);
+  $('#tabBible').hidden = k !== 'tv';
+  if (k !== 'tv' && S.tab === 'bible') setTab('thread');
   if (!isScript(k) && S.tab === 'story') setTab('thread');
-  if (box.dataset.pid === p.id && box.dataset.kind === k) { updateGoal(); return; }
+  if (!force && box.dataset.pid === p.id && box.dataset.kind === k) { updateGoal(); return; }
   box.dataset.pid = p.id; box.dataset.kind = k;
   box.textContent = '';
   box.append(el('button', { type: 'button', class: 'ptype', 'aria-label': 'Type of writing: ' + ptypeName(k) + '. Change', text: ptypeName(k), onclick: e => typeMenu(e.currentTarget) }));
@@ -1608,6 +1850,13 @@ function renderExtra() {
   let at = null;
   a.addEventListener('input', () => { clearTimeout(at); at = setTimeout(() => { saveProjectField('author', a.value.trim()); lsSet('thread:author', a.value.trim()); }, 600); });
   box.append(el('label', {}, isScript(k) ? 'Written by' : 'By', a));
+  if (k === 'tv') {
+    const e = el('input', { class: 'goal', type: 'number', inputmode: 'numeric', min: '1', max: '40', 'aria-label': 'Planned episodes' });
+    e.value = plannedEps(p);
+    let et = null;
+    e.addEventListener('input', () => { clearTimeout(et); et = setTimeout(() => { const v = parseInt(e.value, 10); if (v >= 1) { saveProjectField('episodes', v); renderStruct(); } }, 600); });
+    box.append(el('label', {}, 'Season of', e, 'episodes'));
+  }
   if (k === 'novel' || k === 'short') {
     const g = el('input', { class: 'goal', type: 'number', inputmode: 'numeric', min: '0', step: '500', 'aria-label': 'Word goal' });
     g.value = p.goal || '';
@@ -1633,6 +1882,7 @@ function setKind(k) {
   p.kind = k;
   const patch = { kind: k, updatedAt: Date.now() };
   if (DEFAULT_GOAL[k] && !p.goal) { p.goal = DEFAULT_GOAL[k]; patch.goal = p.goal; }
+  if (k === 'tv' && !p.episodes) { p.episodes = 8; patch.episodes = 8; }
   S.store.updateProject(p.id, patch).catch(e => toast(dbErrMsg(e)));
   els.forEach(n => n.remove()); els.clear();
   buildAddbar(); renderExtra(); renderItems(); renderProjectList();
@@ -1645,8 +1895,12 @@ function buildAddbar() {
   for (const [t, label, icon] of addKinds()) bar.append(el('button', { class: 'chip', type: 'button', html: ICON(icon, 18) + '<span>' + label + '</span>', onclick: () => startAdd(t, null) }));
 }
 function updateMeta() {
-  const items = S.items.map(view);
+  const zone = curZone();
+  const items = threadItems().map(view);
+  const bibleN = (S.allItems || []).length - items.length;
   $('#tcThread').textContent = S.itemsReady && items.length ? String(items.length) : '';
+  $('#tcBible').textContent = S.itemsReady && bibleN ? String(bibleN) : '';
+  if (zone === 'bible') { $('#meta').textContent = !S.itemsReady ? '' : bibleN ? `${plural(bibleN, 'piece', 'pieces')} in the show bible` : 'The show bible is empty'; return; }
   $('#tcChars').textContent = S.charsReady && S.chars.length ? String(S.chars.length) : '';
   if (S.tab === 'chars') {
     $('#meta').textContent = !S.charsReady ? '' : S.chars.length
@@ -1661,6 +1915,7 @@ function updateMeta() {
     const scenes = items.filter(i => i.el === 'scene').length;
     let pages = 0; try { pages = layoutScript(p, items, null); } catch {}
     txt = `${plural(scenes, 'scene', 'scenes')}, about ${plural(Math.max(pages, scenes ? 1 : 0), 'page', 'pages')}`;
+    if (k === 'tv') { const eps = items.filter(i => i.el === 'episode').length; if (eps) txt = `${eps} of ${plannedEps(p)} episodes, ` + txt; }
   } else if (items.length && p.goal && (k === 'novel' || k === 'short')) {
     txt = `${words.toLocaleString()} of ${p.goal.toLocaleString()} words`;
   }
@@ -1681,6 +1936,7 @@ async function createProject(title, kind) {
   S.justCreated.add(pid);
   const doc = { title: title || 'Untitled project', kind, author: lsGet('thread:author') || '', createdAt: now, updatedAt: now };
   if (DEFAULT_GOAL[kind]) doc.goal = DEFAULT_GOAL[kind];
+  if (kind === 'tv') doc.episodes = 8;
   try { await S.store.setProject(pid, doc); S.projects.unshift(Object.assign({ id: pid }, doc)); }
   catch (e) { S.justCreated.delete(pid); toast(dbErrMsg(e)); return; }
   openProject(pid);
@@ -1692,7 +1948,7 @@ function closeProject() {
   if (S.unsubItems) { S.unsubItems(); S.unsubItems = null; }
   if (S.unsubChars) { S.unsubChars(); S.unsubChars = null; }
   if (S.unsubLinks) { S.unsubLinks(); S.unsubLinks = null; }
-  S.currentId = null; S.items = []; S.itemsReady = false;
+  S.currentId = null; S.items = []; S.allItems = []; S.itemsReady = false;
   S.chars = []; S.links = []; S.charsReady = false; S.linksReady = false;
   S.charOpen = null; S.linkForm = null; S.mapFocus = null;
   els.forEach(n => n.remove()); els.clear();
@@ -1707,7 +1963,7 @@ function openProject(pid) {
   S.unsubItems = S.store.subscribeItems(pid, (items, meta) => {
     if (S.currentId !== pid) return;
     if (!items.length && meta && meta.fromCache && !S.itemsReady) return;
-    S.items = items; S.itemsReady = true;
+    S.allItems = items; applyZone(); S.itemsReady = true;
     renderItems();
   }, onDbError);
   S.unsubChars = S.store.subscribe(pid, 'characters', (rows, meta) => {
@@ -1724,7 +1980,7 @@ function openProject(pid) {
   }, onDbError);
   if (S.mode === 'read') setMode('edit');
   buildAddbar();
-  { const lt = lsGet('thread:tab:' + pid); setTab(lt === 'chars' || lt === 'story' ? lt : 'thread'); }
+  { const lt = lsGet('thread:tab:' + pid); setTab(lt === 'chars' || lt === 'story' || lt === 'bible' ? lt : 'thread'); }
   renderHeader(); renderProjectList(); showView('project'); renderItems();
   window.scrollTo(0, 0);
 }
@@ -1755,8 +2011,9 @@ async function exportProject() {
   flushAll();
   const p = currentProject();
   let md = `# ${(p && p.title) || 'Untitled project'}\n\n`;
-  for (const it of S.items.map(view)) {
+  for (const it of threadItems().map(view)) {
     if (it.type === 'writing') {
+      if (it.el === 'episode') md += `## Episode${(it.title || '').trim() ? ': ' + it.title.trim() : ''}\n\n`;
       if (it.el === 'scene') md += `### ${sceneHeading(it)}\n\n`;
       if ((it.title || '').trim()) md += `## ${it.title.trim()}\n\n`;
       if ((it.body || '').trim()) md += it.body.trim() + '\n\n';
@@ -1851,15 +2108,28 @@ function buildItem(item) {
     f.body.addEventListener('focus', () => { f.tools.hidden = false; fillTools(f); });
     f.body.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== f.body) f.tools.hidden = true; }, 150));
     content.append(head, el('div', { class: 'sh' }, f.setting, f.place, f.time), f.tools, f.body, f.wc);
+  } else if (item.type === 'writing' && item.el === 'cast') {
+    f.title = lineInput('w-title', 'Main characters', 'Section title', key, 'title');
+    head.append(f.title, menuBtn);
+    f.body = textarea('w-body', 'Anything to say about the cast as a whole (optional)', 'Notes about the cast', key, 'body');
+    f.cast = el('div', { class: 'cast-box' });
+    content.append(head, f.body, f.cast);
+    fillCast(f.cast, id);
+  } else if (item.type === 'writing' && item.el === 'episode') {
+    f.label = el('span', { class: 'chap-label ep-label' });
+    f.sbeat = el('button', { type: 'button', class: 'beat-chip', 'aria-haspopup': 'menu', onclick: e => { e.stopPropagation(); seasonBeatMenu(e.currentTarget, id); } });
+    head.append(f.label, f.sbeat, menuBtn);
+    f.title = lineInput('w-title', 'Episode title', 'Episode title', key, 'title');
+    content.append(head, f.title);
   } else if (item.type === 'writing' && item.el === 'act') {
     f.title = lineInput('w-title act-title', 'ACT ONE', 'Act name', key, 'title');
     head.append(f.title, menuBtn);
     content.append(head);
   } else if (item.type === 'writing') {
     if (item.el === 'chapter') { f.label = el('div', { class: 'chap-label' }); content.append(f.label); }
-    f.title = lineInput('w-title', item.el === 'chapter' ? 'Chapter title (optional)' : 'Untitled passage', 'Passage title', key, 'title');
+    f.title = lineInput('w-title', item.el === 'chapter' ? 'Chapter title (optional)' : item.el === 'section' ? 'Section title' : 'Untitled passage', 'Passage title', key, 'title');
     f.wc = el('div', { class: 'wc' });
-    f.body = textarea('w-body', 'Start writing…', 'Passage text', key, 'body', () => { f.wc.textContent = wordLabel(countWords(f.body.value)); updateMeta(); });
+    f.body = textarea('w-body', item.el === 'section' ? sectionHint(item.title) : 'Start writing…', 'Passage text', key, 'body', () => { f.wc.textContent = wordLabel(countWords(f.body.value)); updateMeta(); });
     f.title.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); f.body.focus(); } });
     head.append(f.title, menuBtn);
     content.append(head, f.body, f.wc);
@@ -1907,7 +2177,8 @@ function applyItem(li, item, idx) {
   if (f.time && document.activeElement !== f.time && !('time' in p)) f.time.value = item.time || 'DAY';
   const ord = S.ordinals && S.ordinals.get(item.id);
   if (f.beat) { const b = item.beat && beatByKey(item.beat); f.beat.textContent = b ? b[1] : '+ Beat'; f.beat.classList.toggle('set', !!b); f.beat.setAttribute('aria-label', b ? 'Beat: ' + b[1] + '. Change' : 'Mark a story beat'); }
-  if (f.label && ord) f.label.textContent = (item.el === 'scene' ? 'Scene ' : 'Chapter ') + ord;
+  if (f.label && ord) f.label.textContent = (item.el === 'scene' ? 'Scene ' : item.el === 'episode' ? 'Episode ' : 'Chapter ') + ord;
+  if (f.sbeat) { const b = item.sbeat && SEASON_BEATS.find(x => x[0] === item.sbeat); f.sbeat.textContent = b ? b[1] : '+ Season beat'; f.sbeat.classList.toggle('set', !!b); }
   if (item.el === 'act' && f.title && ord) f.title.placeholder = 'ACT ' + (NUMWORDS[ord] || ord);
   if (f.wc) f.wc.textContent = wordLabel(countWords(f.body.value));
   if (item.assetId) {
@@ -1928,7 +2199,7 @@ function renderItems() {
   S.items = items;
   const ids = new Set(items.map(i => i.id));
   const ctr = {}; S.ordinals = new Map();
-  for (const it of items) if (it.el) { ctr[it.el] = (ctr[it.el] || 0) + 1; S.ordinals.set(it.id, ctr[it.el]); }
+  for (const it of items) if (it.el) { if (it.el === 'episode') { ctr.scene = 0; ctr.act = 0; } ctr[it.el] = (ctr[it.el] || 0) + 1; S.ordinals.set(it.id, ctr[it.el]); }
   for (const [id, node] of els) if (!ids.has(id)) { node.remove(); els.delete(id); }
   const fresh = [];
   items.forEach((it, idx) => {
@@ -1941,7 +2212,15 @@ function renderItems() {
     const at = list.children[idx];
     if (at !== node) list.insertBefore(node, at || null);
   });
-  $('#emptyThread').hidden = !S.itemsReady || items.length > 0;
+  const empty = $('#emptyThread');
+  empty.hidden = !S.itemsReady || items.length > 0;
+  if (!empty.hidden) {
+    empty.textContent = '';
+    if (curZone() === 'bible') {
+      empty.append('The show bible holds the big picture: the logline, the world, the season arc, and photos and files that shape it. ');
+      empty.append(el('button', { type: 'button', class: 'btn small', text: 'Start with the usual sections', onclick: addBibleSections, style: 'margin-top:10px' }));
+    } else empty.append(curKind() === 'tv' ? 'This thread is empty. Add an Episode, then its scenes and acts. Notes, photos and files can sit anywhere in between.' : 'This thread is empty. Add a piece of writing, a note, a photo or a file below, and each one takes its place in order.');
+  }
   updatePlaces();
   if (S.tab === 'story') renderStruct();
   updateMeta();
@@ -1951,7 +2230,7 @@ function renderItems() {
     const behavior = reduceMotion() ? 'auto' : 'smooth';
     if (pendingFocus && els.has(pendingFocus)) {
       const n = els.get(pendingFocus); pendingFocus = null;
-      const t = n.dataset.el === 'scene' ? n.querySelector('.sh input') : n.dataset.el === 'act' ? n.querySelector('.w-title') : n.querySelector('textarea');
+      const t = n.dataset.el === 'scene' ? n.querySelector('.sh input') : (n.dataset.el === 'act' || n.dataset.el === 'episode') ? n.querySelector('.w-title') : n.querySelector('textarea');
       n.scrollIntoView({ block: 'center', behavior });
       if (t) t.focus({ preventScroll: true });
     }
@@ -1972,8 +2251,9 @@ function renderRead() {
   r.textContent = '';
   const p = currentProject();
   r.append(el('h1', { text: (p && p.title) || 'Untitled project' }));
-  if (p && isScript(p.kind)) { renderScriptRead(r, p); return; }
-  const writing = S.items.map(view).filter(i => i.type === 'writing' && ((i.body || '').trim() || (i.title || '').trim()));
+  if (p && isScript(p.kind) && curZone() === 'thread') { renderScriptRead(r, p); return; }
+  if (curZone() === 'bible') r.firstChild.textContent += ' – Series bible';
+  const writing = S.items.map(view).filter(i => i.type === 'writing' && (i.el === 'cast' || (i.body || '').trim() || (i.title || '').trim()));
   r.append(el('p', { class: 'reader-note', text: writing.length
     ? 'Your writing, in thread order. Notes, photos and files are hidden while you read.'
     : 'There’s no writing in this thread yet. Switch to Edit and add a piece of writing to read it here.' }));
@@ -1982,6 +2262,7 @@ function renderRead() {
     if ((w.title || '').trim()) r.append(el('h2', { text: w.title.trim() }));
     else if (i > 0) r.append(el('div', { class: 'break', 'aria-hidden': 'true' }));
     for (const para of (w.body || '').trim().split(/\n\s*\n/)) if (para.trim()) r.append(el('p', { text: para }));
+    if (w.el === 'cast') for (const c of S.chars) { const v = charView(c); r.append(el('h3', { text: charName(c) + ((v.role || '').trim() ? ' — ' + v.role.trim() : '') })); for (const t of [v.backstory, v.personality, v.wants]) if ((t || '').trim()) r.append(el('p', { text: t.trim() })); }
   });
 }
 function renderScriptRead(r, p) {
@@ -1999,6 +2280,7 @@ function renderScriptRead(r, p) {
       sp.append(el('p', { class: 'sp-act', text: lastAct }));
       continue;
     }
+    if (it.el === 'episode') { if (lastAct) sp.append(el('p', { class: 'sp-end', text: 'END OF ' + lastAct })); lastAct = null; actN = 0; sp.append(el('p', { class: 'sp-ep', text: 'EPISODE ' + (S.ordinals.get(it.id) || '') + ((it.title || '').trim() ? ': ' + it.title.trim() : '') })); continue; }
     if (it.el === 'scene') sp.append(el('p', { class: 'sp-heading', text: sceneHeading(it) }));
     else if ((it.title || '').trim()) sp.append(el('p', { class: 'sp-heading', text: it.title.trim().toUpperCase() }));
     for (const e of parseScript(it.body)) sp.append(el('p', { class: 'sp-' + e.t, text: e.text }));
@@ -2081,7 +2363,7 @@ function setMode(m) {
   flushAll();
   document.body.dataset.mode = m;
   document.querySelectorAll('#modeSeg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.mode === m)));
-  $('#threadView').hidden = m !== 'edit' || S.tab !== 'thread';
+  $('#threadView').hidden = m !== 'edit' || (S.tab !== 'thread' && S.tab !== 'bible');
   $('#projectHead').hidden = m !== 'edit';
   $('#readView').hidden = m !== 'read';
   updateBack();
@@ -2163,7 +2445,8 @@ async function positionsFor(beforeId, n) {
 function startAdd(type, beforeId) {
   if (!S.currentId) return;
   if (type === 'scene') { addText('writing', beforeId, { el: 'scene', setting: 'INT.', place: '', time: 'DAY' }); return; }
-  if (type === 'act' || type === 'chapter') { addText('writing', beforeId, { el: type }); return; }
+  if (type === 'act' || type === 'chapter' || type === 'episode' || type === 'section') { addText('writing', beforeId, { el: type }); return; }
+  if (type === 'cast') { addText('writing', beforeId, { el: 'cast', title: 'Main characters' }); return; }
   if (type === 'writing' || type === 'note') { addText(type, beforeId); return; }
   if (!S.store.canUpload) { toast('Photos and files need sync. Open this page in claude.ai while signed in to add them.', null, null, 8000); return; }
   S.insertBefore = beforeId;
@@ -2180,7 +2463,7 @@ async function addText(type, beforeId, extra) {
   const iid = 'i' + uid(), now = Date.now();
   pendingFocus = iid;
   try {
-    await S.store.setItem(pid, iid, Object.assign({ type, pos, title: '', body: '', caption: '', createdAt: now, updatedAt: now }, extra || {}));
+    await S.store.setItem(pid, iid, Object.assign({ type, pos, title: '', body: '', caption: '', createdAt: now, updatedAt: now }, curZone() === 'bible' ? { zone: 'bible' } : {}, extra || {}));
     touchProject(pid, true);
   } catch (e) { pendingFocus = null; toast(dbErrMsg(e)); }
 }
@@ -2229,12 +2512,12 @@ async function handleFiles(fileList, beforeId) {
         const now = Date.now(), newId = 'i' + uid();
         if (k === 0) scrollToId = newId;
         await S.store.setItem(pid, newId, { type: kind, pos: positions[k], title: '', body: '', caption: '', assetId: res.id,
-          fileName: f.name, contentType: res.contentType || type, size: res.sizeBytes || blob.size, createdAt: now, updatedAt: now });
+          fileName: f.name, contentType: res.contentType || type, size: res.sizeBytes || blob.size, createdAt: now, updatedAt: now, ...(curZone() === 'bible' ? { zone: 'bible' } : {}) });
         added++;
       } catch (e) { problems.push(e && e.code ? uploadErrMsg(e, f.name) : dbErrMsg(e)); }
     }
     if (added) touchProject(pid, true);
-    if (!problems.length) { toast(added === 1 ? 'Added to the thread' : `Added ${added} to the thread`); return; }
+    if (!problems.length) { toast(added === 1 ? `Added to the ${curZone() === 'bible' ? 'bible' : 'thread'}` : `Added ${added} to the ${curZone() === 'bible' ? 'bible' : 'thread'}`); return; }
   }
   if (problems.length) toast(problems.join(' '), null, null, 10000);
 }
@@ -2267,9 +2550,16 @@ async function deleteItem(iid) {
   }, 8000);
   if (data.assetId) setTimeout(() => { if (!undone) S.store.deleteAsset(data.assetId); }, 9000);
 }
+function exportEpisode(iid) {
+  const all = threadItems().map(view);
+  const e = episodesOf(all).find(x => x.ep && x.ep.id === iid); if (!e) return;
+  exportPdf([e.ep, ...e.items], ` – Episode ${e.n}`, e.n - 1);
+}
 function openItemMenu(anchor, iid) {
   const idx = S.items.findIndex(i => i.id === iid);
+  const it = S.items[idx];
   openMenu(anchor, [
+    ...(it && it.el === 'episode' ? [{ label: 'Export this episode as PDF', onClick: () => exportEpisode(iid) }] : []),
     { label: 'Move up', disabled: idx <= 0, onClick: () => moveItem(iid, -1) },
     { label: 'Move down', disabled: idx < 0 || idx >= S.items.length - 1, onClick: () => moveItem(iid, 1) },
     { label: 'Delete', danger: true, onClick: () => deleteItem(iid) }
@@ -2346,22 +2636,29 @@ function fillPortrait(node, c) {
 function setTab(t) {
   if (t === S.tab && t === 'chars' && S.charOpen) { closeChar(); return; }
   if (t === 'story' && !isScript(curKind())) t = 'thread';
+  if (t === 'bible' && curKind() !== 'tv') t = 'thread';
+  if (t !== 'chars') S.charReturn = null;
   flushAll();
+  const zoneBefore = curZone();
   S.tab = t;
+  if (curZone() !== zoneBefore) { els.forEach(n => n.remove()); els.clear(); applyZone(); buildAddbar(); renderItems(); }
   document.body.dataset.tab = t;
   if (S.currentId) lsSet('thread:tab:' + S.currentId, t);
   document.querySelectorAll('.tab').forEach(b => { const on = b.dataset.tab === t; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
-  $('#threadView').hidden = t !== 'thread' || S.mode !== 'edit';
-  $('#readView').hidden = t !== 'thread' || S.mode !== 'read';
+  const listTab = t === 'thread' || t === 'bible';
+  $('#threadView').hidden = !listTab || S.mode !== 'edit';
+  $('#readView').hidden = !listTab || S.mode !== 'read';
+  if (listTab && S.mode === 'read') renderRead();
   $('#charView').hidden = t !== 'chars';
   $('#structView').hidden = t !== 'story';
   if (t === 'story') { if (S.mode !== 'edit') setMode('edit'); renderStruct(); window.scrollTo(0, 0); }
-  if (t === 'thread') requestAnimationFrame(() => document.querySelectorAll('#items textarea').forEach(autosize));
+  if (listTab) requestAnimationFrame(() => document.querySelectorAll('#items textarea').forEach(autosize));
   renderChars();
 }
 
 function renderChars() {
   updateMeta();
+  refreshCasts();
   if (S.tab !== 'chars' || !S.currentId) return;
   if (S.charOpen) {
     if (charById(S.charOpen)) S.newChars.delete(S.charOpen);
@@ -2952,7 +3249,7 @@ function wire() {
   // drag & drop and paste for photos/files
   let dragDepth = 0;
   const hasFiles = e => e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
-  const canDrop = () => S.currentId && S.mode === 'edit' && S.tab === 'thread';
+  const canDrop = () => S.currentId && S.mode === 'edit' && (S.tab === 'thread' || S.tab === 'bible');
   window.addEventListener('dragenter', e => { if (!hasFiles(e) || !canDrop()) return; e.preventDefault(); dragDepth++; $('#drop').hidden = false; });
   window.addEventListener('dragover', e => { if (!hasFiles(e) || !canDrop()) return; e.preventDefault(); });
   window.addEventListener('dragleave', e => { if (!hasFiles(e)) return; dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) $('#drop').hidden = true; });
