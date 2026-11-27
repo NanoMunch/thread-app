@@ -1,16 +1,16 @@
 // Thread offline support. Change VERSION whenever the app files change,
 // so phones pick up the new version the next time Thread opens.
-const VERSION = 'thread-v2';
+const VERSION = 'thread-v4';
 const FONTS = 'thread-fonts';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './logo.svg',
-  './icons/apple-touch-icon.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/favicon-32.png'
+  './apple-touch-icon.png',
+  './icon-192.png',
+  './icon-512.png',
+  './favicon-32.png'
 ];
 
 self.addEventListener('install', event => {

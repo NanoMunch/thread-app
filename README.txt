@@ -5,7 +5,7 @@ What's in this folder
 - index.html             The whole app.
 - sw.js                  Lets Thread open without internet.
 - manifest.webmanifest   App name, colours and icons for "Add to Home Screen".
-- icons/, logo.svg       The red-thread icon at every size.
+- *.png, logo.svg        The red-thread icon at every size.
 
 Put it online (one time)
 1. On your Mac, go to app.netlify.com/drop.
@@ -28,6 +28,6 @@ Back up and restore
 
 Updating the app later
 1. Replace the files in this folder with the new ones.
-2. In sw.js, change VERSION (for example thread-v2 to thread-v3).
+2. In sw.js, change VERSION (for example thread-v4 to thread-v5).
 3. In Netlify, open the site and drag the folder onto Production deploys.
    Phones pick up the new version the next time Thread opens.
