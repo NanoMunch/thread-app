@@ -1,6 +1,6 @@
 // Thread offline support. Change VERSION whenever the app files change,
 // so phones pick up the new version the next time Thread opens.
-const VERSION = 'thread-v4';
+const VERSION = 'thread-v6';
 const FONTS = 'thread-fonts';
 const SHELL = [
   './',

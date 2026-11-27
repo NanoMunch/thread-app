@@ -16,7 +16,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&family=Hanken+Grotesk:wght@400;500;600&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --paper:#ECEFE8; --surface:#F7F8F4; --ink:#1D2633; --muted:#5D6672; --faint:#858D97; --line:#D2D8CE;
@@ -26,6 +26,7 @@
   --k-enemies:#9E2F3A; --k-mentor:#6B4FA3; --k-work:#56606C; --k-other:#77702F;
   --band:#3B4FA0;
   --serif:"Literata", Georgia, "Times New Roman", serif;
+  --mono:"Courier Prime", "Courier New", Courier, monospace;
   --sans:"Hanken Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color-scheme:light;
   box-sizing:border-box;
@@ -203,7 +204,7 @@ body:not([data-view="project"]) .topbar{border-bottom-color:transparent}
   padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
 .addbar-inner{max-width:46rem;margin:0 auto;display:flex;gap:8px;align-items:center;padding:0 4px}
 .addbar-label{font-size:13.5px;color:var(--muted);margin-right:4px}
-body[data-mode="read"] .addbar,body[data-tab="chars"] .addbar,body[data-tab="chars"] #modeSeg{display:none}
+body[data-mode="read"] .addbar,body[data-tab="chars"] .addbar,body[data-tab="chars"] #modeSeg,body[data-tab="story"] .addbar,body[data-tab="story"] #modeSeg{display:none}
 @media (max-width:560px){
   .addbar-label{display:none}
   .addbar-inner{padding:0}
@@ -381,6 +382,114 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .install-hint strong{font-weight:600}
 @media (min-width:900px){.install-hint{margin:16px auto 0;max-width:calc(46rem - 40px)}}
 
+
+/* ---------- back button + home ---------- */
+.back-btn{display:inline-flex;align-items:center;gap:2px;border:0;background:transparent;padding:6px 10px 6px 2px;border-radius:8px;font-weight:500;color:var(--thread)}
+.back-btn:hover{background:var(--surface)}
+.topbar .nav-btn{display:none}
+.home{padding-top:clamp(28px,7vh,64px);padding-bottom:60px}
+.home h1{font-family:var(--serif);font-weight:600;font-size:clamp(1.9rem,6vw,2.6rem);line-height:1.1;margin:0 0 12px;letter-spacing:-.01em}
+.home .lede{font-family:var(--serif);font-size:1.0625rem;line-height:1.7;color:var(--muted);max-width:34rem;margin:0 0 24px}
+.home h2{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:34px 0 10px}
+.newcard{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:16px}
+.newcard label,.fieldlabel{display:block;font-weight:500;font-size:14px;margin:0 0 6px}
+.newcard input[type=text]{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 12px;font-family:var(--serif);font-size:1.0625rem}
+.newcard input:focus{outline:none;border-color:var(--thread)}
+.types{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 16px}
+.types .chip[aria-pressed="true"]{background:var(--thread);border-color:var(--thread);color:var(--thread-ink)}
+.plist{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.pcard{width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.pcard:hover{border-color:var(--thread)}
+.pcard .pc-body{flex:1;min-width:0;display:flex;flex-direction:column}
+.pcard .pc-title{font-family:var(--serif);font-size:1.1rem;font-weight:600;overflow-wrap:anywhere}
+.pcard .pc-sub{font-size:13px;color:var(--muted)}
+.pcard .pc-go{color:var(--faint);transform:scaleX(-1)}
+.home-backup{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.home-backup p{flex:1 1 220px;margin:0;font-size:13.5px;color:var(--muted)}
+
+/* ---------- project details ---------- */
+.proj-extra{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;margin-top:8px;font-size:14px;color:var(--muted)}
+.proj-extra label{display:inline-flex;align-items:center;gap:6px}
+.proj-extra input{border:0;border-bottom:1px dashed var(--line);background:transparent;padding:2px 0;font-size:14px;color:var(--ink);min-width:0}
+.proj-extra input:focus{outline:none;border-bottom-color:var(--thread)}
+.proj-extra .author{width:12em}
+.proj-extra .goal{width:6em}
+.ptype{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:500;background:var(--surface);color:var(--ink)}
+.goalbar{flex-basis:100%;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.goalbar span{display:block;height:100%;background:var(--thread);border-radius:3px}
+
+/* ---------- scenes, acts, chapters ---------- */
+.item[data-el="scene"] .num,.item[data-el="chapter"] .num{background:var(--thread);color:var(--thread-ink)}
+.item[data-el="act"] .num{border-radius:6px;background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.sh{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 6px}
+.sh select,.sh input{font-family:var(--mono);font-weight:700;font-size:15px;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 8px;color:var(--ink);text-transform:uppercase;min-width:0}
+.sh input{flex:1 1 8em}
+.sh select:last-child{flex:none}
+#charView .back{display:none}
+.sh input::placeholder{color:var(--faint);font-weight:400}
+.sh select:focus,.sh input:focus{outline:none;border-color:var(--thread)}
+.sh .dash{font-family:var(--mono);font-weight:700}
+.w-body.script{font-family:var(--mono);font-size:15px;line-height:1.55}
+.act-title{font-family:var(--mono);font-weight:700;font-size:1.05rem;letter-spacing:.04em;text-transform:uppercase}
+.chap-label{font-size:13px;font-weight:600;color:var(--thread);letter-spacing:.04em;text-transform:uppercase}
+.stools{position:sticky;top:calc(env(safe-area-inset-top,0px) + 54px);z-index:5;box-shadow:0 6px 14px -10px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:6px;margin:6px 0 4px;padding:8px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.stools .row{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;align-items:center}
+.stools .row::-webkit-scrollbar{display:none}
+.stools .lab{font-size:12px;color:var(--muted);flex:none}
+.stools .chip{padding:5px 10px;font-size:13px}
+.stools .chip.name{font-family:var(--mono);font-weight:700}
+.stools .hint{font-size:12.5px;color:var(--faint);white-space:nowrap}
+
+/* screenplay read view */
+.sp{font-family:var(--mono);font-size:15px;line-height:1.45;max-width:62ch}
+.sp p{margin:0}
+.sp .sp-heading{font-weight:700;margin-top:1.45em}
+.sp .sp-action{margin-top:1.45em;white-space:pre-wrap}
+.sp .sp-char{margin:1.45em 0 0 37%}
+.sp .sp-paren{margin-left:27%;width:40%}
+.sp .sp-dial{margin-left:17%;width:60%}
+.sp .sp-trans{text-align:right;margin-top:1.45em}
+.sp .sp-act{text-align:center;font-weight:700;text-decoration:underline;margin-top:2.6em}
+.sp .sp-end{text-align:center;margin-top:1.45em}
+@media (max-width:560px){.sp{font-size:13px}.sp .sp-char{margin-left:30%}.sp .sp-dial{margin-left:10%;width:78%}.sp .sp-paren{margin-left:20%;width:55%}}
+.reader .chap-label{display:block;text-align:center;margin-top:3em}
+
+/* ---------- structure ---------- */
+.beat-chip{border:1px dashed var(--line);background:transparent;color:var(--faint);border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:500;margin-left:4px;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.beat-chip.set{border-style:solid;border-color:var(--thread);color:var(--thread);background:var(--note)}
+.story{padding:18px 0 60px}
+.story-bar{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.len-label{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--muted)}
+.len-label input{width:4.2em;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 6px;font-size:14px;color:var(--ink)}
+.story-intro{font-size:14.5px;color:var(--muted);margin:12px 0 8px;max-width:40rem}
+.tl-box{margin:10px 0 6px}
+.timeline{display:block;width:100%;height:auto}
+.tl-track{fill:var(--line)}
+.tl-scene{fill:var(--thread);opacity:.45}
+.tl-scene.marked{opacity:1}
+.tl-beat{stroke:var(--k-romance);stroke-width:3;stroke-linecap:round;opacity:.85}
+.tl-now{fill:var(--ink)}
+.tl-scale{display:flex;justify-content:space-between;font-size:12px;color:var(--faint)}
+.story h3{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:28px 0 10px}
+.story-empty{font-family:var(--serif);color:var(--muted);margin:0}
+.sugs,.beats{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.sug,.beat{border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:12px 14px}
+.sug{border-left:4px solid var(--thread)}
+.sug.k-char{border-left-color:var(--k-friends)}.sug.k-pace{border-left-color:var(--k-rivals)}.sug.k-tension{border-left-color:var(--k-enemies)}
+.sug-k{font-size:11.5px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sug-t{margin:2px 0 4px;font-weight:600}
+.sug-tip,.beat-tip{margin:0;font-family:var(--serif);color:var(--muted);line-height:1.6}
+.sug-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.sug-acts:empty{display:none}
+.beat-h{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.beat-n{font-weight:600}
+.beat-p{font-size:13px;color:var(--faint);white-space:nowrap}
+.beat-foot{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+.beat-foot .sug-acts{margin:0}
+.beat-st{font-size:13px;color:var(--faint)}
+.beat-st.done{color:var(--thread);font-weight:600}
+.beat.done{border-color:var(--thread)}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none !important;animation:none !important}
 }
@@ -404,6 +513,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 
   <main class="main">
     <header class="topbar">
+      <button class="back-btn" id="backBtn" type="button" hidden></button>
       <button class="nav-btn" id="navBtn" type="button" aria-controls="sidebar" aria-expanded="false"></button>
       <span class="spacer"></span>
       <div class="seg proj-only" id="modeSeg" role="group" aria-label="View">
@@ -419,25 +529,19 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     </div>
     <div class="loading" id="loading">Opening your notebook…</div>
 
-    <section class="welcome column" id="welcome" hidden>
-      <img class="welcome-mark" src="logo.svg" alt="" width="76" height="76">
-      <h1>Start a thread</h1>
-      <p>Keep a project’s writing and everything that sparks it — notes, photos, files — together, in the order it belongs. <span id="welcomeSync"></span></p>
-      <label for="firstTitle">Project name</label>
-      <div class="create-row">
-        <input id="firstTitle" type="text" maxlength="120" placeholder="The lighthouse novel" autocomplete="off">
-        <button class="btn primary" id="firstCreate" type="button">Create project</button>
-      </div>
-    </section>
+    <section class="home column" id="welcome" hidden></section>
+    <datalist id="placeList"></datalist>
 
     <section id="projectView" hidden>
       <div class="column">
         <div class="project-head" id="projectHead">
           <input class="project-title" id="projectTitle" type="text" maxlength="120" aria-label="Project name" autocomplete="off">
           <div class="meta-row"><p class="meta" id="meta"></p><span class="save-status" id="saveStatus" aria-live="polite"></span></div>
+          <div class="proj-extra" id="projExtra"></div>
           <div class="tabs" role="tablist" aria-label="Project sections">
             <button class="tab" id="tabThread" role="tab" type="button" data-tab="thread" aria-selected="true" aria-controls="threadView">Thread <span class="count" id="tcThread"></span></button>
             <button class="tab" id="tabChars" role="tab" type="button" data-tab="chars" aria-selected="false" aria-controls="charView" tabindex="-1">Characters <span class="count" id="tcChars"></span></button>
+            <button class="tab" id="tabStory" role="tab" type="button" data-tab="story" aria-selected="false" aria-controls="structView" tabindex="-1" hidden>Structure <span class="count" id="tcStory"></span></button>
           </div>
         </div>
         <div id="threadView" role="tabpanel" aria-labelledby="tabThread">
@@ -447,6 +551,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         </div>
         <article class="reader" id="readView" hidden></article>
         <section id="charView" role="tabpanel" aria-labelledby="tabChars" hidden></section>
+        <section id="structView" role="tabpanel" aria-labelledby="tabStory" hidden></section>
       </div>
       <div class="addbar" id="addbar">
         <div class="addbar-inner" id="addbarInner"><span class="addbar-label">Add to the end</span></div>
@@ -496,6 +601,8 @@ const PATHS = {
   doc: '<path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/>',
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
   back: '<path d="M14.5 5.5L8 12l6.5 6.5"/>',
+  scene: '<rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M3 9l2.5-5 15 2.6L20 9"/><path d="M8 4.6l1.6 4.2M13 5.5l1.6 3.5"/>',
+  act: '<path d="M4 4h16v4H4zM4 12h16M4 16h10M4 20h12"/>',
   person: '<circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20c1.1-3.7 3.9-5.6 7.2-5.6s6.1 1.9 7.2 5.6"/>'
 };
 const ICON = (n, size = 20) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PATHS[n]}</svg>`;
@@ -725,17 +832,626 @@ const els = new Map();       // item id -> li
 const pending = new Map();   // item id -> {pid, patch, tries}
 const timers = new Map();
 const lastTouch = new Map();
+let menuY = 0;
 let pendingFocus = null, flashId = null, scrollToId = null, saving = 0, lastError = null;
 
 const currentProject = () => S.projects.find(p => p.id === S.currentId) || null;
 const viewOf = (sub, it) => { const p = pending.get(sub + '/' + it.id); return p ? Object.assign({}, it, p.patch) : it; };
 const view = it => viewOf('items', it);
+/* ---------------- writing types ---------------- */
+const PTYPES = [['film', 'Film script'], ['tv', 'TV script'], ['novel', 'Novel'], ['short', 'Short story'], ['other', 'Other writing']];
+const ptypeName = k => (PTYPES.find(x => x[0] === k) || PTYPES[4])[1];
+const isScript = k => k === 'film' || k === 'tv';
+const curKind = () => (currentProject() || {}).kind || 'other';
+const DEFAULT_GOAL = { novel: 80000, short: 5000 };
+const SETTINGS = ['INT.', 'EXT.', 'INT./EXT.'];
+const TIMES = ['DAY', 'NIGHT', 'MORNING', 'AFTERNOON', 'EVENING', 'DAWN', 'DUSK', 'CONTINUOUS', 'LATER', 'MOMENTS LATER'];
+const TRANSITIONS = ['CUT TO:', 'DISSOLVE TO:', 'SMASH CUT TO:', 'MATCH CUT TO:', 'FADE IN:', 'FADE OUT.', 'FADE TO BLACK.'];
+const NUMWORDS = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TEN', 'ELEVEN', 'TWELVE'];
+function addKinds() {
+  const k = curKind(), base = [['note', 'Note', 'note'], ['image', 'Photo', 'photo'], ['file', 'File', 'clip']];
+  if (k === 'film') return [['scene', 'Scene', 'scene'], ...base];
+  if (k === 'tv') return [['scene', 'Scene', 'scene'], ['act', 'Act', 'act'], ...base];
+  if (k === 'novel') return [['chapter', 'Chapter', 'pen'], ...base];
+  return [['writing', 'Writing', 'pen'], ...base];
+}
+const sceneHeading = v => `${v.setting || 'INT.'} ${(v.place || '').trim().toUpperCase() || 'LOCATION'} - ${v.time || 'DAY'}`;
+const actName = (v, n) => (v.title || '').trim() || 'ACT ' + (NUMWORDS[n] || n);
+
+/* script parsing: plain text in, screenplay elements out */
+const cueBase = s => s.replace(/\s*\(.*$/, '').trim();
+function isTrans(s) { return /^[A-Z0-9 .'’-]+ TO:$/.test(s) || /^(FADE IN:|FADE OUT\.|FADE TO BLACK\.|CUT TO BLACK\.|THE END\.?)$/.test(s); }
+function isCue(s) { const b = cueBase(s); return b.length > 0 && b.length <= 38 && /[A-Z]/.test(b) && b === b.toUpperCase() && !/[:!?]$/.test(b) && !/^\(/.test(s); }
+function parseScript(src) {
+  const out = [];
+  const blocks = (src || '').replace(/\r/g, '').split(/\n[ \t]*\n/);
+  for (const b of blocks) {
+    const lines = b.split('\n').map(l => l.trim()).filter(Boolean);
+    if (!lines.length) continue;
+    if (lines.length === 1 && isTrans(lines[0])) { out.push({ t: 'trans', text: lines[0] }); continue; }
+    if (lines.length > 1 && isCue(lines[0])) {
+      out.push({ t: 'char', text: lines[0] });
+      for (const l of lines.slice(1)) out.push({ t: /^\(.*\)$/.test(l) ? 'paren' : 'dial', text: l });
+      continue;
+    }
+    out.push({ t: 'action', text: lines.join('\n') });
+  }
+  let last = null;               // add (CONT'D) when the same character speaks again after action
+  for (const e of out) {
+    if (e.t !== 'char') continue;
+    const base = cueBase(e.text);
+    if (base === last && !/CONT['’]D/.test(e.text)) e.text += " (CONT'D)";
+    last = base;
+  }
+  return out;
+}
+function scriptNames() {
+  const counts = new Map();
+  const bump = (n, w) => { if (n) counts.set(n, (counts.get(n) || 0) + w); };
+  for (const c of S.chars) { const n = (charView(c).name || '').trim(); if (n) bump(n.toUpperCase(), 1); }
+  for (const it of S.items.map(view)) if (it.el === 'scene') for (const e of parseScript(it.body)) if (e.t === 'char') bump(cueBase(e.text), 2);
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(x => x[0]);
+}
+
+/* ---------------- PDF (built here, no internet needed) ---------------- */
+const WIN = { '€': 128, '‚': 130, 'ƒ': 131, '„': 132, '…': 133, '†': 134, '‡': 135, 'ˆ': 136, '‰': 137, 'Š': 138, '‹': 139, 'Œ': 140, 'Ž': 142,
+  '‘': 145, '’': 146, '“': 147, '”': 148, '•': 149, '–': 150, '—': 151, '˜': 152, '™': 153, 'š': 154, '›': 155, 'œ': 156, 'ž': 158, 'Ÿ': 159 };
+function winAnsi(s) {
+  let o = '';
+  for (const ch of String(s).normalize('NFC')) {
+    const c = ch.codePointAt(0);
+    let b = (c < 128 || (c >= 160 && c < 256)) ? c : WIN[ch];
+    if (b === undefined) b = 63;
+    if (b < 32) b = 32;
+    o += (b === 40 || b === 41 || b === 92) ? '\\' + String.fromCharCode(b) : String.fromCharCode(b);
+  }
+  return o;
+}
+const FONTS = { C: 'Courier', CB: 'Courier-Bold', T: 'Times-Roman', TB: 'Times-Bold', TI: 'Times-Italic' };
+function makePdf(w, h) {
+  const pages = [];
+  let cur = null;
+  return {
+    w, h, pages,
+    page() { cur = []; pages.push(cur); },
+    text(x, y, s, f, size) { if (s) cur.push(`BT /${f} ${size} Tf ${x.toFixed(2)} ${y.toFixed(2)} Td (${winAnsi(s)}) Tj ET`); },
+    rule(x1, y, x2) { cur.push(`0.6 w ${x1.toFixed(2)} ${y.toFixed(2)} m ${x2.toFixed(2)} ${y.toFixed(2)} l S`); },
+    bytes(title) {
+      const objs = [];
+      const fontIds = {};
+      objs.push('<< /Type /Catalog /Pages 2 0 R >>');
+      objs.push(null);
+      for (const [k, name] of Object.entries(FONTS)) { objs.push(`<< /Type /Font /Subtype /Type1 /BaseFont /${name} /Encoding /WinAnsiEncoding >>`); fontIds[k] = objs.length; }
+      const fontDict = '<< ' + Object.keys(FONTS).map(k => `/${k} ${fontIds[k]} 0 R`).join(' ') + ' >>';
+      const kids = [];
+      for (const p of pages) {
+        const stream = p.join('\n');
+        objs.push(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
+        const cid = objs.length;
+        objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${w} ${h}] /Resources << /Font ${fontDict} >> /Contents ${cid} 0 R >>`);
+        kids.push(objs.length);
+      }
+      objs[1] = `<< /Type /Pages /Kids [${kids.map(k => k + ' 0 R').join(' ')}] /Count ${kids.length} >>`;
+      objs.push(`<< /Title (${winAnsi(title || 'Thread')}) /Producer (Thread) >>`);
+      const info = objs.length;
+      let out = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
+      const offs = [];
+      objs.forEach((o, i) => { offs.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
+      const xref = out.length;
+      out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n` + offs.map(o => String(o).padStart(10, '0') + ' 00000 n \n').join('');
+      out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R /Info ${info} 0 R >>\nstartxref\n${xref}\n%%EOF`;
+      const u8 = new Uint8Array(out.length);
+      for (let i = 0; i < out.length; i++) u8[i] = out.charCodeAt(i) & 255;
+      return u8;
+    }
+  };
+}
+// wrap to a character count (Courier is monospaced)
+function wrapChars(text, n) {
+  const out = [];
+  for (const para of String(text).split('\n')) {
+    let line = '';
+    for (const word of para.split(/\s+/).filter(Boolean)) {
+      let w = word;
+      while (w.length > n) { if (line) { out.push(line); line = ''; } out.push(w.slice(0, n)); w = w.slice(n); }
+      if (!line) line = w; else if (line.length + 1 + w.length <= n) line += ' ' + w; else { out.push(line); line = w; }
+    }
+    out.push(line);
+  }
+  return out;
+}
+let measureCtx = null;
+function timesWidth(s, size, italic) {
+  if (!measureCtx) { try { measureCtx = document.createElement('canvas').getContext('2d'); } catch { measureCtx = false; } }
+  if (!measureCtx) return s.length * size * 0.47;
+  measureCtx.font = `${italic ? 'italic ' : ''}100px "Times New Roman", Times, "Liberation Serif", serif`;
+  return measureCtx.measureText(s).width / 100 * size;
+}
+function wrapWidth(text, width, size, first = 0) {
+  const out = [];
+  let line = '', avail = width - first;
+  for (const word of String(text).split(/\s+/).filter(Boolean)) {
+    const tryLine = line ? line + ' ' + word : word;
+    if (!line || timesWidth(tryLine, size) <= avail) line = tryLine;
+    else { out.push(line); line = word; avail = width; }
+  }
+  if (line) out.push(line);
+  return out;
+}
+
+/* screenplay layout: US Letter, Courier 12, industry margins */
+function layoutScript(proj, items, pdf) {
+  const IN = 72, LH = 12, CW = 7.2, TOP = 792 - IN - 9, ROWS = 54;
+  const X = { heading: 1.5 * IN, action: 1.5 * IN, char: 3.7 * IN, paren: 3.1 * IN, dial: 2.5 * IN };
+  const W = { heading: 60, action: 60, char: 38, paren: 26, dial: 35 };
+  let row = 0, page = 0;
+  const pages = [[]];
+  const put = l => pages[page].push(Object.assign({ row, sid: curBlock && curBlock.sid, act: curBlock && curBlock.act }, l));
+  const newPage = () => { pages.push([]); page++; row = 0; };
+  const free = () => ROWS - row;
+  // build blocks
+  const blocks = [];
+  let curSid = null, curAct = null, curBlock = null;
+  const acts = [];
+  const pushB = b => blocks.push(Object.assign(b, { sid: curSid, act: curAct }));
+  const tv = proj.kind === 'tv';
+  let actN = 0, firstAct = true, lastAct = null;
+  for (const it of items) {
+    if (it.el === 'act' && tv) {
+      actN++; curSid = null;
+      if (lastAct) pushB({ kind: 'center', lines: ['END OF ' + lastAct], before: 2 });
+      lastAct = actName(it, actN).toUpperCase();
+      curAct = { name: actName(it, actN).replace(/^ACT/i, 'Act').replace(/\b([A-Z])([A-Z]+)\b/g, (m, a, b) => a + b.toLowerCase()), start: null, end: 0, lastScene: null }; acts.push(curAct);
+      pushB({ kind: 'act', lines: [lastAct], before: 0, newPage: !firstAct || blocks.length > 0 });
+      firstAct = false;
+      continue;
+    }
+    curSid = it.id;
+    if (it.el === 'scene') {
+      pushB({ kind: 'heading', lines: wrapChars(sceneHeading(it), W.heading), before: blocks.length ? 1 : 0, keep: true });
+    } else if (it.type === 'writing' && ((it.title || '').trim())) {
+      pushB({ kind: 'heading', lines: wrapChars(it.title.trim().toUpperCase(), W.heading), before: 1, keep: true });
+    } else if (it.type !== 'writing') continue;
+    const els = parseScript(it.body);
+    for (let i = 0; i < els.length; i++) {
+      const e = els[i];
+      if (e.t === 'action') pushB({ kind: 'action', lines: wrapChars(e.text, W.action), before: 1 });
+      else if (e.t === 'trans') pushB({ kind: e.text === 'FADE IN:' ? 'action' : 'trans', lines: [e.text], before: 1 });
+      else if (e.t === 'char') {
+        const parts = [];
+        while (els[i + 1] && (els[i + 1].t === 'dial' || els[i + 1].t === 'paren')) { i++; parts.push(els[i]); }
+        const body = [];
+        for (const p of parts) for (const l of wrapChars(p.text, W[p.t])) body.push({ t: p.t, text: l });
+        pushB({ kind: 'dialogue', cue: e.text, body, lines: [e.text, ...body], before: 1 });
+      }
+    }
+  }
+  if (lastAct) pushB({ kind: 'center', lines: ['END OF ' + lastAct], before: 2 });
+
+  const putLines = (kind, lines) => { for (const t of lines) { put({ kind, text: t }); row++; } };
+  for (let b = 0; b < blocks.length; b++) {
+    const bl = blocks[b]; curBlock = bl;
+    if (bl.newPage && row > 0) newPage();
+    let before = row === 0 ? 0 : bl.before;
+    let need = before + bl.lines.length;
+    if (bl.keep) { const nx = blocks[b + 1]; need += nx ? nx.before + Math.min(2, nx.lines.length) : 0; }
+    if (need <= free()) { row += before; if (bl.kind === 'dialogue') { putLines('char', [bl.cue]); for (const l of bl.body) { put({ kind: l.t, text: l.text }); row++; } } else putLines(bl.kind, bl.lines); continue; }
+    if (bl.kind === 'action' && free() - before >= 2 && bl.lines.length - (free() - before) >= 2) {
+      row += before; const n = free(); putLines('action', bl.lines.slice(0, n)); newPage(); putLines('action', bl.lines.slice(n)); continue;
+    }
+    if (bl.kind === 'dialogue' && free() - before >= 4 && bl.body.length >= 3) {
+      row += before; const n = free() - 2;                 // cue + n lines + (MORE)
+      putLines('char', [bl.cue]);
+      for (const l of bl.body.slice(0, n)) { put({ kind: l.t, text: l.text }); row++; }
+      putLines('char', ['(MORE)']); newPage();
+      putLines('char', [cueBase(bl.cue) + " (CONT'D)"]);
+      for (const l of bl.body.slice(n)) { put({ kind: l.t, text: l.text }); row++; if (row >= ROWS) newPage(); }
+      continue;
+    }
+    newPage();
+    if (bl.kind === 'dialogue') { putLines('char', [bl.cue]); for (const l of bl.body) { put({ kind: l.t, text: l.text }); row++; if (row >= ROWS) newPage(); } }
+    else for (const t of bl.lines) { put({ kind: bl.kind, text: t }); row++; if (row >= ROWS) newPage(); }
+  }
+  const count = pages.filter(p => p.length).length;
+  const stats = { scenes: new Map(), acts };
+  pages.forEach((pg, i) => pg.forEach(l => {
+    const a = i + l.row / ROWS, z = i + (l.row + 1) / ROWS;
+    if (l.sid) { const sc = stats.scenes.get(l.sid) || { start: a, end: z }; sc.end = z; sc.lines = (sc.end - sc.start) * ROWS; stats.scenes.set(l.sid, sc); }
+    if (l.act) { if (l.act.start == null) l.act.start = a; l.act.end = z; if (l.sid) l.act.lastScene = l.sid; }
+  }));
+  for (const a of acts) a.pages = a.start == null ? 0 : a.end - a.start;
+  layoutScript.lastStats = stats;
+  if (!pdf) return count;
+  // title page
+  pdf.page();
+  const title = ((proj.title || 'Untitled').trim()).toUpperCase();
+  const centre = (s, y, f = 'C') => pdf.text((612 - s.length * CW) / 2, y, s, f, 12);
+  centre(title, 792 - 4 * IN);
+  pdf.rule((612 - title.length * CW) / 2, 792 - 4 * IN - 2, (612 + title.length * CW) / 2);
+  if ((proj.author || '').trim()) { centre('Written by', 792 - 4 * IN - 4 * LH); centre(proj.author.trim(), 792 - 4 * IN - 6 * LH); }
+  pages.forEach((p, i) => {
+    if (!p.length) return;
+    pdf.page();
+    if (i > 0) { const n = (i + 1) + '.'; pdf.text(7.5 * IN - n.length * CW, 792 - 0.5 * IN - 9, n, 'C', 12); }
+    for (const l of p) {
+      const y = TOP - l.row * LH;
+      let x = X[l.kind] || X.action, f = 'C';
+      if (l.kind === 'trans') x = 7.5 * IN - l.text.length * CW;
+      if (l.kind === 'center' || l.kind === 'act') x = (612 - l.text.length * CW) / 2;
+      if (l.kind === 'heading' || l.kind === 'act') f = 'CB';
+      pdf.text(x, y, l.text, f, 12);
+      if (l.kind === 'act') pdf.rule(x, y - 2, x + l.text.length * CW);
+    }
+  });
+  return count;
+}
+
+/* prose manuscript layout: A4, Times 12, double spaced */
+function layoutProse(proj, items, pdf, wordsTotal) {
+  const W = 595.28, H = 841.89, M = 72, SIZE = 12, LH = proj.kind === 'other' ? 18 : 24, TEXTW = W - 2 * M;
+  const author = (proj.author || '').trim(), title = (proj.title || 'Untitled').trim();
+  const surname = author.split(/\s+/).pop() || '';
+  let y = 0, pageNo = 0;
+  const centre = (s, yy, f = 'T', size = SIZE) => pdf.text((W - timesWidth(s, size, f === 'TI')) / 2, yy, s, f, size);
+  const header = () => {
+    if (proj.kind === 'other') { const s = String(pageNo); pdf.text(W - M - timesWidth(s, SIZE), H - 40, s, 'T', SIZE); return; }
+    const s = [surname, title.toUpperCase().slice(0, 40), pageNo].filter(Boolean).join(' / ');
+    pdf.text(W - M - timesWidth(s, SIZE), H - 40, s, 'T', SIZE);
+  };
+  const newPage = () => { pdf.page(); pageNo++; header(); y = H - M - SIZE; };
+  const line = (s, x = M, f = 'T') => { if (y < M) newPage(); pdf.text(x, y, s, f, SIZE); y -= LH; };
+  const round = proj.kind === 'novel' ? 1000 : 100;
+  const approx = 'about ' + (Math.max(round, Math.round(wordsTotal / round) * round)).toLocaleString('en') + ' words';
+  // first page block
+  pdf.page(); pageNo = 1;
+  let yTop = H - M - SIZE;
+  if (proj.kind !== 'other') {
+    if (author) pdf.text(M, yTop, author, 'T', SIZE);
+    pdf.text(W - M - timesWidth(approx, SIZE), yTop, approx, 'T', SIZE);
+  }
+  const novel = proj.kind === 'novel';
+  if (novel) {
+    centre(title, H / 2 + 20, 'TB', 16);
+    if (author) centre('by ' + author, H / 2 - 10);
+    y = -1;                                   // force a new page for the text
+  } else {
+    y = H * 0.62;
+    centre(title, y, 'TB', 14); y -= LH;
+    if (author) { centre('by ' + author, y); y -= LH; }
+    y -= LH;
+  }
+  let chap = 0, first = true;
+  const paragraphs = body => (body || '').replace(/\r/g, '').split('\n').map(s => s.trim()).filter(Boolean);
+  for (const it of items) {
+    if (it.type !== 'writing') continue;
+    const paras = paragraphs(it.body);
+    if (it.el === 'chapter' || (novel && !first && (it.title || '').trim())) {
+      chap += it.el === 'chapter' ? 1 : 0;
+      newPage(); y = H - M - SIZE - 2.5 * 72 + 72;
+      if (it.el === 'chapter') { centre('Chapter ' + chap, y); y -= LH; }
+      if ((it.title || '').trim()) { centre(it.title.trim(), y); y -= LH; }
+      y -= LH;
+    } else {
+      if (y < 0) newPage();
+      if (!first) { line('#', (W - timesWidth('#', SIZE)) / 2); }
+      if ((it.title || '').trim() && !novel) { centre(it.title.trim(), y < M ? (newPage(), y) : y); y -= LH; }
+    }
+    first = false;
+    for (const p of paras) {
+      if (/^(#|\*\s*\*\s*\*|\*\*\*)$/.test(p)) { line('#', (W - timesWidth('#', SIZE)) / 2); continue; }
+      wrapWidth(p, TEXTW, SIZE, 36).forEach((l, i) => line(l, M + (i === 0 ? 36 : 0)));
+    }
+  }
+  if (y < M) newPage();
+  y -= LH / 2; if (y < M) newPage();
+  line('END', (W - timesWidth('END', SIZE)) / 2);
+  return pageNo;
+}
+
+function exportPdf() {
+  flushAll();
+  const p = currentProject(); if (!p) return;
+  const proj = Object.assign({}, p, { title: $('#projectTitle').value.trim() || p.title });
+  const items = S.items.map(view);
+  const script = isScript(proj.kind);
+  if (!items.some(i => i.type === 'writing' && ((i.body || '').trim() || i.el))) { toast('There’s no writing to export yet.'); return; }
+  const words = items.filter(i => i.type === 'writing').reduce((n, i) => n + countWords(i.body), 0);
+  const pdf = script ? makePdf(612, 792) : makePdf(595.28, 841.89);
+  if (script) layoutScript(proj, items, pdf); else layoutProse(proj, items, pdf, words);
+  const bytes = pdf.bytes(proj.title);
+  saveFile(new File([bytes], slug(proj.title) + '.pdf', { type: 'application/pdf' }));
+}
+
 
 function showView(v) {
   document.body.dataset.view = v;
   $('#loading').hidden = v !== 'loading';
   $('#welcome').hidden = v !== 'welcome';
   $('#projectView').hidden = v !== 'project';
+  updateBack();
+}
+function updateBack() {
+  const b = $('#backBtn'); if (!b) return;
+  const inProj = document.body.dataset.view === 'project';
+  b.hidden = !inProj;
+  if (!inProj) return;
+  const label = S.charOpen ? 'Characters' : S.mode === 'read' ? 'Edit' : 'Projects';
+  b.innerHTML = ICON('back', 20) + '<span></span>';
+  b.lastChild.textContent = label;
+  b.setAttribute('aria-label', 'Back to ' + label.toLowerCase());
+}
+function goBack() {
+  if (S.charOpen) { closeChar(); updateBack(); window.scrollTo(0, 0); return; }
+  if (S.mode === 'read') { setMode('edit'); return; }
+  goHome();
+}
+function goHome(focusNew) {
+  flushAll();
+  closeProject();
+  lsSet('thread:last', '');
+  renderProjectList(); renderHome(); showView('welcome');
+  window.scrollTo(0, 0);
+  if (focusNew) requestAnimationFrame(() => { const i = $('#newTitle'); if (i) i.focus(); });
+}
+let newKind = 'film';
+function renderHome() {
+  const root = $('#welcome'); if (!root) return;
+  const had = $('#newTitle'), keep = had ? had.value : '';
+  root.textContent = '';
+  const none = !S.projects.length;
+  root.append(el('h1', { text: none ? 'Start a thread' : 'Your projects' }));
+  if (none) root.append(el('p', { class: 'lede', text: 'Keep a project’s writing and everything that sparks it — notes, photos, files and characters — together, in order. Everything stays on this device, and you can back it up to iCloud Drive.' }));
+  const card = el('div', { class: 'newcard' });
+  const input = el('input', { id: 'newTitle', type: 'text', maxlength: '120', placeholder: 'The lighthouse', autocomplete: 'off' });
+  input.value = keep;
+  const types = el('div', { class: 'types', role: 'group', 'aria-label': 'Type of writing' });
+  for (const [k, label] of PTYPES) types.append(el('button', { type: 'button', class: 'chip', 'aria-pressed': String(k === newKind), text: label,
+    onclick: e => { newKind = k; types.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', String(c === e.currentTarget))); } }));
+  const go = () => { const v = input.value.trim(); input.value = ''; createProject(v, newKind); };
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  card.append(el('label', { for: 'newTitle', text: none ? 'Name your first project' : 'New project' }), input,
+    el('span', { class: 'fieldlabel', text: 'What are you writing?', style: 'margin-top:14px' }), types,
+    el('button', { type: 'button', class: 'btn primary', text: 'Create project', onclick: go }));
+  root.append(card);
+  if (!none) {
+    root.append(el('h2', { text: 'Projects' }));
+    const ul = el('ul', { class: 'plist' });
+    for (const p of S.projects) ul.append(el('li', {}, el('button', { type: 'button', class: 'pcard', onclick: () => openProject(p.id) },
+      el('span', { class: 'pc-body' }, el('span', { class: 'pc-title', text: p.title || 'Untitled project' }),
+        el('span', { class: 'pc-sub', text: ptypeName(p.kind) + (p.updatedAt ? ' · edited ' + ago(p.updatedAt) : '') })),
+      el('span', { class: 'pc-go', html: ICON('back', 18) }))));
+    root.append(ul);
+  }
+  const last = +lsGet('thread:lastBackup') || 0;
+  root.append(el('div', { class: 'home-backup' },
+    el('p', { text: 'Your writing is saved on this device only. ' + (last ? `Last backup ${ago(last)}.` : 'Not backed up yet.') }),
+    el('button', { type: 'button', class: 'btn small', text: 'Back up', onclick: backupFlow }),
+    el('button', { type: 'button', class: 'btn small', text: 'Restore', onclick: restoreFlow })));
+}
+
+/* ---------------- story structure: beats and suggestions ---------------- */
+// Beat positions are fractions of the script's length. Descriptions are short summaries in our own words.
+const FRAMEWORKS = {
+  cat: { name: 'Save the Cat', by: 'Blake Snyder’s 15 beats', beats: [
+    ['opening', 'Opening Image', 0, 'A snapshot of the hero’s world and problem before anything changes. The final image will mirror it.'],
+    ['theme', 'Theme Stated', .05, 'Someone (rarely the hero) hints at the lesson the hero needs to learn.'],
+    ['setup', 'Set-up', .09, 'Show the hero’s everyday life, what’s missing, and the people who matter. Plant what will pay off later.'],
+    ['catalyst', 'Catalyst', .11, 'The event that knocks the hero’s life off course: news, a meeting, a loss.'],
+    ['debate', 'Debate', .18, 'The hero hesitates. Should they go? Raise the question of whether they can.'],
+    ['break2', 'Break into Two', .23, 'The hero chooses to act and enters a new world. It must be their decision.'],
+    ['bstory', 'B Story', .27, 'A second storyline, often a relationship, that carries the theme.'],
+    ['fun', 'Fun and Games', .4, 'The promise of the premise: the scenes the audience came to see.'],
+    ['midpoint', 'Midpoint', .5, 'A false win or false loss. Stakes rise, time gets shorter, and fun turns serious.'],
+    ['closein', 'Bad Guys Close In', .6, 'Pressure builds from outside and doubt grows inside. The team starts to crack.'],
+    ['alllost', 'All Is Lost', .68, 'The lowest point. Something or someone is lost; a hint of death raises the stakes.'],
+    ['darknight', 'Dark Night of the Soul', .73, 'The hero sits with the loss before finding the truth they’ve been avoiding.'],
+    ['break3', 'Break into Three', .77, 'The A and B stories combine: the hero has the answer and a plan.'],
+    ['finale', 'Finale', .88, 'The hero applies the lesson, the plan meets resistance, and the old world is changed.'],
+    ['final', 'Final Image', 1, 'The opposite of the opening image, showing how much has changed.']
+  ] },
+  field: { name: 'Syd Field', by: 'Syd Field’s three-act paradigm', beats: [
+    ['setupF', 'Set-up', .02, 'Act One: introduce the hero, the world and the dramatic need in the first pages.'],
+    ['inciting', 'Inciting Incident', .1, 'The event that sets the story in motion.'],
+    ['pp1', 'Plot Point I', .23, 'A turn that spins the story into Act Two and confrontation.'],
+    ['pinch1', 'Pinch I', .37, 'A reminder of the central conflict that keeps Act Two on track.'],
+    ['mid', 'Midpoint', .5, 'A key event that links the two halves of Act Two and changes the direction.'],
+    ['pinch2', 'Pinch II', .62, 'A second reminder of the conflict, pushing toward the next turn.'],
+    ['pp2', 'Plot Point II', .75, 'A turn that spins the story into Act Three and resolution.'],
+    ['climax', 'Climax', .9, 'The final confrontation where the dramatic need is won or lost.'],
+    ['resolution', 'Resolution', 1, 'Tie it off: the new normal after the climax.']
+  ] },
+  tv: { name: 'TV acts', by: 'act-out structure for an episode', beats: [
+    ['teaser', 'Teaser / Cold open', 0, 'Hook in the first few pages and end on a question that carries over the titles.'],
+    ['act1out', 'Act One out', .25, 'End the act on a turn or reveal that makes the audience stay through the break.'],
+    ['act2out', 'Act Two out', .45, 'Raise the stakes. A complication the hero didn’t see coming.'],
+    ['act3out', 'Act Three out (midpoint)', .65, 'The biggest twist of the episode. The plan breaks.'],
+    ['act4out', 'Act Four out', .85, 'The lowest point or the hardest choice, right before the final act.'],
+    ['tag', 'Final act and tag', 1, 'Resolve the episode’s story, and leave a thread hanging for the next one.']
+  ] }
+};
+const frameworkFor = p => FRAMEWORKS[p.framework] ? p.framework : (p.kind === 'tv' ? 'tv' : 'cat');
+const defaultLength = p => p.kind === 'tv' ? 60 : 110;
+const beatByKey = k => { for (const f of Object.values(FRAMEWORKS)) { const b = f.beats.find(x => x[0] === k); if (b) return b; } return null; };
+
+function scriptStats(p, items) {
+  const pages = layoutScript(p, items, null);
+  const L = layoutScript.lastStats || { scenes: new Map() };
+  const scenes = items.filter(i => i.el === 'scene').map((it, n) => {
+    const st = L.scenes.get(it.id) || { start: 0, lines: 0 };
+    const els = parseScript(it.body);
+    const speakers = new Set(els.filter(e => e.t === 'char').map(e => cueBase(e.text)));
+    const actionText = els.filter(e => e.t === 'action').map(e => e.text).join(' ');
+    const dialLines = els.filter(e => e.t === 'dial').reduce((a, e) => a + Math.ceil(e.text.length / 35), 0);
+    const actLines = els.filter(e => e.t === 'action').reduce((a, e) => a + Math.ceil(e.text.length / 60), 0);
+    return { it, n: n + 1, start: st.start, len: st.lines / 54, speakers, actionText, dialLines, actLines };
+  });
+  return { pages, scenes, acts: L.acts || [] };
+}
+function sceneAtPage(scenes, page) {
+  let best = null;
+  for (const s of scenes) if (s.start <= page) best = s;
+  return best || scenes[0] || null;
+}
+function suggestions(p, st, len) {
+  const out = [];
+  const { scenes, pages } = st;
+  if (!scenes.length) return out;
+  const fw = FRAMEWORKS[frameworkFor(p)];
+  const marked = new Map(scenes.filter(s => s.it.beat).map(s => [s.it.beat, s]));
+  const pg = x => 'p. ' + Math.max(1, Math.round(x));
+  const at = x => 'p. ' + (Math.floor(x) + 1);
+  // beats you've passed without marking, and beats that land far from target
+  for (const [key, name, frac, tip] of fw.beats) {
+    const target = frac * len, m = marked.get(key);
+    if (m) {
+      const off = m.start - target;
+      if (Math.abs(off) > Math.max(5, len * 0.12) && frac > 0 && frac < 1)
+        out.push({ kind: 'beat', scene: m, text: `${name} lands on ${at(m.start)}, but it usually lands near ${pg(target)}.`, tip: off > 0 ? 'Things before it may be taking too long. Look for scenes to trim or combine before this point.' : 'It may be arriving too soon. The audience may need more time to care before this turn.' });
+    } else if (frac > 0 && pages > target + Math.max(4, len * 0.05) && frac < 1) {
+      const s = sceneAtPage(scenes, target);
+      out.push({ kind: 'beat', scene: s, text: `You’re past where ${fw.name === 'TV acts' ? 'the ' + name.toLowerCase() : 'the ' + name} usually lands (${pg(target)}).`, tip: tip + (s ? ` Scene ${s.n} sits at that point. If it does this job, mark it.` : ''), mark: s && key });
+    }
+  }
+  // characters off screen too long
+  const appear = new Map();
+  const names = new Set();
+  for (const s of scenes) for (const n of s.speakers) names.add(n);
+  for (const c of S.chars) { const n = (charView(c).name || '').trim().toUpperCase(); if (n) names.add(n); }
+  for (const name of names) {
+    const first = name.split(/\s+/)[0];
+    const re = new RegExp('\\b' + first.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+    const hits = scenes.filter(s => s.speakers.has(name) || re.test(s.actionText));
+    if (hits.length) appear.set(name, hits);
+  }
+  const gapLimit = Math.max(10, len * 0.15);
+  const ranked = [...appear.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 5);
+  for (const [name, hits] of ranked) {
+    if (hits.length < 2 && scenes.length < 6) continue;
+    for (let i = 1; i < hits.length; i++) {
+      const gap = hits[i].start - (hits[i - 1].start + hits[i - 1].len);
+      if (gap > gapLimit) {
+        const mid = sceneAtPage(scenes, hits[i - 1].start + gap / 2);
+        out.push({ kind: 'char', scene: mid, text: `${name} is off screen for about ${Math.round(gap)} pages (scenes ${hits[i - 1].n} to ${hits[i].n}).`, tip: `Audiences lose track of a character after a long absence. A short scene or a mention around scene ${mid ? mid.n : hits[i - 1].n + 1} keeps them in the story.` });
+      }
+    }
+    const last = hits[hits.length - 1], since = pages - (last.start + last.len);
+    if (since > gapLimit && hits.length >= 3)
+      out.push({ kind: 'char', scene: last, text: `${name} hasn’t appeared since scene ${last.n}, about ${Math.round(since)} pages ago.`, tip: 'If they matter to the ending, bring them back before the finale, or pay off what they set up.' });
+  }
+  // pacing
+  const longLimit = p.kind === 'tv' ? 3 : 4;
+  for (const s of scenes) if (s.len > longLimit)
+    out.push({ kind: 'pace', scene: s, text: `Scene ${s.n} runs about ${Math.round(s.len)} pages.`, tip: 'Long scenes can sag. Come in later and leave earlier, or add a turn halfway through so the scene changes direction.' });
+  for (let i = 0; i + 2 < scenes.length; i++) {
+    const run = scenes.slice(i, i + 3);
+    if (run.every(s => s.dialLines > 3 * Math.max(1, s.actLines))) {
+      out.push({ kind: 'tension', scene: run[1], text: `Scenes ${run[0].n} to ${run[2].n} are mostly talk.`, tip: 'Add tension with something we can see: a ticking clock, an interruption, someone who wants something and can’t get it.' });
+      i += 2;
+    }
+    const pl = run.map(s => (s.it.place || '').trim().toUpperCase());
+    if (pl[0] && pl.every(x => x === pl[0])) { out.push({ kind: 'pace', scene: run[0], text: `Scenes ${run[0].n} to ${run[2].n} are all in ${pl[0]}.`, tip: 'A change of place can lift the energy, or combine them into one scene.' }); i += 2; }
+  }
+  // TV act balance
+  if (p.kind === 'tv' && st.acts.length > 1) {
+    const avg = st.acts.reduce((a, x) => a + x.pages, 0) / st.acts.length;
+    for (const a of st.acts) if (a.pages > avg * 1.4 || a.pages < avg * 0.6)
+      out.push({ kind: 'pace', scene: null, text: `${a.name} is about ${Math.round(a.pages)} pages; your acts average ${Math.round(avg)}.`, tip: 'Acts of similar length keep the episode’s rhythm steady between breaks.' });
+    for (const a of st.acts) if (a.lastScene) {
+      const s = scenes.find(x => x.it.id === a.lastScene);
+      if (s && !s.it.beat) out.push({ kind: 'tension', scene: s, text: `${a.name} ends with scene ${s.n}.`, tip: 'An act should end on a question, a reveal or a threat, so the audience stays through the break. Make sure the last moment of this scene does that.' });
+    }
+  }
+  return out;
+}
+
+function renderStruct() {
+  const root = $('#structView'); if (!root || S.tab !== 'story') return;
+  const p = currentProject(); if (!p) return;
+  const items = S.items.map(view);
+  const st = scriptStats(p, items);
+  const len = Math.max(p.targetPages || defaultLength(p), st.pages);
+  const fwKey = frameworkFor(p), fw = FRAMEWORKS[fwKey];
+  root.textContent = '';
+  const wrap = el('div', { class: 'story' });
+  const seg = el('div', { class: 'seg small', role: 'group', 'aria-label': 'Structure' });
+  for (const k of (p.kind === 'tv' ? ['tv', 'cat', 'field'] : ['cat', 'field'])) seg.append(el('button', { type: 'button', 'aria-pressed': String(k === fwKey), text: FRAMEWORKS[k].name,
+    onclick: () => { saveProjectField('framework', k); renderStruct(); } }));
+  const lenIn = el('input', { type: 'number', inputmode: 'numeric', min: '10', max: '200', class: 'len', 'aria-label': 'Planned length in pages' });
+  lenIn.value = p.targetPages || defaultLength(p);
+  let lt = null;
+  lenIn.addEventListener('input', () => { clearTimeout(lt); lt = setTimeout(() => { const v = parseInt(lenIn.value, 10); if (v >= 10) { saveProjectField('targetPages', v); renderStruct(); } }, 700); });
+  wrap.append(el('div', { class: 'story-bar' }, seg, el('label', { class: 'len-label' }, 'Aiming for', lenIn, 'pages')));
+  wrap.append(el('p', { class: 'story-intro', text: `${fw.by}, placed on a ${len}-page script. You’re on page ${Math.max(1, st.pages)}. These are guides, not rules: mark the scene that does each job, and Thread checks the timing.` }));
+
+  // timeline
+  const W = 1000, H = 64;
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, class: 'timeline', role: 'img', 'aria-label': 'Your scenes and the beats across the script' });
+  svg.append(svgEl('rect', { x: 0, y: 26, width: W, height: 12, rx: 6, class: 'tl-track' }));
+  for (const s of st.scenes) {
+    const x = s.start / len * W, w = Math.max(2, s.len / len * W - 1.5);
+    svg.append(svgEl('rect', { x, y: 26, width: w, height: 12, rx: 2, class: 'tl-scene' + (s.it.beat ? ' marked' : '') }));
+  }
+  for (const [key, name, frac] of fw.beats) {
+    const x = Math.min(W - 1, Math.max(1, frac * W));
+    svg.append(svgEl('line', { x1: x, x2: x, y1: 14, y2: 50, class: 'tl-beat' }));
+  }
+  const now = Math.min(W, st.pages / len * W);
+  svg.append(svgEl('path', { d: `M${now - 6} 4 L${now + 6} 4 L${now} 14 Z`, class: 'tl-now' }));
+  wrap.append(el('div', { class: 'tl-box' }, svg, el('div', { class: 'tl-scale' }, el('span', { text: 'p. 1' }), el('span', { text: 'p. ' + Math.round(len / 2) }), el('span', { text: 'p. ' + len }))));
+
+  // suggestions
+  const sug = suggestions(p, st, len);
+  wrap.append(el('h3', { text: sug.length ? `Suggestions (${sug.length})` : 'Suggestions' }));
+  if (!st.scenes.length) wrap.append(el('p', { class: 'story-empty', text: 'Add a few scenes and suggestions will appear here: beats you’ve passed, characters who’ve been away too long, and stretches that could use more tension.' }));
+  else if (!sug.length) wrap.append(el('p', { class: 'story-empty', text: 'Nothing to flag right now. Keep writing.' }));
+  const ul = el('ul', { class: 'sugs' });
+  const KLAB = { beat: 'Structure', char: 'Character', pace: 'Pace', tension: 'Tension' };
+  for (const s of sug) {
+    const acts = el('div', { class: 'sug-acts' });
+    if (s.scene) acts.append(el('button', { type: 'button', class: 'chip small', text: 'Go to scene ' + s.scene.n, onclick: () => goToItem(s.scene.it.id) }));
+    if (s.mark) acts.append(el('button', { type: 'button', class: 'chip small', text: 'Mark it', onclick: () => setBeat(s.scene.it.id, s.mark) }));
+    ul.append(el('li', { class: 'sug k-' + s.kind }, el('span', { class: 'sug-k', text: KLAB[s.kind] }), el('p', { class: 'sug-t', text: s.text }), el('p', { class: 'sug-tip', text: s.tip }), acts));
+  }
+  wrap.append(ul);
+
+  // beats
+  wrap.append(el('h3', { text: 'The beats' }));
+  const bl = el('ol', { class: 'beats' });
+  const pg = x => Math.max(1, Math.round(x));
+  for (const [key, name, frac, tip] of fw.beats) {
+    const target = frac * len;
+    const m = st.scenes.find(s => s.it.beat === key);
+    const near = sceneAtPage(st.scenes, target);
+    const status = m ? el('span', { class: 'beat-st done', text: `Scene ${m.n}, p. ${Math.floor(m.start) + 1}` })
+      : el('span', { class: 'beat-st', text: st.pages >= target ? 'Not marked yet' : 'Coming up' });
+    const acts = el('div', { class: 'sug-acts' });
+    if (m) acts.append(el('button', { type: 'button', class: 'chip small', text: 'Go to scene ' + m.n, onclick: () => goToItem(m.it.id) }));
+    else if (near && st.pages >= target - 2) acts.append(el('button', { type: 'button', class: 'chip small', text: `Mark scene ${near.n}`, onclick: () => setBeat(near.it.id, key) }));
+    bl.append(el('li', { class: 'beat' + (m ? ' done' : '') },
+      el('div', { class: 'beat-h' }, el('span', { class: 'beat-n', text: name }), el('span', { class: 'beat-p', text: 'around p. ' + pg(target) })),
+      el('p', { class: 'beat-tip', text: tip }), el('div', { class: 'beat-foot' }, status, acts)));
+  }
+  wrap.append(bl);
+  root.append(wrap);
+  $('#tcStory').textContent = sug.length ? String(sug.length) : '';
+}
+function setBeat(iid, key) {
+  const it = S.items.find(i => i.id === iid); if (!it) return;
+  for (const o of S.items) if (o.id !== iid && view(o).beat === key) { queueSave('items/' + o.id, 'beat', ''); flush('items/' + o.id); }
+  queueSave('items/' + iid, 'beat', key); flush('items/' + iid);
+  setTimeout(renderStruct, 50);
+}
+function goToItem(iid) {
+  setTab('thread');
+  if (S.mode !== 'edit') setMode('edit');
+  flashId = iid; renderItems();
+}
+function beatMenu(anchor, iid) {
+  const p = currentProject(); if (!p) return;
+  const fw = FRAMEWORKS[frameworkFor(p)];
+  const cur = view(S.items.find(i => i.id === iid) || {}).beat;
+  openMenu(anchor, [{ label: cur ? 'Remove beat' : 'No beat', onClick: () => setBeat(iid, '') }]
+    .concat(fw.beats.map(([k, name]) => ({ label: (k === cur ? '✓ ' : '') + name, onClick: () => setBeat(iid, k) }))));
 }
 
 /* ---------------- toast ---------------- */
@@ -785,7 +1501,7 @@ function openMenu(anchor, entries) {
       onclick: () => { closeMenu(); e.onClick(); } }));
   }
   document.body.append(m);
-  menuEl = m; menuAnchor = anchor; anchor.setAttribute('aria-expanded', 'true');
+  menuEl = m; menuAnchor = anchor; menuY = window.scrollY; anchor.setAttribute('aria-expanded', 'true');
   const r = anchor.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
   const left = Math.min(Math.max(8, r.right - mw), window.innerWidth - mw - 8);
   let top = r.bottom + 6;
@@ -842,14 +1558,16 @@ function onProjects(list, meta) {
   const ids = new Set(list.map(p => p.id));
   for (const id of [...S.justCreated]) if (ids.has(id)) S.justCreated.delete(id);
   if (S.currentId && !ids.has(S.currentId) && !S.justCreated.has(S.currentId)) closeProject();
-  if (!S.currentId) {
+  if (!S.currentId && !S.started) {
+    S.started = true;
     const last = lsGet('thread:last');
-    const pick = S.projects.find(p => p.id === last) || S.projects[0];
+    const pick = S.projects.find(p => p.id === last);
     if (pick) openProject(pick.id);
   }
+  S.started = true;
   renderProjectList();
   if (S.currentId) { renderHeader(); showView('project'); }
-  else { showView('welcome'); }
+  else { renderHome(); showView('welcome'); }
 }
 function renderProjectList() {
   const nav = $('#projectList');
@@ -867,7 +1585,64 @@ function renderHeader() {
   const p = currentProject();
   const t = $('#projectTitle');
   if (p && document.activeElement !== t && !titleDirty) t.value = p.title || '';
+  renderExtra();
   updateMeta();
+}
+function saveProjectField(field, value) {
+  const pid = S.currentId; if (!pid) return;
+  const p = currentProject(); if (p) p[field] = value;
+  S.store.updateProject(pid, { [field]: value, updatedAt: Date.now() }).catch(e => toast(dbErrMsg(e)));
+}
+function renderExtra() {
+  const box = $('#projExtra'), p = currentProject();
+  if (!box || !p) return;
+  const k = p.kind || 'other';
+  $('#tabStory').hidden = !isScript(k);
+  if (!isScript(k) && S.tab === 'story') setTab('thread');
+  if (box.dataset.pid === p.id && box.dataset.kind === k) { updateGoal(); return; }
+  box.dataset.pid = p.id; box.dataset.kind = k;
+  box.textContent = '';
+  box.append(el('button', { type: 'button', class: 'ptype', 'aria-label': 'Type of writing: ' + ptypeName(k) + '. Change', text: ptypeName(k), onclick: e => typeMenu(e.currentTarget) }));
+  const a = el('input', { class: 'author', type: 'text', placeholder: 'your name', maxlength: '80', autocomplete: 'off', 'aria-label': 'Author' });
+  a.value = p.author || '';
+  let at = null;
+  a.addEventListener('input', () => { clearTimeout(at); at = setTimeout(() => { saveProjectField('author', a.value.trim()); lsSet('thread:author', a.value.trim()); }, 600); });
+  box.append(el('label', {}, isScript(k) ? 'Written by' : 'By', a));
+  if (k === 'novel' || k === 'short') {
+    const g = el('input', { class: 'goal', type: 'number', inputmode: 'numeric', min: '0', step: '500', 'aria-label': 'Word goal' });
+    g.value = p.goal || '';
+    let gt = null;
+    g.addEventListener('input', () => { clearTimeout(gt); gt = setTimeout(() => { saveProjectField('goal', Math.max(0, parseInt(g.value, 10) || 0)); updateMeta(); }, 500); });
+    box.append(el('label', {}, 'Goal', g, 'words'), el('div', { class: 'goalbar', id: 'goalBar' }, el('span')));
+  }
+  updateGoal();
+}
+function updateGoal() {
+  const bar = $('#goalBar'), p = currentProject(); if (!bar || !p) return;
+  const words = S.items.map(view).filter(i => i.type === 'writing').reduce((n, i) => n + countWords(i.body), 0);
+  const pct = p.goal ? Math.min(100, words / p.goal * 100) : 0;
+  bar.firstChild.style.width = pct + '%';
+  bar.hidden = !p.goal;
+}
+function typeMenu(anchor) {
+  const p = currentProject(); if (!p) return;
+  openMenu(anchor, PTYPES.map(([k, label]) => ({ label: (k === (p.kind || 'other') ? '✓ ' : '') + label, onClick: () => setKind(k) })));
+}
+function setKind(k) {
+  const p = currentProject(); if (!p || (p.kind || 'other') === k) return;
+  p.kind = k;
+  const patch = { kind: k, updatedAt: Date.now() };
+  if (DEFAULT_GOAL[k] && !p.goal) { p.goal = DEFAULT_GOAL[k]; patch.goal = p.goal; }
+  S.store.updateProject(p.id, patch).catch(e => toast(dbErrMsg(e)));
+  els.forEach(n => n.remove()); els.clear();
+  buildAddbar(); renderExtra(); renderItems(); renderProjectList();
+  toast('This project is now a ' + ptypeName(k).toLowerCase());
+}
+function buildAddbar() {
+  const bar = $('#addbarInner');
+  bar.textContent = '';
+  bar.append(el('span', { class: 'addbar-label', text: 'Add to the end' }));
+  for (const [t, label, icon] of addKinds()) bar.append(el('button', { class: 'chip', type: 'button', html: ICON(icon, 18) + '<span>' + label + '</span>', onclick: () => startAdd(t, null) }));
 }
 function updateMeta() {
   const items = S.items.map(view);
@@ -880,9 +1655,17 @@ function updateMeta() {
     return;
   }
   const words = items.filter(i => i.type === 'writing').reduce((n, i) => n + countWords(i.body), 0);
-  $('#meta').textContent = !S.itemsReady ? '' : items.length
-    ? `${plural(items.length, 'piece', 'pieces')}, ${plural(words, 'word', 'words')} of writing`
-    : 'Nothing added yet';
+  const p = currentProject() || {}, k = p.kind || 'other';
+  let txt = items.length ? `${plural(items.length, 'piece', 'pieces')}, ${plural(words, 'word', 'words')} of writing` : 'Nothing added yet';
+  if (items.length && isScript(k)) {
+    const scenes = items.filter(i => i.el === 'scene').length;
+    let pages = 0; try { pages = layoutScript(p, items, null); } catch {}
+    txt = `${plural(scenes, 'scene', 'scenes')}, about ${plural(Math.max(pages, scenes ? 1 : 0), 'page', 'pages')}`;
+  } else if (items.length && p.goal && (k === 'novel' || k === 'short')) {
+    txt = `${words.toLocaleString()} of ${p.goal.toLocaleString()} words`;
+  }
+  $('#meta').textContent = !S.itemsReady ? '' : txt;
+  updateGoal();
 }
 function flushTitle() {
   clearTimeout(titleTimer);
@@ -892,10 +1675,13 @@ function flushTitle() {
   const v = $('#projectTitle').value.trim() || 'Untitled project';
   S.store.updateProject(pid, { title: v, updatedAt: Date.now() }).catch(e => toast(dbErrMsg(e)));
 }
-async function createProject(title) {
+async function createProject(title, kind) {
   const pid = 'p' + uid(), now = Date.now();
+  kind = kind || 'other';
   S.justCreated.add(pid);
-  try { await S.store.setProject(pid, { title: title || 'Untitled project', createdAt: now, updatedAt: now }); }
+  const doc = { title: title || 'Untitled project', kind, author: lsGet('thread:author') || '', createdAt: now, updatedAt: now };
+  if (DEFAULT_GOAL[kind]) doc.goal = DEFAULT_GOAL[kind];
+  try { await S.store.setProject(pid, doc); S.projects.unshift(Object.assign({ id: pid }, doc)); }
   catch (e) { S.justCreated.delete(pid); toast(dbErrMsg(e)); return; }
   openProject(pid);
   closeNav();
@@ -937,7 +1723,8 @@ function openProject(pid) {
     renderChars();
   }, onDbError);
   if (S.mode === 'read') setMode('edit');
-  setTab(lsGet('thread:tab:' + pid) === 'chars' ? 'chars' : 'thread');
+  buildAddbar();
+  { const lt = lsGet('thread:tab:' + pid); setTab(lt === 'chars' || lt === 'story' ? lt : 'thread'); }
   renderHeader(); renderProjectList(); showView('project'); renderItems();
   window.scrollTo(0, 0);
 }
@@ -959,6 +1746,7 @@ async function deleteProjectFlow() {
       for (const r of rows) { await S.store.del(pid, name, r.id); if (r.portraitId) await S.store.deleteAsset(r.portraitId); }
     }
     await S.store.deleteProject(pid);
+    if (S.currentId === pid) goHome();
     toast('Project deleted');
   } catch (e) { toast(dbErrMsg(e)); }
 }
@@ -969,6 +1757,7 @@ async function exportProject() {
   let md = `# ${(p && p.title) || 'Untitled project'}\n\n`;
   for (const it of S.items.map(view)) {
     if (it.type === 'writing') {
+      if (it.el === 'scene') md += `### ${sceneHeading(it)}\n\n`;
       if ((it.title || '').trim()) md += `## ${it.title.trim()}\n\n`;
       if ((it.body || '').trim()) md += it.body.trim() + '\n\n';
     } else if (it.type === 'note') {
@@ -1021,11 +1810,11 @@ function lineInput(cls, placeholder, label, id, field) {
 }
 function buildItem(item) {
   const id = item.id, key = 'items/' + id;
-  const li = el('li', { class: 'item', 'data-id': id, 'data-type': item.type });
+  const li = el('li', { class: 'item', 'data-id': id, 'data-type': item.type, 'data-el': item.el || '' });
   const gap = el('div', { class: 'gap' });
   const plus = el('button', { class: 'gap-plus', type: 'button', 'aria-label': 'Add something here', 'aria-expanded': 'false', html: '<span>' + ICON('plus', 14) + '</span>' });
   const choices = el('div', { class: 'gap-choices' });
-  for (const [t, label, icon] of ADD_KINDS) {
+  for (const [t, label, icon] of addKinds()) {
     choices.append(el('button', { class: 'chip small', type: 'button', html: ICON(icon, 16) + '<span>' + label + '</span>',
       onclick: e => { e.stopPropagation(); closeGaps(); startAdd(t, id); } }));
   }
@@ -1044,8 +1833,31 @@ function buildItem(item) {
     onclick: e => { e.stopPropagation(); openItemMenu(e.currentTarget, id); } });
   const f = {};
 
-  if (item.type === 'writing') {
-    f.title = lineInput('w-title', 'Untitled passage', 'Passage title', key, 'title');
+  if (item.type === 'writing' && item.el === 'scene') {
+    f.label = el('span', { class: 'chap-label' });
+    f.beat = el('button', { type: 'button', class: 'beat-chip', 'aria-haspopup': 'menu', onclick: e => { e.stopPropagation(); beatMenu(e.currentTarget, id); } });
+    head.append(f.label, f.beat, menuBtn);
+    f.setting = el('select', { 'aria-label': 'Interior or exterior' }, ...SETTINGS.map(v => el('option', { value: v, text: v })));
+    f.place = el('input', { type: 'text', placeholder: 'Location', 'aria-label': 'Location', list: 'placeList', autocomplete: 'off', autocapitalize: 'characters', maxlength: '120' });
+    f.time = el('select', { 'aria-label': 'Time of day' }, ...TIMES.map(v => el('option', { value: v, text: v })));
+    f.setting.addEventListener('change', () => { queueSave(key, 'setting', f.setting.value); flush(key); });
+    f.time.addEventListener('change', () => { queueSave(key, 'time', f.time.value); flush(key); });
+    f.place.addEventListener('input', () => queueSave(key, 'place', f.place.value));
+    f.place.addEventListener('blur', () => { flush(key); updatePlaces(); });
+    f.place.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); f.body.focus(); } });
+    f.wc = el('div', { class: 'wc' });
+    f.body = textarea('w-body script', 'Action goes here. Tap a name below for dialogue.', 'Scene', key, 'body', () => { updateMeta(); if (!f.tools.hidden) fillTools(f); });
+    f.tools = el('div', { class: 'stools', hidden: true });
+    f.body.addEventListener('focus', () => { f.tools.hidden = false; fillTools(f); });
+    f.body.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== f.body) f.tools.hidden = true; }, 150));
+    content.append(head, el('div', { class: 'sh' }, f.setting, f.place, f.time), f.tools, f.body, f.wc);
+  } else if (item.type === 'writing' && item.el === 'act') {
+    f.title = lineInput('w-title act-title', 'ACT ONE', 'Act name', key, 'title');
+    head.append(f.title, menuBtn);
+    content.append(head);
+  } else if (item.type === 'writing') {
+    if (item.el === 'chapter') { f.label = el('div', { class: 'chap-label' }); content.append(f.label); }
+    f.title = lineInput('w-title', item.el === 'chapter' ? 'Chapter title (optional)' : 'Untitled passage', 'Passage title', key, 'title');
     f.wc = el('div', { class: 'wc' });
     f.body = textarea('w-body', 'Start writing…', 'Passage text', key, 'body', () => { f.wc.textContent = wordLabel(countWords(f.body.value)); updateMeta(); });
     f.title.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); f.body.focus(); } });
@@ -1090,7 +1902,13 @@ function applyItem(li, item, idx) {
     const v = item[field] || '';
     if (input.value !== v) { input.value = v; if (input.tagName === 'TEXTAREA') autosize(input); }
   };
-  set(f.title, 'title'); set(f.body, 'body'); set(f.caption, 'caption');
+  set(f.title, 'title'); set(f.body, 'body'); set(f.caption, 'caption'); set(f.place, 'place');
+  if (f.setting && document.activeElement !== f.setting && !('setting' in p)) f.setting.value = item.setting || 'INT.';
+  if (f.time && document.activeElement !== f.time && !('time' in p)) f.time.value = item.time || 'DAY';
+  const ord = S.ordinals && S.ordinals.get(item.id);
+  if (f.beat) { const b = item.beat && beatByKey(item.beat); f.beat.textContent = b ? b[1] : '+ Beat'; f.beat.classList.toggle('set', !!b); f.beat.setAttribute('aria-label', b ? 'Beat: ' + b[1] + '. Change' : 'Mark a story beat'); }
+  if (f.label && ord) f.label.textContent = (item.el === 'scene' ? 'Scene ' : 'Chapter ') + ord;
+  if (item.el === 'act' && f.title && ord) f.title.placeholder = 'ACT ' + (NUMWORDS[ord] || ord);
   if (f.wc) f.wc.textContent = wordLabel(countWords(f.body.value));
   if (item.assetId) {
     const url = S.store.assetUrl(item.assetId);
@@ -1109,11 +1927,13 @@ function renderItems() {
   const items = S.items.slice().sort((a, b) => (a.pos - b.pos) || ((a.createdAt || 0) - (b.createdAt || 0)));
   S.items = items;
   const ids = new Set(items.map(i => i.id));
+  const ctr = {}; S.ordinals = new Map();
+  for (const it of items) if (it.el) { ctr[it.el] = (ctr[it.el] || 0) + 1; S.ordinals.set(it.id, ctr[it.el]); }
   for (const [id, node] of els) if (!ids.has(id)) { node.remove(); els.delete(id); }
   const fresh = [];
   items.forEach((it, idx) => {
     let node = els.get(it.id);
-    if (!node || node.dataset.type !== it.type) {
+    if (!node || node.dataset.type !== it.type || node.dataset.el !== (it.el || '')) {
       if (node) node.remove();
       node = buildItem(it); els.set(it.id, node); fresh.push(node);
     }
@@ -1122,6 +1942,8 @@ function renderItems() {
     if (at !== node) list.insertBefore(node, at || null);
   });
   $('#emptyThread').hidden = !S.itemsReady || items.length > 0;
+  updatePlaces();
+  if (S.tab === 'story') renderStruct();
   updateMeta();
   if (S.mode === 'read') renderRead();
   requestAnimationFrame(() => {
@@ -1129,7 +1951,7 @@ function renderItems() {
     const behavior = reduceMotion() ? 'auto' : 'smooth';
     if (pendingFocus && els.has(pendingFocus)) {
       const n = els.get(pendingFocus); pendingFocus = null;
-      const t = n.querySelector('textarea');
+      const t = n.dataset.el === 'scene' ? n.querySelector('.sh input') : n.dataset.el === 'act' ? n.querySelector('.w-title') : n.querySelector('textarea');
       n.scrollIntoView({ block: 'center', behavior });
       if (t) t.focus({ preventScroll: true });
     }
@@ -1150,16 +1972,110 @@ function renderRead() {
   r.textContent = '';
   const p = currentProject();
   r.append(el('h1', { text: (p && p.title) || 'Untitled project' }));
+  if (p && isScript(p.kind)) { renderScriptRead(r, p); return; }
   const writing = S.items.map(view).filter(i => i.type === 'writing' && ((i.body || '').trim() || (i.title || '').trim()));
   r.append(el('p', { class: 'reader-note', text: writing.length
     ? 'Your writing, in thread order. Notes, photos and files are hidden while you read.'
     : 'There’s no writing in this thread yet. Switch to Edit and add a piece of writing to read it here.' }));
   writing.forEach((w, i) => {
+    if (w.el === 'chapter') r.append(el('span', { class: 'chap-label', text: 'Chapter ' + ((S.ordinals && S.ordinals.get(w.id)) || '') }));
     if ((w.title || '').trim()) r.append(el('h2', { text: w.title.trim() }));
     else if (i > 0) r.append(el('div', { class: 'break', 'aria-hidden': 'true' }));
     for (const para of (w.body || '').trim().split(/\n\s*\n/)) if (para.trim()) r.append(el('p', { text: para }));
   });
 }
+function renderScriptRead(r, p) {
+  const items = S.items.map(view);
+  const sp = el('div', { class: 'sp' });
+  if (!items.some(i => i.type === 'writing')) { r.append(el('p', { class: 'reader-note', text: 'There are no scenes yet. Switch to Edit and add a scene.' })); return; }
+  r.append(el('p', { class: 'reader-note', text: 'Your script, formatted. Notes, photos and files are hidden. Export as PDF from the ⋯ menu.' }));
+  let lastAct = null, actN = 0;
+  for (const it of items) {
+    if (it.type !== 'writing') continue;
+    if (it.el === 'act') {
+      if (p.kind !== 'tv') continue;
+      if (lastAct) sp.append(el('p', { class: 'sp-end', text: 'END OF ' + lastAct }));
+      lastAct = actName(it, ++actN).toUpperCase();
+      sp.append(el('p', { class: 'sp-act', text: lastAct }));
+      continue;
+    }
+    if (it.el === 'scene') sp.append(el('p', { class: 'sp-heading', text: sceneHeading(it) }));
+    else if ((it.title || '').trim()) sp.append(el('p', { class: 'sp-heading', text: it.title.trim().toUpperCase() }));
+    for (const e of parseScript(it.body)) sp.append(el('p', { class: 'sp-' + e.t, text: e.text }));
+  }
+  if (lastAct) sp.append(el('p', { class: 'sp-end', text: 'END OF ' + lastAct }));
+  r.append(sp);
+}
+function updatePlaces() {
+  const dl = $('#placeList'); if (!dl) return;
+  const set = new Set();
+  for (const it of S.items.map(view)) if (it.el === 'scene' && (it.place || '').trim()) set.add(it.place.trim().toUpperCase());
+  const key = [...set].join('|');
+  if (dl.dataset.key === key) return;
+  dl.dataset.key = key; dl.textContent = '';
+  for (const v of set) dl.append(el('option', { value: v }));
+}
+
+/* script toolbar: names, parentheticals, transitions */
+function editText(t, fn) {
+  const v = t.value, s = t.selectionStart, e = t.selectionEnd;
+  const r = fn(v.slice(0, s), v.slice(e));
+  t.value = r.before + (r.after || '');
+  const pos = r.before.length + (r.caret || 0);
+  t.setSelectionRange(pos, pos);
+  t.dispatchEvent(new Event('input', { bubbles: true }));
+  t.focus();
+}
+const curLine = before => before.slice(before.lastIndexOf('\n') + 1);
+const blankBefore = before => { const b = before.replace(/[ \t]+$/, ''); return !b ? '' : b.endsWith('\n\n') ? b : b.endsWith('\n') ? b + '\n' : b + '\n\n'; };
+function insertName(t, name) {
+  editText(t, (before, after) => {
+    const line = curLine(before);
+    if (line && line === line.toUpperCase() && name.startsWith(line.trim())) before = before.slice(0, before.length - line.length);
+    else before = blankBefore(before);
+    return { before: before + name + '\n', after: after && !after.startsWith('\n') ? '\n' + after : after };
+  });
+}
+function insertParen(t) {
+  editText(t, (before, after) => {
+    if (curLine(before).trim()) before = before.replace(/[ \t]+$/, '') + '\n';
+    return { before: before + '(', after: ')\n' + after.replace(/^\n/, '') };
+  });
+}
+function insertAction(t) { editText(t, (before, after) => ({ before: blankBefore(before), after })); }
+function insertTransition(t, tr) { editText(t, (before, after) => ({ before: blankBefore(before) + tr + '\n\n', after })); }
+function insertExt(t, ext) {
+  editText(t, (before, after) => {
+    const lines = before.split('\n');
+    for (let i = lines.length - 1; i >= Math.max(0, lines.length - 3); i--) {
+      if (lines[i].trim() && isCue(lines[i].trim())) {
+        if (!lines[i].includes(ext)) lines[i] = lines[i].replace(/\s+$/, '') + ' ' + ext;
+        return { before: lines.join('\n'), after };
+      }
+    }
+    return { before, after };
+  });
+}
+function fillTools(f) {
+  const t = f.body, box = f.tools;
+  const line = curLine(t.value.slice(0, t.selectionStart)).trim();
+  let names = scriptNames();
+  if (line && line === line.toUpperCase() && /[A-Z]/.test(line)) names = names.filter(n => n.startsWith(line)).concat(names.filter(n => !n.startsWith(line)));
+  const keep = fn => ({ onpointerdown: e => e.preventDefault(), onmousedown: e => e.preventDefault(), onclick: fn });
+  box.textContent = '';
+  const r1 = el('div', { class: 'row' }, el('span', { class: 'lab', text: 'Character' }));
+  if (names.length) for (const n of names.slice(0, 20)) r1.append(el('button', Object.assign({ type: 'button', class: 'chip name', text: n }, keep(() => insertName(t, n)))));
+  else r1.append(el('span', { class: 'hint', text: 'Type a name in CAPITALS on its own line, or add character cards.' }));
+  const r2 = el('div', { class: 'row' },
+    el('button', Object.assign({ type: 'button', class: 'chip', text: 'Action' }, keep(() => insertAction(t)))),
+    el('button', Object.assign({ type: 'button', class: 'chip', text: '( )' , 'aria-label': 'Parenthetical' }, keep(() => insertParen(t)))),
+    el('button', Object.assign({ type: 'button', class: 'chip', text: '(V.O.)' }, keep(() => insertExt(t, '(V.O.)')))),
+    el('button', Object.assign({ type: 'button', class: 'chip', text: '(O.S.)' }, keep(() => insertExt(t, '(O.S.)')))));
+  const r3 = el('div', { class: 'row' }, el('span', { class: 'lab', text: 'Transition' }));
+  for (const tr of TRANSITIONS) r3.append(el('button', Object.assign({ type: 'button', class: 'chip', text: tr }, keep(() => insertTransition(t, tr)))));
+  box.append(r1, r2, r3);
+}
+
 function setMode(m) {
   S.mode = m;
   flushAll();
@@ -1168,6 +2084,7 @@ function setMode(m) {
   $('#threadView').hidden = m !== 'edit' || S.tab !== 'thread';
   $('#projectHead').hidden = m !== 'edit';
   $('#readView').hidden = m !== 'read';
+  updateBack();
   if (m === 'read') renderRead();
   else requestAnimationFrame(() => document.querySelectorAll('#items textarea').forEach(autosize));
   window.scrollTo(0, 0);
@@ -1245,6 +2162,8 @@ async function positionsFor(beforeId, n) {
 }
 function startAdd(type, beforeId) {
   if (!S.currentId) return;
+  if (type === 'scene') { addText('writing', beforeId, { el: 'scene', setting: 'INT.', place: '', time: 'DAY' }); return; }
+  if (type === 'act' || type === 'chapter') { addText('writing', beforeId, { el: type }); return; }
   if (type === 'writing' || type === 'note') { addText(type, beforeId); return; }
   if (!S.store.canUpload) { toast('Photos and files need sync. Open this page in claude.ai while signed in to add them.', null, null, 8000); return; }
   S.insertBefore = beforeId;
@@ -1255,13 +2174,13 @@ function startAdd(type, beforeId) {
   input.value = '';
   input.click();
 }
-async function addText(type, beforeId) {
+async function addText(type, beforeId, extra) {
   const pid = S.currentId; if (!pid) return;
   const [pos] = await positionsFor(beforeId, 1);
   const iid = 'i' + uid(), now = Date.now();
   pendingFocus = iid;
   try {
-    await S.store.setItem(pid, iid, { type, pos, title: '', body: '', caption: '', createdAt: now, updatedAt: now });
+    await S.store.setItem(pid, iid, Object.assign({ type, pos, title: '', body: '', caption: '', createdAt: now, updatedAt: now }, extra || {}));
     touchProject(pid, true);
   } catch (e) { pendingFocus = null; toast(dbErrMsg(e)); }
 }
@@ -1426,6 +2345,7 @@ function fillPortrait(node, c) {
 
 function setTab(t) {
   if (t === S.tab && t === 'chars' && S.charOpen) { closeChar(); return; }
+  if (t === 'story' && !isScript(curKind())) t = 'thread';
   flushAll();
   S.tab = t;
   document.body.dataset.tab = t;
@@ -1434,6 +2354,8 @@ function setTab(t) {
   $('#threadView').hidden = t !== 'thread' || S.mode !== 'edit';
   $('#readView').hidden = t !== 'thread' || S.mode !== 'read';
   $('#charView').hidden = t !== 'chars';
+  $('#structView').hidden = t !== 'story';
+  if (t === 'story') { if (S.mode !== 'edit') setMode('edit'); renderStruct(); window.scrollTo(0, 0); }
   if (t === 'thread') requestAnimationFrame(() => document.querySelectorAll('#items textarea').forEach(autosize));
   renderChars();
 }
@@ -1446,6 +2368,7 @@ function renderChars() {
     else if (!S.newChars.has(S.charOpen) && S.charsReady) { S.charOpen = null; S.linkForm = null; }
   }
   if (S.charOpen) renderCharDetail(); else renderCharList();
+  updateBack();
 }
 
 /* list + map */
@@ -1956,15 +2879,11 @@ function wire() {
   $('#newProject').innerHTML = ICON('plus', 18) + '<span>New project</span>';
   $('#projMore').innerHTML = ICON('more');
   $('#lbClose').innerHTML = ICON('close');
-  const bar = $('#addbarInner');
-  for (const [t, label, icon] of ADD_KINDS) bar.append(el('button', { class: 'chip', type: 'button', html: ICON(icon, 18) + '<span>' + label + '</span>', onclick: () => startAdd(t, null) }));
+  $('#backBtn').addEventListener('click', goBack);
 
   $('#navBtn').addEventListener('click', () => $('#app').classList.contains('nav-open') ? closeNav() : openNav());
   $('#scrim').addEventListener('click', closeNav);
-  $('#newProject').addEventListener('click', () => createProject(''));
-  const firstCreate = () => { const v = $('#firstTitle').value.trim(); createProject(v); $('#firstTitle').value = ''; };
-  $('#firstCreate').addEventListener('click', firstCreate);
-  $('#firstTitle').addEventListener('keydown', e => { if (e.key === 'Enter') firstCreate(); });
+  $('#newProject').addEventListener('click', () => { closeNav(); goHome(true); });
 
   const t = $('#projectTitle');
   t.addEventListener('input', () => { titleDirty = true; clearTimeout(titleTimer); titleTimer = setTimeout(flushTitle, 600); });
@@ -1977,7 +2896,8 @@ function wire() {
     b.addEventListener('keydown', e => {
       if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
       e.preventDefault();
-      const t = b.dataset.tab === 'thread' ? 'chars' : 'thread';
+      const vis = [...document.querySelectorAll('.tab:not([hidden])')].map(x => x.dataset.tab);
+      const t = vis[(vis.indexOf(b.dataset.tab) + (e.key === 'ArrowRight' ? 1 : vis.length - 1)) % vis.length];
       setTab(t); document.querySelector(`.tab[data-tab="${t}"]`).focus();
     });
   });
@@ -1985,6 +2905,8 @@ function wire() {
   $('#projMore').addEventListener('click', e => {
     e.stopPropagation();
     openMenu(e.currentTarget, [
+      { label: 'Export as PDF', onClick: exportPdf },
+      { label: 'Type of writing: ' + ptypeName(curKind()), onClick: () => typeMenu($('#projMore')) },
       { label: 'Export as Markdown', onClick: exportProject },
       { label: 'Back up all projects', onClick: backupFlow },
       { label: 'Restore from a backup', onClick: restoreFlow },
@@ -2005,7 +2927,7 @@ function wire() {
     if (menuEl && !menuEl.contains(e.target) && !(menuAnchor && menuAnchor.contains(e.target))) closeMenu();
     if (!e.target.closest('.gap')) closeGaps();
   });
-  window.addEventListener('scroll', () => { if (menuEl) closeMenu(); }, { passive: true });
+  window.addEventListener('scroll', () => { if (menuEl && Math.abs(window.scrollY - menuY) > 40) closeMenu(); }, { passive: true });
   let lastW = window.innerWidth;
   window.addEventListener('resize', () => {
     closeMenu(); clearTimeout(window.__rs);
@@ -2020,7 +2942,7 @@ function wire() {
     if (menuEl) { const a = menuAnchor; closeMenu(); if (a) a.focus(); return; }
     if (!$('#lightbox').hidden) { closeLightbox(); return; }
     if (document.querySelector('.gap.open')) { closeGaps(); return; }
-    if ($('#app').classList.contains('nav-open')) closeNav();
+    if ($('#app').classList.contains('nav-open')) { closeNav(); return; }
   });
   document.addEventListener('focusin', e => { if (e.target.matches('textarea, input[type="text"]')) document.body.classList.add('typing'); });
   document.addEventListener('focusout', () => setTimeout(() => { const a = document.activeElement; if (!a || !a.matches('textarea, input[type="text"]')) document.body.classList.remove('typing'); }, 60));
@@ -2063,7 +2985,6 @@ async function start() {
   S.downloads = true;
   updateBackupNote();
   setInterval(updateBackupNote, 60000);
-  $('#welcomeSync').textContent = 'Everything stays on this device, and you can back it up to iCloud Drive.';
   setStatus();
   S.store.subscribeProjects(onProjects, onDbError);
 }
