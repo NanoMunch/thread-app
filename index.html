@@ -543,6 +543,46 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .label-row .att-btn{width:30px;height:30px;margin:0}
 .att-help{margin:0 0 4px;font-size:13px;color:var(--faint)}
 
+
+/* ---------- source book ---------- */
+:root{--bt-adapted:rgba(59,79,160,.16);--bt-adapted-line:#3B4FA0;--bt-maybe:rgba(201,140,20,.24);--bt-skipped:rgba(120,128,138,.14)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bt-adapted:rgba(120,140,230,.22);--bt-adapted-line:#8EA0EE;--bt-maybe:rgba(220,165,40,.26)}}
+:root[data-theme="dark"]{--bt-adapted:rgba(120,140,230,.22);--bt-adapted-line:#8EA0EE;--bt-maybe:rgba(220,165,40,.26)}
+.bookpane{position:fixed;z-index:30;top:env(safe-area-inset-top,0px);bottom:env(safe-area-inset-bottom,0px);left:0;right:0;background:var(--surface);display:flex;flex-direction:column;min-width:0}
+.bp-head{display:flex;align-items:center;gap:8px;padding:10px 12px 8px 16px;border-bottom:1px solid var(--line);min-width:0}
+.bp-info{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.bp-info b{font-family:var(--serif);font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bp-prog{font-size:12.5px;color:var(--muted)}
+.bp-sub{padding:8px 16px;border-bottom:1px solid var(--line)}
+.bp-ch-sel{width:100%;font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink)}
+.bp-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.bp-text{max-width:38rem;margin:0 auto;padding:18px 20px 140px;font-family:var(--serif);font-size:17px;line-height:1.65}
+.bp-text p{margin:0 0 .9em}
+.bp-chno{font-family:var(--sans);font-size:12.5px;color:var(--faint);letter-spacing:.03em}
+.bt{border-radius:3px;cursor:pointer;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.bt-adapted{background:var(--bt-adapted);box-shadow:inset 0 -2px 0 var(--bt-adapted-line)}
+.bt-maybe{background:var(--bt-maybe)}
+.bt-skipped{background:var(--bt-skipped);color:var(--faint);text-decoration:line-through;text-decoration-color:var(--faint)}
+.bt-flash{outline:2px solid var(--thread);outline-offset:2px}
+.bp-nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:2em;font-family:var(--sans)}
+.bp-nav .btn{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bp-bar{position:absolute;left:12px;right:12px;bottom:12px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 12px;background:var(--paper);border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.bp-bar-l{font-size:12.5px;color:var(--muted);margin-right:4px}
+.chip.bt-c-adapted{border-color:var(--bt-adapted-line)}
+.chip.bt-c-maybe{background:var(--bt-maybe)}
+.bp-empty{padding:28px 20px;max-width:32rem;margin:0 auto}
+.bp-empty h2{font-family:var(--serif);font-weight:600;margin:0 0 .4em}
+.bp-fine{font-size:13px;color:var(--muted);margin-top:1.2em}
+.book-chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--surface);color:var(--thread);border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600;flex:none}
+#bookBtn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+@media (min-width:760px){
+  .bp-back{display:none !important}
+  body.book-open .bookpane{left:auto;width:min(46vw,640px);border-left:1px solid var(--line)}
+  body.book-open .main{margin-right:min(46vw,640px)}
+  body.book-open .app{grid-template-columns:minmax(0,1fr)}
+  body.book-open .sidebar{display:none}
+}
+@media (max-width:759px){ .bp-x{display:none} body.book-open{overflow:hidden} }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none !important;animation:none !important}
 }
@@ -659,6 +699,7 @@ const PATHS = {
   tv: '<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M8 21h8M9 3l3 3 3-3"/>',
   scene: '<rect x="3" y="9" width="18" height="11" rx="1.5"/><path d="M3 9l2.5-5 15 2.6L20 9"/><path d="M8 4.6l1.6 4.2M13 5.5l1.6 3.5"/>',
   act: '<path d="M4 4h16v4H4zM4 12h16M4 16h10M4 20h12"/>',
+  book: '<path d="M3.5 5.5c2.8-1.3 5.7-1.2 8.5.8 2.8-2 5.7-2.1 8.5-.8v13c-2.8-1.3-5.7-1.2-8.5.8-2.8-2-5.7-2.1-8.5-.8z"/><path d="M12 6.3v13.3"/>',
   person: '<circle cx="12" cy="8.5" r="3.6"/><path d="M4.8 20c1.1-3.7 3.9-5.6 7.2-5.6s6.1 1.9 7.2 5.6"/>'
 };
 const ICON = (n, size = 20) => `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PATHS[n]}</svg>`;
@@ -859,7 +900,7 @@ async function makeIdbStore() {
     async dump() {
       const out = { app: 'thread', format: 1, exportedAt: new Date().toISOString(), projects: {}, items: {}, characters: {}, links: {}, files: {} };
       const want = new Set();
-      for (const [pid, v] of Object.entries(data.projects)) out.projects[pid] = v;
+      for (const [pid, v] of Object.entries(data.projects)) { out.projects[pid] = v; if (v.book && v.book.asset) want.add(v.book.asset); }
       for (const n of SUBS) for (const [pid, rows] of Object.entries(data[n] || {})) {
         if (!data.projects[pid]) continue;
         out[n][pid] = rows;
@@ -1295,6 +1336,7 @@ function updateBack() {
   b.setAttribute('aria-label', 'Back to ' + label.toLowerCase());
 }
 function goBack() {
+  if (BK.open && !bookWide()) { closeBook(); return; }
   if (S.charOpen && S.charReturn === 'bible') { const back = S.castId; closeChar(); setTab('bible'); if (back) { scrollToId = back; renderItems(); } return; }
   if (S.charOpen) { closeChar(); updateBack(); window.scrollTo(0, 0); return; }
   if (S.mode === 'read') { setMode('edit'); return; }
@@ -1863,15 +1905,16 @@ function renderStruct() {
   wrap.append(el('div', { class: 'tl-box' }, svg, el('div', { class: 'tl-scale' }, el('span', { text: 'p. 1' }), el('span', { text: 'p. ' + Math.round(len / 2) }), el('span', { text: 'p. ' + len }))));
 
   // suggestions
-  const sug = suggestions(p, st, len);
+  const sug = suggestions(p, st, len).concat(bookSuggestions(p));
   wrap.append(el('h3', { text: sug.length ? `Suggestions (${sug.length})` : 'Suggestions' }));
   if (!st.scenes.length) wrap.append(el('p', { class: 'story-empty', text: 'Add a few scenes and suggestions will appear here: beats you’ve passed, characters who’ve been away too long, and stretches that could use more tension.' }));
   else if (!sug.length) wrap.append(el('p', { class: 'story-empty', text: 'Nothing to flag right now. Keep writing.' }));
   const ul = el('ul', { class: 'sugs' });
-  const KLAB = { beat: 'Structure', char: 'Character', pace: 'Pace', tension: 'Tension' };
+  const KLAB = { beat: 'Structure', char: 'Character', pace: 'Pace', tension: 'Tension', book: 'Book' };
   for (const s of sug) {
     const acts = el('div', { class: 'sug-acts' });
     if (s.scene) acts.append(el('button', { type: 'button', class: 'chip small', text: 'Go to scene ' + s.scene.n, onclick: () => goToItem(s.scene.it.id) }));
+    if (s.bookCh != null) acts.append(el('button', { type: 'button', class: 'chip small', text: 'Open chapter ' + (s.bookCh + 1), onclick: async () => { await openBook(); if (BK.data) goChapter(s.bookCh); } }));
     if (s.mark) acts.append(el('button', { type: 'button', class: 'chip small', text: 'Mark it', onclick: () => setBeat(s.scene.it.id, s.mark) }));
     ul.append(el('li', { class: 'sug k-' + s.kind }, el('span', { class: 'sug-k', text: KLAB[s.kind] }), el('p', { class: 'sug-t', text: s.text }), el('p', { class: 'sug-tip', text: s.tip }), acts));
   }
@@ -2179,6 +2222,8 @@ function closeProject() {
   if (S.unsubItems) { S.unsubItems(); S.unsubItems = null; }
   if (S.unsubChars) { S.unsubChars(); S.unsubChars = null; }
   if (S.unsubLinks) { S.unsubLinks(); S.unsubLinks = null; }
+  if (BK.open) { document.body.classList.remove('book-open'); const bp = $('#bookPane'); if (bp) bp.hidden = true; BK.open = false; }
+  BK.data = null; BK.pid = null; BK.tags = [];
   S.currentId = null; S.items = []; S.allItems = []; S.itemsReady = false;
   S.chars = []; S.links = []; S.charsReady = false; S.linksReady = false;
   S.charOpen = null; S.linkForm = null; S.mapFocus = null;
@@ -2213,6 +2258,7 @@ function openProject(pid) {
   buildAddbar();
   { const lt = lsGet('thread:tab:' + pid); setTab(lt === 'chars' || lt === 'story' || lt === 'bible' ? lt : 'thread'); }
   renderHeader(); renderProjectList(); showView('project'); renderItems();
+  bookOnProjectOpen();
   window.scrollTo(0, 0);
 }
 async function deleteProjectFlow() {
@@ -2229,6 +2275,7 @@ async function deleteProjectFlow() {
       if (it.assetId) await S.store.deleteAsset(it.assetId);
       for (const a of it.attachments || []) if (a.asset) await S.store.deleteAsset(a.asset);
     }
+    if (p.book && p.book.asset) await S.store.deleteAsset(p.book.asset);
     for (const name of ['links', 'characters']) {
       const rows = await S.store.list(pid, name);
       for (const r of rows) { await S.store.del(pid, name, r.id); if (r.portraitId) await S.store.deleteAsset(r.portraitId); for (const a of r.attachments || []) if (a.asset) await S.store.deleteAsset(a.asset); }
@@ -3415,8 +3462,476 @@ async function onRestoreFile(f) {
   } catch (e) { toast(e && e.code === 'quota_exceeded' ? 'There isn’t enough space on this device for this backup.' : 'The backup couldn’t be restored. Try again.'); }
 }
 
+/* ---------------- source book (adaptation) ---------------- */
+// An ePub (or plain text) sits beside the script. Passages are tagged Adapted (linked to a scene), Skipped or Maybe.
+const BK = { pid: null, data: null, ch: 0, open: false, tags: [], sel: null, barTouch: 0, lastTa: null, loading: null };
+const BT_NAME = { adapted: 'Adapted', skipped: 'Skipped', maybe: 'Maybe' };
+const BT_RANK = { adapted: 3, skipped: 2, maybe: 1 };
+const bookWide = () => window.matchMedia('(min-width:760px)').matches;
+
+async function unzip(buf) {
+  const dv = new DataView(buf), u8 = new Uint8Array(buf), td = new TextDecoder();
+  let eo = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 70000); i--) if (dv.getUint32(i, true) === 0x06054b50) { eo = i; break; }
+  if (eo < 0) throw new Error('notzip');
+  const n = dv.getUint16(eo + 10, true); let p = dv.getUint32(eo + 16, true);
+  const files = new Map();
+  for (let k = 0; k < n && p + 46 <= buf.byteLength; k++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true);
+    files.set(td.decode(u8.subarray(p + 46, p + 46 + nl)), { method: dv.getUint16(p + 10, true), csize: dv.getUint32(p + 20, true), lo: dv.getUint32(p + 42, true) });
+    p += 46 + nl + xl + cl;
+  }
+  return {
+    has: name => files.has(name),
+    async text(name) {
+      const f = files.get(name); if (!f) return null;
+      const st = f.lo + 30 + dv.getUint16(f.lo + 26, true) + dv.getUint16(f.lo + 28, true);
+      const data = u8.subarray(st, st + f.csize);
+      if (f.method === 0) return td.decode(data);
+      if (f.method !== 8 || typeof DecompressionStream !== 'function') throw new Error('method');
+      return td.decode(await new Response(new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer());
+    }
+  };
+}
+function joinPath(base, href) {
+  const parts = (base + href).split('/'), out = [];
+  for (const s of parts) { if (s === '..') out.pop(); else if (s !== '.' && s !== '') out.push(s); }
+  return out.join('/');
+}
+const BLOCK_SEL = 'p,h1,h2,h3,h4,h5,h6,li,blockquote,pre,div,section,article,dd,dt,td,figcaption,aside';
+function blockTexts(root, out) {
+  for (const e of root.children) {
+    const tag = e.localName.toLowerCase();
+    if (tag === 'script' || tag === 'style' || tag === 'head') continue;
+    if (e.matches(BLOCK_SEL) && !e.querySelector(BLOCK_SEL)) {
+      e.querySelectorAll('br').forEach(b => b.replaceWith(' '));
+      const t = (e.textContent || '').replace(/\s+/g, ' ').trim();
+      if (t) out.push({ t, h: /^h[1-6]$/.test(tag) });
+    } else blockTexts(e, out);
+  }
+  return out;
+}
+function parseDoc(s, type) {
+  let d = new DOMParser().parseFromString(s, type);
+  if (d.getElementsByTagName('parsererror').length && type !== 'text/html') d = new DOMParser().parseFromString(s, 'text/html');
+  return d;
+}
+async function parseEpub(file) {
+  const z = await unzip(await file.arrayBuffer());
+  const cont = await z.text('META-INF/container.xml'); if (!cont) throw new Error('noopf');
+  const rf = parseDoc(cont, 'application/xml').getElementsByTagNameNS('*', 'rootfile')[0];
+  const opfPath = rf && rf.getAttribute('full-path'); if (!opfPath) throw new Error('noopf');
+  const opf = parseDoc(await z.text(opfPath), 'application/xml');
+  const base = opfPath.includes('/') ? opfPath.slice(0, opfPath.lastIndexOf('/') + 1) : '';
+  const dc = n => { const x = opf.getElementsByTagNameNS('*', n)[0]; return x ? x.textContent.replace(/\s+/g, ' ').trim() : ''; };
+  const man = {};
+  for (const it of opf.getElementsByTagNameNS('*', 'item')) {
+    let href = it.getAttribute('href') || ''; try { href = decodeURIComponent(href); } catch {}
+    man[it.getAttribute('id')] = { path: joinPath(base, href), props: it.getAttribute('properties') || '', type: it.getAttribute('media-type') || '' };
+  }
+  // chapter names from the table of contents
+  const toc = new Map();
+  const addToc = (from, href, label) => {
+    if (!href || !label) return;
+    let h = href.split('#')[0]; try { h = decodeURIComponent(h); } catch {}
+    const path = joinPath(from, h);
+    if (!toc.has(path)) toc.set(path, label.replace(/\s+/g, ' ').trim());
+  };
+  const nav = Object.values(man).find(m => /\bnav\b/.test(m.props));
+  if (nav) {
+    const d = parseDoc(await z.text(nav.path) || '', 'application/xhtml+xml');
+    const dir = nav.path.includes('/') ? nav.path.slice(0, nav.path.lastIndexOf('/') + 1) : '';
+    for (const a of d.getElementsByTagName('a')) addToc(dir, a.getAttribute('href'), a.textContent);
+  }
+  const spineEl = opf.getElementsByTagNameNS('*', 'spine')[0];
+  const ncx = spineEl && man[spineEl.getAttribute('toc')];
+  if (ncx && !toc.size) {
+    const d = parseDoc(await z.text(ncx.path) || '', 'application/xml');
+    const dir = ncx.path.includes('/') ? ncx.path.slice(0, ncx.path.lastIndexOf('/') + 1) : '';
+    for (const np of d.getElementsByTagNameNS('*', 'navPoint')) {
+      const lab = np.getElementsByTagNameNS('*', 'text')[0], c = np.getElementsByTagNameNS('*', 'content')[0];
+      addToc(dir, c && c.getAttribute('src'), lab && lab.textContent);
+    }
+  }
+  const ch = [];
+  for (const ref of spineEl ? spineEl.getElementsByTagNameNS('*', 'itemref') : []) {
+    const m = man[ref.getAttribute('idref')]; if (!m || !/html|xml/.test(m.type)) continue;
+    const src = await z.text(m.path); if (!src) continue;
+    const d = parseDoc(src, 'application/xhtml+xml');
+    const body = d.getElementsByTagName('body')[0] || d.documentElement;
+    const blocks = blockTexts(body, []);
+    if (!blocks.length) continue;
+    const head = blocks.find(b => b.h);
+    ch.push({ t: toc.get(m.path) || (head && head.t.slice(0, 80)) || 'Section ' + (ch.length + 1), p: blocks.map(b => b.t) });
+  }
+  if (!ch.length) throw new Error('empty');
+  return { title: dc('title') || file.name.replace(/\.epub$/i, ''), author: dc('creator'), ch };
+}
+async function parseTxt(file) {
+  const raw = (await file.text()).replace(/\r\n?/g, '\n');
+  const paras = raw.split(/\n\s*\n/).map(s => s.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const ch = []; let cur = null;
+  for (const p of paras) {
+    if (/^(chapter|part|book|prologue|epilogue)\b/i.test(p) && p.length < 80) { cur = { t: p, p: [p] }; ch.push(cur); continue; }
+    if (!cur || cur.p.length >= 400 && !ch.some(c => /^(chapter|part)/i.test(c.t))) { cur = { t: 'Section ' + (ch.length + 1), p: [] }; ch.push(cur); }
+    cur.p.push(p);
+  }
+  if (!ch.length) throw new Error('empty');
+  return { title: file.name.replace(/\.(txt|md)$/i, ''), author: '', ch };
+}
+const chLen = c => c.p.reduce((n, s) => n + s.length + 1, 0) - 1;
+
+async function loadBookFile(file) {
+  const pid = S.currentId; if (!pid || !file) return;
+  toast('Reading the book…', null, null, 60000);
+  let data;
+  try { data = /\.epub$/i.test(file.name) || file.type === 'application/epub+zip' ? await parseEpub(file) : await parseTxt(file); }
+  catch (e) { toast(e && e.message === 'method' ? 'This ePub uses compression this device can’t read. Update iOS, or try a plain text copy.' : 'That file couldn’t be read as a book. Use a DRM-free .epub or a .txt file.'); return; }
+  try {
+    const old = (currentProject() || {}).book;
+    const up = await uploadWithRetry(new Blob([JSON.stringify(data)], { type: 'application/json' }), 'application/json');
+    await S.store.updateProject(pid, { book: { asset: up.id, title: data.title, author: data.author, name: file.name }, bookTags: [] });
+    if (old && old.asset) S.store.deleteAsset(old.asset);
+    BK.pid = pid; BK.data = data; BK.ch = 0; BK.tags = [];
+    lsSet('thread:bookpos:' + pid, '');
+    hideToast();
+    toast(`${data.title}: ${plural(data.ch.length, 'chapter', 'chapters')} ready.`);
+    renderBook(); refreshBookChips();
+  } catch (e) { toast(dbErrMsg(e)); }
+}
+async function ensureBook() {
+  const p = currentProject();
+  if (!p || !p.book) { BK.pid = S.currentId; BK.data = null; BK.tags = []; return false; }
+  if (BK.pid === p.id && BK.data) return true;
+  BK.pid = p.id; BK.data = null; BK.tags = (p.bookTags || []).slice();
+  const url = S.store.assetUrl(p.book.asset); if (!url) return false;
+  try { BK.data = await (await fetch(url)).json(); } catch { BK.data = null; return false; }
+  const pos = (lsGet('thread:bookpos:' + p.id) || '').split(':');
+  BK.ch = Math.min(BK.data.ch.length - 1, Math.max(0, +pos[0] || 0)); BK.pendingScroll = +pos[1] || 0;
+  return true;
+}
+function saveTags() {
+  const pid = BK.pid; if (!pid || pid !== S.currentId) return;
+  S.store.updateProject(pid, { bookTags: BK.tags }).catch(e => toast(dbErrMsg(e)));
+  refreshBookChips();
+}
+// carve [s,e) out of every tag in a chapter, so a new tag wins where they overlap
+function carve(ch, s, e) {
+  const out = [];
+  for (const t of BK.tags) {
+    if (t.ch !== ch || t.e <= s || t.s >= e) { out.push(t); continue; }
+    if (t.s < s) out.push(Object.assign({}, t, { e: s }));
+    if (t.e > e) out.push(Object.assign({}, t, { id: 'b' + uid(), s: e }));
+  }
+  BK.tags = out;
+}
+function addTag(st, item) {
+  const sl = BK.sel; if (!sl) return;
+  carve(sl.ch, sl.s, sl.e);
+  if (st) BK.tags.push({ id: 'b' + uid(), ch: sl.ch, s: sl.s, e: sl.e, st, item: item || null });
+  saveTags(); clearSel(); renderChapter(true);
+}
+function coverage(k) {
+  const c = BK.data.ch[k], L = Math.max(1, chLen(c));
+  const r = BK.tags.filter(t => t.ch === k && t.st !== 'maybe').map(t => [t.s, t.e]).sort((a, b) => a[0] - b[0]);
+  let n = 0, end = -1;
+  for (const [s, e] of r) { if (e <= end) continue; n += e - Math.max(s, end); end = e; }
+  return Math.min(1, n / L);
+}
+function totalCoverage() {
+  let all = 0, done = 0;
+  BK.data.ch.forEach((c, k) => { const L = chLen(c); all += L; done += coverage(k) * L; });
+  return all ? done / all : 0;
+}
+const pct = x => Math.round(x * 100) + '%';
+
+function scenesInOrder() {
+  return (S.allItems || []).filter(i => i.el === 'scene' && i.zone !== 'bible').sort((a, b) => (a.pos < b.pos ? -1 : a.pos > b.pos ? 1 : 0));
+}
+function sceneName(it) {
+  const v = view(it), n = scenesInOrder().findIndex(x => x.id === it.id) + 1;
+  const head = [v.setting, (v.place || '').toUpperCase(), v.time ? '– ' + v.time : ''].filter(Boolean).join(' ');
+  return `Scene ${n}${v.place ? ': ' + head : ''}`;
+}
+
+function bookPane() {
+  let p = $('#bookPane'); if (p) return p;
+  p = el('aside', { id: 'bookPane', class: 'bookpane', 'aria-label': 'Source book', hidden: '' });
+  document.body.append(p);
+  return p;
+}
+async function openBook() {
+  BK.open = true; lsSet('thread:bookopen:' + S.currentId, '1');
+  document.body.classList.add('book-open');
+  bookPane().hidden = false;
+  updateBookBtn();
+  await ensureBook();
+  renderBook();
+}
+function closeBook() {
+  BK.open = false; if (S.currentId) lsSet('thread:bookopen:' + S.currentId, '');
+  document.body.classList.remove('book-open');
+  const p = $('#bookPane'); if (p) p.hidden = true;
+  clearSel(); updateBookBtn();
+}
+function updateBookBtn() {
+  const b = $('#bookBtn'); if (!b) return;
+  const p = currentProject();
+  b.hidden = !p || !(isScript(p.kind) || p.book);
+  b.setAttribute('aria-pressed', String(BK.open));
+}
+function renderBook() {
+  const pane = bookPane(); if (!BK.open) return;
+  pane.textContent = '';
+  const p = currentProject();
+  const head = el('div', { class: 'bp-head' });
+  head.append(el('button', { type: 'button', class: 'back-btn bp-back', html: ICON('back', 20) + '<span>Script</span>', 'aria-label': 'Back to the script', onclick: closeBook }));
+  if (!p || !p.book || !BK.data) {
+    head.append(el('span', { class: 'spacer' }), el('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Close the book', html: ICON('close'), onclick: closeBook }));
+    const empty = el('div', { class: 'bp-empty' },
+      el('h2', { text: 'Adapt a book' }),
+      el('p', { text: 'Load the book you’re adapting and it sits beside your script. Select a passage to mark it Adapted (linked to the scene you wrote), Skipped or Maybe, and Thread keeps track of what’s left.' }),
+      el('button', { type: 'button', class: 'btn primary', text: p && p.book ? 'Load the book again' : 'Choose an ePub or text file', onclick: () => $('#bookInput').click() }),
+      el('p', { class: 'bp-fine', text: 'Use a DRM-free .epub or a .txt file. The book stays on this device and goes into your backups, like the rest of the project.' }));
+    pane.append(head, empty);
+    return;
+  }
+  const d = BK.data;
+  const info = el('div', { class: 'bp-info' }, el('b', { text: d.title }), el('span', { class: 'bp-prog', text: pct(totalCoverage()) + ' covered' }));
+  const sel = el('select', { class: 'bp-ch-sel', 'aria-label': 'Chapter', onchange: e => goChapter(+e.target.value) });
+  d.ch.forEach((c, k) => sel.append(el('option', { value: k, text: `${c.t} · ${pct(coverage(k))}` })));
+  sel.value = BK.ch;
+  const more = el('button', { type: 'button', class: 'icon-btn', 'aria-label': 'Book options', 'aria-haspopup': 'menu', 'aria-expanded': 'false', html: ICON('more'),
+    onclick: e => { e.stopPropagation(); openMenu(e.currentTarget, [
+      { label: 'Replace with another book', onClick: async () => { if (!BK.tags.length || await confirmDialog('Replace the book?', 'Your tags belong to this edition and will be cleared. Your scenes stay as they are.', 'Replace')) $('#bookInput').click(); } },
+      { label: 'Remove the book', danger: true, onClick: removeBook }
+    ]); } });
+  head.append(info, more, el('button', { type: 'button', class: 'icon-btn bp-x', 'aria-label': 'Close the book', html: ICON('close'), onclick: closeBook }));
+  const bar = el('div', { class: 'bp-sub' }, sel);
+  const body = el('div', { class: 'bp-body', id: 'bpBody' }, el('article', { class: 'bp-text', id: 'bpText' }));
+  let st; body.addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(() => lsSet('thread:bookpos:' + BK.pid, BK.ch + ':' + Math.round(body.scrollTop)), 200); }, { passive: true });
+  const sbar = el('div', { class: 'bp-bar', id: 'bpBar', hidden: '' });
+  ['pointerdown', 'mousedown'].forEach(ev => sbar.addEventListener(ev, e => { BK.barTouch = Date.now(); if (e.target.closest('button')) e.preventDefault(); }));
+  pane.append(head, bar, body, sbar);
+  renderChapter();
+}
+function goChapter(k) {
+  BK.ch = Math.max(0, Math.min(BK.data.ch.length - 1, k)); BK.pendingScroll = 0; clearSel();
+  const s = $('#bookPane .bp-ch-sel'); if (s) s.value = BK.ch;
+  renderChapter();
+  lsSet('thread:bookpos:' + BK.pid, BK.ch + ':0');
+}
+function renderChapter(keepScroll) {
+  const text = $('#bpText'), body = $('#bpBody'); if (!text || !BK.data) return;
+  const top = body.scrollTop;
+  const c = BK.data.ch[BK.ch], tags = BK.tags.filter(t => t.ch === BK.ch);
+  text.textContent = '';
+  text.append(el('p', { class: 'bp-chno', text: `Chapter ${BK.ch + 1} of ${BK.data.ch.length} · ${pct(coverage(BK.ch))} covered` }));
+  let off = 0;
+  c.p.forEach(para => {
+    const s = off, e = off + para.length, p = el('p', { 'data-o': s });
+    const cuts = new Set([s, e]);
+    for (const t of tags) if (t.e > s && t.s < e) { cuts.add(Math.max(s, t.s)); cuts.add(Math.min(e, t.e)); }
+    const pts = [...cuts].sort((a, b) => a - b);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = pts[i], b = pts[i + 1], str = para.slice(a - s, b - s);
+      const cov = tags.filter(t => t.s <= a && t.e >= b).sort((x, y) => BT_RANK[y.st] - BT_RANK[x.st])[0];
+      p.append(cov ? el('span', { class: 'bt bt-' + cov.st, 'data-tag': cov.id, text: str }) : str);
+    }
+    text.append(p); off = e + 1;
+  });
+  const nav = el('div', { class: 'bp-nav' });
+  if (BK.ch > 0) nav.append(el('button', { type: 'button', class: 'btn small', text: '← ' + BK.data.ch[BK.ch - 1].t.slice(0, 40), onclick: () => { goChapter(BK.ch - 1); } }));
+  nav.append(el('span', { class: 'spacer' }));
+  if (BK.ch < BK.data.ch.length - 1) nav.append(el('button', { type: 'button', class: 'btn small', text: BK.data.ch[BK.ch + 1].t.slice(0, 40) + ' →', onclick: () => { goChapter(BK.ch + 1); } }));
+  text.append(nav);
+  body.scrollTop = keepScroll ? top : (BK.pendingScroll || 0); BK.pendingScroll = 0;
+  const info = $('#bookPane .bp-prog'); if (info) info.textContent = pct(totalCoverage()) + ' covered';
+  const sel = $('#bookPane .bp-ch-sel'); if (sel && sel.options[BK.ch]) sel.options[BK.ch].text = `${c.t} · ${pct(coverage(BK.ch))}`;
+}
+function selOffsets() {
+  const text = $('#bpText'), sel = window.getSelection(); if (!text || !sel || !sel.rangeCount || sel.isCollapsed) return null;
+  const r = sel.getRangeAt(0); if (!text.contains(r.commonAncestorContainer)) return null;
+  const L = chLen(BK.data.ch[BK.ch]);
+  const at = (node, o, isEnd) => {
+    const host = node.nodeType === 1 ? node : node.parentNode;
+    const p = host.closest('p[data-o]');
+    if (!p) {
+      if (node === text) { const kid = text.childNodes[o]; if (kid && kid.dataset && kid.dataset.o != null) return +kid.dataset.o; return isEnd ? L : 0; }
+      return isEnd ? L : 0;
+    }
+    const rr = document.createRange(); rr.selectNodeContents(p); rr.setEnd(node, o);
+    return +p.dataset.o + rr.toString().length;
+  };
+  let s = at(r.startContainer, r.startOffset, false), e = at(r.endContainer, r.endOffset, true);
+  const full = BK.data.ch[BK.ch].p.join('\n');
+  while (s < e && /\s/.test(full[s])) s++;
+  while (e > s && /\s/.test(full[e - 1])) e--;
+  if (e <= s) return null;
+  return { ch: BK.ch, s, e, text: full.slice(s, e) };
+}
+function clearSel() {
+  BK.sel = null;
+  const b = $('#bpBar'); if (b) b.hidden = true;
+}
+function showSelBar() {
+  const b = $('#bpBar'); if (!b || !BK.sel) return;
+  b.textContent = '';
+  const words = BK.sel.text.split(/\s+/).length;
+  b.append(el('span', { class: 'bp-bar-l', text: plural(words, 'word', 'words') }));
+  const btn = (label, cls, fn) => el('button', { type: 'button', class: 'chip small ' + cls, text: label, onclick: e => { e.stopPropagation(); fn(e.currentTarget); } });
+  b.append(
+    btn('Adapted…', 'bt-c-adapted', a => adaptMenu(a)),
+    btn('Skipped', 'bt-c-skipped', () => addTag('skipped')),
+    btn('Maybe', 'bt-c-maybe', () => addTag('maybe')));
+  if (isScript(curKind())) b.append(btn('Use as dialogue…', '', a => dialogueMenu(a)));
+  if (BK.tags.some(t => t.ch === BK.sel.ch && t.e > BK.sel.s && t.s < BK.sel.e)) b.append(btn('Clear', '', () => addTag(null)));
+  b.hidden = false;
+}
+function onBookSelection() {
+  if (!BK.open || !BK.data) return;
+  const o = selOffsets();
+  if (o) { BK.sel = o; showSelBar(); return; }
+  // a tap on the bar collapses the selection on iPhone; keep what was selected
+  setTimeout(() => { if (Date.now() - BK.barTouch > 900 && !selOffsets() && !menuEl) clearSel(); }, 300);
+}
+function adaptMenu(anchor) {
+  const scenes = scenesInOrder();
+  const cur = BK.lastTa && BK.lastTa.isConnected ? BK.lastTa.closest('li[data-el="scene"]') : null;
+  const entries = [{ label: 'New scene from this', onClick: newSceneFromSel }];
+  if (cur) { const it = scenes.find(x => x.id === cur.dataset.id); if (it) entries.push({ label: '✓ ' + sceneName(it) + ' (the one you’re in)', onClick: () => addTag('adapted', it.id) }); }
+  for (const it of scenes) if (!cur || it.id !== cur.dataset.id) entries.push({ label: sceneName(it), onClick: () => addTag('adapted', it.id) });
+  if (!scenes.length) entries.push({ label: 'Adapted, no scene yet', onClick: () => addTag('adapted') });
+  openMenu(anchor, entries);
+}
+async function newSceneFromSel() {
+  const sl = BK.sel, pid = S.currentId; if (!sl || !pid) return;
+  if (S.tab !== 'thread') setTab('thread');
+  if (S.mode !== 'edit') setMode('edit');
+  const [pos] = await positionsFor(null, 1);
+  const iid = 'i' + uid(), now = Date.now();
+  try {
+    await S.store.setItem(pid, iid, { type: 'writing', el: 'scene', setting: 'INT.', place: '', time: 'DAY', pos, title: '', body: '', caption: '', createdAt: now, updatedAt: now });
+    touchProject(pid, true);
+  } catch (e) { toast(dbErrMsg(e)); return; }
+  addTag('adapted', iid);
+  if (!bookWide()) closeBook();
+  pendingFocus = iid; flashId = iid; scrollToId = iid; renderItems();
+  toast('New scene added, linked to that passage.');
+}
+function dialogueMenu(anchor) {
+  const names = [...new Set((S.chars || []).map(c => (c.name || '').trim()).filter(Boolean))];
+  const entries = names.map(n => ({ label: n.toUpperCase(), onClick: () => insertDialogue(n) }));
+  entries.push({ label: 'Name it in the script', onClick: () => insertDialogue('') });
+  openMenu(anchor, entries);
+}
+function insertDialogue(name) {
+  const sl = BK.sel; if (!sl) return;
+  const t = BK.lastTa && BK.lastTa.isConnected ? BK.lastTa : null;
+  if (!t) { toast('Tap into a scene first, then select the line again.'); return; }
+  const line = sl.text.replace(/^[\s“”"‘’']+|[\s“”"‘’']+$/g, '');
+  const at = t._caret != null ? t._caret : t.value.length;
+  const before = t.value.slice(0, at).replace(/\s*$/, ''), after = t.value.slice(at).replace(/^\s*/, '');
+  const block = (name ? name.toUpperCase() : 'NAME') + '\n' + line;
+  t.value = (before ? before + '\n\n' : '') + block + (after ? '\n\n' + after : '');
+  t._caret = (before ? before.length + 2 : 0) + block.length;
+  t.dispatchEvent(new Event('input', { bubbles: true }));
+  autosize(t);
+  const li = t.closest('li[data-el="scene"]');
+  addTag('adapted', li ? li.dataset.id : null);
+  toast(name ? 'Line added to the scene.' : 'Line added. Replace NAME with who says it.');
+}
+function tagMenu(span) {
+  const t = BK.tags.find(x => x.id === span.dataset.tag); if (!t) return;
+  const it = t.item && (S.allItems || []).find(x => x.id === t.item);
+  const set = st => { t.st = st; if (st !== 'adapted') t.item = null; saveTags(); renderChapter(true); };
+  const entries = [];
+  if (it) entries.push({ label: 'Go to ' + sceneName(it), onClick: () => { if (!bookWide()) closeBook(); goToItem(it.id); } });
+  if (t.st !== 'adapted' || !it) entries.push({ label: 'Mark Adapted…', onClick: () => { BK.sel = { ch: t.ch, s: t.s, e: t.e, text: '' }; adaptMenu(span); } });
+  if (t.st !== 'skipped') entries.push({ label: 'Mark Skipped', onClick: () => set('skipped') });
+  if (t.st !== 'maybe') entries.push({ label: 'Mark Maybe', onClick: () => set('maybe') });
+  entries.push({ label: 'Remove tag', danger: true, onClick: () => { BK.tags = BK.tags.filter(x => x !== t); saveTags(); renderChapter(true); } });
+  openMenu(span, entries);
+}
+async function openBookAt(tag) {
+  await openBook(); if (!BK.data) return;
+  if (BK.ch !== tag.ch) { BK.ch = tag.ch; const s = $('#bookPane .bp-ch-sel'); if (s) s.value = BK.ch; renderChapter(); }
+  const n = document.querySelector(`#bpText [data-tag="${tag.id}"]`);
+  if (n) { n.scrollIntoView({ block: 'center' }); document.querySelectorAll(`#bpText [data-tag="${tag.id}"]`).forEach(x => { x.classList.add('bt-flash'); setTimeout(() => x.classList.remove('bt-flash'), 1800); }); }
+}
+async function removeBook() {
+  const p = currentProject(); if (!p || !p.book) return;
+  if (!await confirmDialog('Remove the book?', 'The book and its tags are removed from this project. Your scenes stay as they are.', 'Remove')) return;
+  const a = p.book.asset;
+  await S.store.updateProject(p.id, { book: null, bookTags: [] });
+  if (a) S.store.deleteAsset(a);
+  BK.data = null; BK.tags = [];
+  renderBook(); refreshBookChips();
+}
+function refreshBookChips() {
+  const has = !!(currentProject() || {}).book;
+  document.querySelectorAll('#items li[data-el="scene"]').forEach(li => {
+    const head = li.querySelector('.head'); if (!head) return;
+    let chip = head.querySelector('.book-chip');
+    const mine = has ? BK.tags.filter(t => t.item === li.dataset.id && t.st === 'adapted').sort((a, b) => a.ch - b.ch || a.s - b.s) : [];
+    if (!mine.length) { if (chip) chip.remove(); return; }
+    if (!chip) { chip = el('button', { type: 'button', class: 'book-chip' }); head.insertBefore(chip, head.querySelector('.item-menu')); }
+    chip.innerHTML = ICON('book', 14) + '<span></span>';
+    chip.lastChild.textContent = 'Ch. ' + [...new Set(mine.map(t => t.ch + 1))].join(', ');
+    chip.setAttribute('aria-label', 'From the book: show the passage');
+    chip.onclick = e => {
+      e.stopPropagation();
+      if (mine.length === 1) { openBookAt(mine[0]); return; }
+      openMenu(chip, mine.map(t => ({ label: `Chapter ${t.ch + 1}: “${(BK.data ? BK.data.ch[t.ch].p.join('\n').slice(t.s, t.s + 50) : '').replace(/\s+/g, ' ')}…”`, onClick: () => openBookAt(t) })));
+    };
+  });
+}
+// structure tips: stretches of the book you've passed without adapting or skipping
+function bookSuggestions(p) {
+  if (!p || !p.book || !BK.data || BK.pid !== p.id) return [];
+  const n = BK.data.ch.length, cov = BK.data.ch.map((c, k) => coverage(k));
+  let last = -1; cov.forEach((c, k) => { if (c >= 0.05) last = k; });
+  const out = [];
+  for (let k = 0; k < last && out.length < 3; k++) {
+    if (cov[k] >= 0.05 || chLen(BK.data.ch[k]) < 400) continue;
+    let j = k; while (j + 1 < last && (cov[j + 1] < 0.05 || chLen(BK.data.ch[j + 1]) < 400)) j++;
+    const name = j > k ? `Chapters ${k + 1}–${j + 1}` : `Chapter ${k + 1} (${BK.data.ch[k].t.slice(0, 40)})`;
+    out.push({ kind: 'book', bookCh: k, text: `${name} ${j > k ? 'aren’t' : 'isn’t'} in the script yet, though you’ve adapted later chapters.`,
+      tip: 'Adapt what the film needs from it, or mark the rest Skipped so you know it was a choice. Cutting subplots is normal: a feature usually keeps the spine of the story and loses a lot of the middle.' });
+    k = j;
+  }
+  const maybe = BK.tags.filter(t => t.st === 'maybe').length;
+  if (maybe) out.push({ kind: 'book', bookCh: BK.tags.find(t => t.st === 'maybe').ch, text: `${plural(maybe, 'passage is', 'passages are')} marked Maybe.`, tip: 'Decide on these before the second draft: adapt each one into a scene, or mark it Skipped.' });
+  if (last >= 0 && totalCoverage() > 0) out.push({ kind: 'book', bookCh: Math.min(n - 1, last + 1), text: `You’ve covered ${pct(totalCoverage())} of the book, up to chapter ${last + 1} of ${n}.`, tip: 'Keep an eye on length: if you’re past the midpoint of your pages but well short of the middle of the book, the rest will need tighter compression.' });
+  return out;
+}
+function wireBook() {
+  const tb = $('#modeSeg');
+  const b = el('button', { type: 'button', class: 'icon-btn proj-only', id: 'bookBtn', 'aria-label': 'Show the book beside the script', 'aria-pressed': 'false', title: 'Book', html: ICON('book'), hidden: '',
+    onclick: () => BK.open ? closeBook() : openBook() });
+  tb.parentNode.insertBefore(b, tb);
+  const inp = el('input', { type: 'file', id: 'bookInput', accept: '.epub,application/epub+zip,.txt,text/plain', hidden: '' });
+  inp.addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) loadBookFile(f); });
+  document.body.append(inp);
+  let t; document.addEventListener('selectionchange', () => { clearTimeout(t); t = setTimeout(onBookSelection, 120); });
+  document.addEventListener('click', e => {
+    const sp = e.target.closest && e.target.closest('#bpText .bt');
+    if (sp && (window.getSelection() || {}).isCollapsed !== false) { e.stopPropagation(); tagMenu(sp); }
+  }, true);
+  document.addEventListener('focusin', e => { if (e.target.matches('#items li[data-el="scene"] textarea')) BK.lastTa = e.target; });
+}
+async function bookOnProjectOpen() {
+  BK.data = null; BK.tags = []; BK.pid = null; BK.lastTa = null;
+  const want = lsGet('thread:bookopen:' + S.currentId) === '1';
+  updateBookBtn();
+  if (want) await openBook(); else { closeBook(); await ensureBook(); }
+  refreshBookChips();
+}
+
 /* ---------------- wiring ---------------- */
 function wire() {
+  wireBook();
   $('#navBtn').innerHTML = ICON('menu') + '<span>Projects</span>';
   $('#newProject').innerHTML = ICON('plus', 18) + '<span>New project</span>';
   $('#projMore').innerHTML = ICON('more');
