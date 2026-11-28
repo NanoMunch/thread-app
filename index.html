@@ -224,7 +224,7 @@ body[data-mode="read"] .addbar,body[data-tab="chars"] .addbar,body[data-tab="cha
 .reader .break{width:48px;height:2px;margin:2.2em auto;background:repeating-linear-gradient(90deg,var(--thread) 0 7px,transparent 7px 12px);opacity:.7}
 
 /* ---------- overlays ---------- */
-.menu{position:fixed;z-index:70;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:5px;min-width:190px;
+.menu{position:fixed;z-index:70;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:5px;min-width:190px;
   box-shadow:0 14px 34px -14px rgba(0,0,0,.4)}
 .menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:9px 11px;border-radius:7px;font-size:14.5px}
 .menu button:hover:not([disabled]){background:var(--paper)}
@@ -521,6 +521,28 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .cast-empty{margin:0;color:var(--muted);font-family:var(--serif)}
 .reader h3{font-family:var(--serif);font-size:1.1rem;margin:1.4em 0 .3em}
 
+.att-btn{margin-left:auto}
+.att-btn + .item-menu{margin-left:0}
+.atts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+.att{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:5px 4px 5px 5px;max-width:100%;transition:border-color .15s,box-shadow .15s}
+.att.hl{border-color:var(--thread);box-shadow:0 0 0 3px var(--flash)}
+.att-open{flex:none;width:52px;height:52px;border:0;padding:0;border-radius:7px;overflow:hidden;background:var(--paper);display:grid;place-items:center;color:var(--thread);cursor:zoom-in}
+.att-open img{width:100%;height:100%;object-fit:cover;display:block}
+.att-file{cursor:pointer}
+.att-l{display:flex;flex-direction:column;min-width:0;font-size:12.5px;line-height:1.3}
+.att-l b{font-weight:600;color:var(--thread)}
+.att-l span{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:11em}
+.att-x{width:28px;height:28px}
+.att-ref{color:var(--thread);font-weight:600;font-family:var(--sans);font-size:.85em;white-space:nowrap}
+.att-row{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px;margin:.4em 0 1.2em}
+.att-row figure{margin:0;width:140px}
+.att-row .att-open{width:140px;height:105px}
+.att-row figcaption{font-size:12px;color:var(--muted);font-family:var(--sans)}
+
+.label-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.label-row .att-btn{width:30px;height:30px;margin:0}
+.att-help{margin:0 0 4px;font-size:13px;color:var(--faint)}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none !important;animation:none !important}
 }
@@ -601,6 +623,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <div class="drop" id="drop" hidden>Drop to add to the end of this thread</div>
 <input type="file" id="fileInput" multiple hidden>
 <input type="file" id="portraitInput" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+<input type="file" id="attachInput" multiple accept="image/png,image/jpeg,image/gif,image/webp,video/mp4,video/webm,.pdf,.txt,.md,.csv,.json" hidden>
 <input type="file" id="restoreInput" accept=".json,application/json" hidden>
 
 <script>
@@ -840,7 +863,7 @@ async function makeIdbStore() {
       for (const n of SUBS) for (const [pid, rows] of Object.entries(data[n] || {})) {
         if (!data.projects[pid]) continue;
         out[n][pid] = rows;
-        for (const r of Object.values(rows)) { if (r.assetId) want.add(r.assetId); if (r.portraitId) want.add(r.portraitId); }
+        for (const r of Object.values(rows)) { if (r.assetId) want.add(r.assetId); if (r.portraitId) want.add(r.portraitId); if (Array.isArray(r.attachments)) for (const a of r.attachments) if (a && a.asset) want.add(a.asset); }
       }
       for (const [id, blob] of await idbAll(idb, 'files')) if (want.has(id)) out.files[id] = { type: blob.type, data: await blobToB64(blob) };
       return out;
@@ -944,9 +967,12 @@ function winAnsi(s) {
 const FONTS = { C: 'Courier', CB: 'Courier-Bold', T: 'Times-Roman', TB: 'Times-Bold', TI: 'Times-Italic' };
 function makePdf(w, h) {
   const pages = [];
+  const images = [];
   let cur = null;
   return {
     w, h, pages,
+    image(im) { if (im._name) return im._name; images.push(im); im._name = 'Im' + images.length; return im._name; },
+    draw(im, x, y, w2, h2) { const n = this.image(im); cur.push(`q ${w2.toFixed(2)} 0 0 ${h2.toFixed(2)} ${x.toFixed(2)} ${y.toFixed(2)} cm /${n} Do Q`); },
     page() { cur = []; pages.push(cur); },
     text(x, y, s, f, size) { if (s) cur.push(`BT /${f} ${size} Tf ${x.toFixed(2)} ${y.toFixed(2)} Td (${winAnsi(s)}) Tj ET`); },
     rule(x1, y, x2) { cur.push(`0.6 w ${x1.toFixed(2)} ${y.toFixed(2)} m ${x2.toFixed(2)} ${y.toFixed(2)} l S`); },
@@ -957,12 +983,15 @@ function makePdf(w, h) {
       objs.push(null);
       for (const [k, name] of Object.entries(FONTS)) { objs.push(`<< /Type /Font /Subtype /Type1 /BaseFont /${name} /Encoding /WinAnsiEncoding >>`); fontIds[k] = objs.length; }
       const fontDict = '<< ' + Object.keys(FONTS).map(k => `/${k} ${fontIds[k]} 0 R`).join(' ') + ' >>';
+      const imgRefs = [];
+      for (const im of images) { objs.push(`<< /Type /XObject /Subtype /Image /Width ${im.w} /Height ${im.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${im.data.length} >>\nstream\n${im.data}\nendstream`); imgRefs.push(`/${im._name} ${objs.length} 0 R`); }
+      const xo = imgRefs.length ? ` /XObject << ${imgRefs.join(' ')} >>` : '';
       const kids = [];
       for (const p of pages) {
         const stream = p.join('\n');
         objs.push(`<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`);
         const cid = objs.length;
-        objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${w} ${h}] /Resources << /Font ${fontDict} >> /Contents ${cid} 0 R >>`);
+        objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${w} ${h}] /Resources << /Font ${fontDict}${xo} >> /Contents ${cid} 0 R >>`);
         kids.push(objs.length);
       }
       objs[1] = `<< /Type /Pages /Kids [${kids.map(k => k + ' 0 R').join(' ')}] /Count ${kids.length} >>`;
@@ -1031,7 +1060,17 @@ function layoutScript(proj, items, pdf) {
   const tv = proj.kind === 'tv';
   let actN = 0, firstAct = true, lastAct = null;
   let epN = 0;
+  const imgs = proj.imgs, figs = [];
+  const pushFig = (asset, label) => {
+    const im = imgs && imgs.get(asset); if (!im) return;
+    const box = fitBox(im, 288, 187), rows = Math.ceil((box.h + 6) / LH) + 1;
+    figs.push({ im, box, label });
+    const lines = new Array(rows).fill(''); lines[0] = '\u0001' + (figs.length - 1);
+    pushB({ kind: 'image', lines, before: 1 });
+  };
+  const figsFor = (text, it) => { if (imgs) for (const r of photoRefs(text, it)) pushFig(r.asset, r.label); };
   for (const it of items) {
+    if (it.type === 'image') { if (imgs) pushFig(it.assetId, (it.caption || '').trim()); continue; }
     if (it.el === 'episode') {
       epN++; curSid = null; curAct = null;
       if (lastAct) pushB({ kind: 'center', lines: ['END OF ' + lastAct], before: 2 });
@@ -1058,7 +1097,7 @@ function layoutScript(proj, items, pdf) {
     const els = parseScript(it.body);
     for (let i = 0; i < els.length; i++) {
       const e = els[i];
-      if (e.t === 'action') pushB({ kind: 'action', lines: wrapChars(e.text, W.action), before: 1 });
+      if (e.t === 'action') { pushB({ kind: 'action', lines: wrapChars(e.text, W.action), before: 1 }); figsFor(e.text, it); }
       else if (e.t === 'trans') pushB({ kind: e.text === 'FADE IN:' ? 'action' : 'trans', lines: [e.text], before: 1 });
       else if (e.t === 'char') {
         const parts = [];
@@ -1066,6 +1105,7 @@ function layoutScript(proj, items, pdf) {
         const body = [];
         for (const p of parts) for (const l of wrapChars(p.text, W[p.t])) body.push({ t: p.t, text: l });
         pushB({ kind: 'dialogue', cue: e.text, body, lines: [e.text, ...body], before: 1 });
+        for (const p of parts) figsFor(p.text, it);
       }
     }
   }
@@ -1122,6 +1162,14 @@ function layoutScript(proj, items, pdf) {
       if (l.kind === 'trans') x = 7.5 * IN - l.text.length * CW;
       if (l.kind === 'center' || l.kind === 'act') x = (612 - l.text.length * CW) / 2;
       if (l.kind === 'heading' || l.kind === 'act') f = 'CB';
+      if (l.kind === 'image') {
+        if (l.text.charAt(0) !== '\u0001') continue;
+        const fg = figs[+l.text.slice(1)];
+        const ix = 1.5 * IN + (6 * IN - fg.box.w) / 2, top = y + 9;
+        pdf.draw(fg.im, ix, top - fg.box.h, fg.box.w, fg.box.h);
+        if (fg.label) pdf.text((612 - fg.label.length * 6) / 2, top - fg.box.h - 11, fg.label, 'C', 10);
+        continue;
+      }
       pdf.text(x, y, l.text, f, 12);
       if (l.kind === 'act') pdf.rule(x, y - 2, x + l.text.length * CW);
     }
@@ -1164,8 +1212,18 @@ function layoutProse(proj, items, pdf, wordsTotal) {
     y -= LH;
   }
   let chap = 0, first = true;
+  const figure = (asset, label) => {
+    const im = proj.imgs && proj.imgs.get(asset); if (!im) return;
+    const box = fitBox(im, TEXTW * 0.62, 230);
+    if (y + 8 - box.h - 28 < M) newPage();
+    const top = y + 8, x = (W - box.w) / 2;
+    pdf.draw(im, x, top - box.h, box.w, box.h);
+    if (label) pdf.text((W - timesWidth(label, 10, true)) / 2, top - box.h - 13, label, 'TI', 10);
+    y = top - box.h - 13 - LH;
+  };
   const paragraphs = body => (body || '').replace(/\r/g, '').split('\n').map(s => s.trim()).filter(Boolean);
   for (const it of items) {
+    if (it.type === 'image') { if (proj.imgs) { if (y < 0) newPage(); figure(it.assetId, (it.caption || '').trim()); } continue; }
     if (it.type !== 'writing') continue;
     const paras = paragraphs(it.body);
     if (it.el === 'cast') for (const c of S.chars) { const v = charView(c); paras.push(charName(c) + ((v.role || '').trim() ? ', ' + v.role.trim() : '') + '. ' + [v.backstory, v.personality, v.wants].filter(t => (t || '').trim()).map(t => t.trim()).join(' ')); }
@@ -1184,6 +1242,7 @@ function layoutProse(proj, items, pdf, wordsTotal) {
     for (const p of paras) {
       if (/^(#|\*\s*\*\s*\*|\*\*\*)$/.test(p)) { line('#', (W - timesWidth('#', SIZE)) / 2); continue; }
       wrapWidth(p, TEXTW, SIZE, 36).forEach((l, i) => line(l, M + (i === 0 ? 36 : 0)));
+      if (proj.imgs) for (const r of photoRefs(p, it)) figure(r.asset, r.label);
     }
   }
   if (y < M) newPage();
@@ -1192,7 +1251,7 @@ function layoutProse(proj, items, pdf, wordsTotal) {
   return pageNo;
 }
 
-function exportPdf(only, suffix, epBase) {
+async function exportPdf(only, suffix, epBase, withPhotos) {
   flushAll();
   const p = currentProject(); if (!p) return;
   let proj = Object.assign({}, p, { title: $('#projectTitle').value.trim() || p.title });
@@ -1200,13 +1259,21 @@ function exportPdf(only, suffix, epBase) {
   if (!only && S.tab === 'bible') { items = S.items.map(view); proj = Object.assign({}, proj, { kind: 'other', title: proj.title + ' – Series bible' }); }
   if (suffix) proj.title += suffix;
   if (epBase) proj.epBase = epBase;
+  if (withPhotos) {
+    toast('Preparing your PDF with photos…', null, null, 120000);
+    try { proj.imgs = await loadImagesFor(items); } catch { proj.imgs = new Map(); }
+  }
   const script = isScript(proj.kind);
   if (!items.some(i => i.type === 'writing' && ((i.body || '').trim() || i.el))) { toast('There’s no writing to export yet.'); return; }
   const words = items.filter(i => i.type === 'writing').reduce((n, i) => n + countWords(i.body), 0);
   const pdf = script ? makePdf(612, 792) : makePdf(595.28, 841.89);
   if (script) layoutScript(proj, items, pdf); else layoutProse(proj, items, pdf, words);
   const bytes = pdf.bytes(proj.title);
-  saveFile(new File([bytes], slug(proj.title) + '.pdf', { type: 'application/pdf' }));
+  const file = new File([bytes], slug(proj.title) + '.pdf', { type: 'application/pdf' });
+  if (!withPhotos) { saveFile(file); return; }
+  hideToast();
+  const n = proj.imgs.size;
+  if (await confirmDialog('Your PDF is ready', `${plural(pdf.pages.length, 'page', 'pages')} with ${plural(n, 'photo', 'photos')}, ${fmtSize(file.size)}. ${isTouch() ? 'Tap Save, then choose Save to Files, Print or an app.' : 'Save downloads the file.'}`, 'Save', 'primary')) saveFile(file);
 }
 
 
@@ -1442,6 +1509,162 @@ function seasonBeatMenu(anchor, iid) {
   openMenu(anchor, [{ label: cur ? 'Remove season beat' : 'No season beat', onClick: () => setSeasonBeat(iid, '') }]
     .concat(SEASON_BEATS.map(([k, name]) => ({ label: (k === cur ? '✓ ' : '') + name, onClick: () => setSeasonBeat(iid, k) }))));
 }
+
+
+/* ---------------- attachments tied to a spot in the text ---------------- */
+// Works for thread items (one text box) and character cards (several text boxes sharing one set of attachments).
+const ATT_RE = /\[(Photo|Video|File) (\d+)\]/g;
+let attTarget = null;
+function lastCaret(t) { return t._caret != null ? t._caret : t.value.length; }
+function itemTarget(iid) {
+  const node = els.get(iid); if (!node || !node._f.body) return null;
+  const f = node._f;
+  return { key: 'items/' + iid, field: 'body', t: f.body, fields: ['body'],
+    atts: () => view(S.items.find(i => i.id === iid) || {}).attachments || [],
+    text: fld => view(S.items.find(i => i.id === iid) || {})[fld] || '',
+    box: () => (els.get(iid) || {})._f };
+}
+function charTarget(cid, field) {
+  if (!cd || cd.id !== cid) return null;
+  const fields = CHAR_FIELDS.map(x => x[0]);
+  return { key: 'characters/' + cid, field, t: cd.f[field], fields,
+    atts: () => charView(charById(cid) || { id: cid }).attachments || [],
+    text: fld => charView(charById(cid) || { id: cid })[fld] || '',
+    box: () => cd && cd.id === cid ? cd.f : null };
+}
+function startAttach(iid) { const tg = itemTarget(iid); if (tg) openAttach(tg); }
+function startCharAttach(cid, field) { const tg = charTarget(cid, field); if (tg) openAttach(tg); }
+function openAttach(tg) {
+  tg.caret = lastCaret(tg.t);
+  attTarget = tg;
+  const input = $('#attachInput'); input.value = ''; input.click();
+}
+async function onAttachFiles(fileList) {
+  const tg = attTarget; attTarget = null;
+  const files = Array.from(fileList || []); if (!tg || !files.length) return;
+  const atts = tg.atts().slice();
+  let caret = tg.caret, text = tg.t.value;
+  for (const f of files) {
+    const type = resolveType(f);
+    if (!type) { toast(`${f.name} isn’t a supported type.`); continue; }
+    toast(`Attaching ${f.name}…`, null, null, 60000);
+    try {
+      let blob = f, ty = type;
+      if ((ty === 'image/jpeg' || ty === 'image/png' || ty === 'image/webp') && f.size > 2.5e6) { const r = await downscale(f, ty); if (r) { blob = r.blob; ty = r.type; } }
+      const res = await uploadWithRetry(blob, ty);
+      const kind = ty.startsWith('image/') ? 'Photo' : ty.startsWith('video/') ? 'Video' : 'File';
+      const n = 1 + atts.filter(a => a.kind === kind).reduce((m, a) => Math.max(m, a.n), 0);
+      atts.push({ asset: res.id, kind, n, name: f.name, type: res.contentType || ty });
+      const before = text.slice(0, caret), after = text.slice(caret);
+      const tok = `${before && !/\s$/.test(before) ? ' ' : ''}[${kind} ${n}]`;
+      const sp = after && !/^\s/.test(after) ? ' ' : '';
+      text = before + tok + sp + after;
+      caret += tok.length + sp.length;
+    } catch (e) { toast(e && e.code ? uploadErrMsg(e, f.name) : dbErrMsg(e)); }
+  }
+  queueSave(tg.key, 'attachments', atts);
+  queueSave(tg.key, tg.field, text);
+  flush(tg.key);
+  tg.t.value = text; autosize(tg.t); tg.t._caret = caret;
+  try { tg.t.focus({ preventScroll: true }); tg.t.setSelectionRange(caret, caret); } catch {}
+  const f = tg.box(); if (f) fillAtts(f, tg, atts);
+  hideToast();
+}
+function removeAttachment(tg, label) {
+  const all = tg.atts(), gone = all.find(a => `${a.kind} ${a.n}` === label);
+  const atts = all.filter(a => a !== gone);
+  queueSave(tg.key, 'attachments', atts);
+  const f = tg.box();
+  for (const fld of tg.fields) {
+    const box = fld === 'body' ? (f && f.body) : (f && f[fld]);
+    const cur = box ? box.value : tg.text(fld);
+    if (!cur.includes(`[${label}]`)) continue;
+    const next = cur.split(`[${label}]`).join('').replace(/ {2,}/g, ' ');
+    queueSave(tg.key, fld, next);
+    if (box) { box.value = next; autosize(box); }
+  }
+  flush(tg.key);
+  if (f) fillAtts(f, tg, atts);
+  if (gone && gone.asset) setTimeout(() => S.store.deleteAsset(gone.asset), 500);
+  toast(label + ' removed');
+}
+function fillAtts(f, tg, atts) {
+  const box = f.atts; if (!box) return;
+  const k = JSON.stringify(atts || []);
+  if (box.dataset.key === k) return;
+  box.dataset.key = k; box.textContent = '';
+  box.hidden = !(atts || []).length;
+  for (const a of atts || []) {
+    const label = `${a.kind} ${a.n}`, url = S.store.assetUrl(a.asset);
+    const open = a.kind === 'Photo' ? el('button', { type: 'button', class: 'att-open', 'aria-label': 'View ' + label, onclick: () => openLightbox(url, label + (a.name ? ' · ' + a.name : '')) }, el('img', { src: url, alt: '', loading: 'lazy' }))
+      : el('a', { class: 'att-open att-file', href: url, target: '_blank', rel: 'noopener', 'aria-label': 'Open ' + label, html: ICON(a.kind === 'Video' ? 'photo' : 'doc', 22) });
+    const x = el('button', { type: 'button', class: 'icon-btn att-x', 'aria-label': 'Remove ' + label, html: ICON('close', 14),
+      onclick: async e => { e.stopPropagation(); if (await confirmDialog('Remove ' + label + '?', 'The ' + a.kind.toLowerCase() + ' and its marker in the text will be removed.', 'Remove')) removeAttachment(tg, label); } });
+    box.append(el('div', { class: 'att', 'data-label': label }, open, el('span', { class: 'att-l' }, el('b', { text: label }), el('span', { text: a.name || '' })), x));
+  }
+}
+function highlightAtt(t, box) {
+  if (!t || !box || box.hidden) return;
+  const pos = t.selectionStart, v = t.value;
+  let hit = null;
+  for (const m of v.matchAll(ATT_RE)) if (pos >= m.index && pos <= m.index + m[0].length) hit = m[1] + ' ' + m[2];
+  if (!hit) { const s0 = v.lastIndexOf('\n', pos - 1) + 1, e0 = v.indexOf('\n', pos); const m = v.slice(s0, e0 < 0 ? v.length : e0).match(/\[(Photo|Video|File) (\d+)\]/); if (m) hit = m[1] + ' ' + m[2]; }
+  box.querySelectorAll('.att').forEach(n => n.classList.toggle('hl', n.dataset.label === hit));
+}
+function trackCaret(t, box) {
+  const save = () => { t._caret = t.selectionStart; highlightAtt(t, box()); };
+  for (const ev of ['keyup', 'click', 'select', 'blur']) t.addEventListener(ev, save);
+}
+const clipBtn = (label, onclick) => el('button', { type: 'button', class: 'icon-btn att-btn', 'aria-label': label, title: label, html: ICON('clip', 18),
+  onpointerdown: e => e.preventDefault(), onmousedown: e => e.preventDefault(), onclick: e => { e.stopPropagation(); onclick(); } });
+// read view: text with markers, followed by the things they point to
+function textWithAtts(tag, cls, text, it) {
+  const p = el(tag, cls ? { class: cls } : {});
+  let last = 0; const found = [];
+  for (const m of text.matchAll(ATT_RE)) {
+    p.append(text.slice(last, m.index));
+    p.append(el('span', { class: 'att-ref', text: m[0] }));
+    last = m.index + m[0].length;
+    const a = (it.attachments || []).find(x => x.kind === m[1] && x.n === +m[2]);
+    if (a) found.push(a);
+  }
+  p.append(text.slice(last));
+  if (!found.length) return [p];
+  const row = el('div', { class: 'att-row' });
+  for (const a of found) {
+    const url = S.store.assetUrl(a.asset), label = `${a.kind} ${a.n}`;
+    row.append(a.kind === 'Photo'
+      ? el('figure', {}, el('button', { type: 'button', class: 'att-open', onclick: () => openLightbox(url, label) }, el('img', { src: url, alt: label, loading: 'lazy' })), el('figcaption', { text: label }))
+      : el('a', { class: 'chip small', href: url, target: '_blank', rel: 'noopener', text: label + (a.name ? ': ' + a.name : '') }));
+  }
+  return [p, row];
+}
+
+/* ---------------- photos inside PDFs ---------------- */
+async function loadPdfImage(url, maxPx = 1100) {
+  const img = new Image();
+  img.decoding = 'async';
+  await new Promise((ok, bad) => { img.onload = ok; img.onerror = bad; img.src = url; });
+  const sc = Math.min(1, maxPx / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(1, Math.round(img.naturalWidth * sc)), h = Math.max(1, Math.round(img.naturalHeight * sc));
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.drawImage(img, 0, 0, w, h);
+  const blob = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.82));
+  const buf = new Uint8Array(await blob.arrayBuffer());
+  let bin = ''; for (let i = 0; i < buf.length; i += 8192) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 8192));
+  return { data: bin, w, h };
+}
+async function loadImagesFor(items) {
+  const want = new Map();
+  for (const it of items) {
+    if (it.type === 'image' && it.assetId) want.set(it.assetId, null);
+    for (const a of it.attachments || []) if (a.kind === 'Photo' && a.asset) want.set(a.asset, null);
+  }
+  for (const id of want.keys()) { try { want.set(id, await loadPdfImage(S.store.assetUrl(id))); } catch { want.delete(id); } }
+  return want;
+}
+const photoRefs = (text, it) => { const out = []; for (const m of String(text).matchAll(ATT_RE)) { if (m[1] !== 'Photo') continue; const a = (it.attachments || []).find(x => x.kind === 'Photo' && x.n === +m[2]); if (a && !out.some(o => o.asset === a.asset)) out.push({ asset: a.asset, label: `Photo ${a.n}` }); } return out; };
+const fitBox = (im, maxW, maxH) => { const s = Math.min(maxW / im.w, maxH / im.h, 1.6); return { w: im.w * s, h: im.h * s }; };
 
 /* ---------------- story structure: beats and suggestions ---------------- */
 // Beat positions are fractions of the script's length. Descriptions are short summaries in our own words.
@@ -1742,11 +1965,19 @@ function openMenu(anchor, entries) {
   }
   document.body.append(m);
   menuEl = m; menuAnchor = anchor; menuY = window.scrollY; anchor.setAttribute('aria-expanded', 'true');
-  const r = anchor.getBoundingClientRect(), mw = m.offsetWidth, mh = m.offsetHeight;
+  // keep the whole menu on screen, clear of the status bar and home indicator; scroll inside it if it's tall
+  const cs = getComputedStyle(document.documentElement);
+  const minTop = (parseFloat(cs.paddingTop) || 0) + 8, maxBottom = window.innerHeight - (parseFloat(cs.paddingBottom) || 0) - 8;
+  const r = anchor.getBoundingClientRect(), mw = m.offsetWidth, full = m.offsetHeight;
   const left = Math.min(Math.max(8, r.right - mw), window.innerWidth - mw - 8);
-  let top = r.bottom + 6;
-  if (top + mh > window.innerHeight - 8) top = Math.max(8, r.top - mh - 6);
-  m.style.left = left + 'px'; m.style.top = top + 'px';
+  const below = maxBottom - (r.bottom + 6), above = (r.top - 6) - minTop;
+  let top, maxH;
+  if (full <= below) { top = r.bottom + 6; maxH = below; }
+  else if (full <= above) { top = r.top - 6 - full; maxH = above; }
+  else if (Math.max(below, above) >= 240) { if (below >= above) { top = r.bottom + 6; maxH = below; } else { maxH = above; top = minTop; } }
+  else { top = minTop; maxH = maxBottom - minTop; }
+  m.style.maxHeight = Math.max(120, maxH) + 'px';
+  m.style.left = left + 'px'; m.style.top = Math.max(minTop, top) + 'px';
   const first = m.querySelector('button:not([disabled])');
   if (first) first.focus({ preventScroll: true });
 }
@@ -1996,10 +2227,11 @@ async function deleteProjectFlow() {
     for (const it of items) {
       await S.store.deleteItem(pid, it.id);
       if (it.assetId) await S.store.deleteAsset(it.assetId);
+      for (const a of it.attachments || []) if (a.asset) await S.store.deleteAsset(a.asset);
     }
     for (const name of ['links', 'characters']) {
       const rows = await S.store.list(pid, name);
-      for (const r of rows) { await S.store.del(pid, name, r.id); if (r.portraitId) await S.store.deleteAsset(r.portraitId); }
+      for (const r of rows) { await S.store.del(pid, name, r.id); if (r.portraitId) await S.store.deleteAsset(r.portraitId); for (const a of r.attachments || []) if (a.asset) await S.store.deleteAsset(a.asset); }
     }
     await S.store.deleteProject(pid);
     if (S.currentId === pid) goHome();
@@ -2159,6 +2391,12 @@ function buildItem(item) {
     f.caption = lineInput('caption file-cap', 'Add a note about this file', 'Note about this file', key, 'caption');
     content.append(head, el('div', { class: 'file-row' }, el('span', { class: 'file-icon', html: ICON('doc', 30) }), el('div', { class: 'file-info' }, f.name, f.sub), f.link), f.caption);
   }
+  if (f.body && (item.type === 'writing' || item.type === 'note')) {
+    menuBtn.before(clipBtn('Attach a photo or file where your cursor is', () => startAttach(id)));
+    f.atts = el('div', { class: 'atts', hidden: true });
+    trackCaret(f.body, () => f.atts);
+    f.body.after(f.atts);
+  }
   li._f = f;
   li.append(gap, stitch, content);
   return li;
@@ -2173,6 +2411,7 @@ function applyItem(li, item, idx) {
     if (input.value !== v) { input.value = v; if (input.tagName === 'TEXTAREA') autosize(input); }
   };
   set(f.title, 'title'); set(f.body, 'body'); set(f.caption, 'caption'); set(f.place, 'place');
+  if (f.atts) fillAtts(f, itemTarget(item.id) || { key: 'items/' + item.id, fields: ['body'], atts: () => item.attachments || [], text: () => '', box: () => f }, item.attachments || []);
   if (f.setting && document.activeElement !== f.setting && !('setting' in p)) f.setting.value = item.setting || 'INT.';
   if (f.time && document.activeElement !== f.time && !('time' in p)) f.time.value = item.time || 'DAY';
   const ord = S.ordinals && S.ordinals.get(item.id);
@@ -2255,13 +2494,13 @@ function renderRead() {
   if (curZone() === 'bible') r.firstChild.textContent += ' – Series bible';
   const writing = S.items.map(view).filter(i => i.type === 'writing' && (i.el === 'cast' || (i.body || '').trim() || (i.title || '').trim()));
   r.append(el('p', { class: 'reader-note', text: writing.length
-    ? 'Your writing, in thread order. Notes, photos and files are hidden while you read.'
+    ? 'Your writing, in thread order. Photos and files you attached in the text appear where you placed them; other notes, photos and files are hidden.'
     : 'There’s no writing in this thread yet. Switch to Edit and add a piece of writing to read it here.' }));
   writing.forEach((w, i) => {
     if (w.el === 'chapter') r.append(el('span', { class: 'chap-label', text: 'Chapter ' + ((S.ordinals && S.ordinals.get(w.id)) || '') }));
     if ((w.title || '').trim()) r.append(el('h2', { text: w.title.trim() }));
     else if (i > 0) r.append(el('div', { class: 'break', 'aria-hidden': 'true' }));
-    for (const para of (w.body || '').trim().split(/\n\s*\n/)) if (para.trim()) r.append(el('p', { text: para }));
+    for (const para of (w.body || '').trim().split(/\n\s*\n/)) if (para.trim()) r.append(...textWithAtts('p', null, para, w));
     if (w.el === 'cast') for (const c of S.chars) { const v = charView(c); r.append(el('h3', { text: charName(c) + ((v.role || '').trim() ? ' — ' + v.role.trim() : '') })); for (const t of [v.backstory, v.personality, v.wants]) if ((t || '').trim()) r.append(el('p', { text: t.trim() })); }
   });
 }
@@ -2283,7 +2522,7 @@ function renderScriptRead(r, p) {
     if (it.el === 'episode') { if (lastAct) sp.append(el('p', { class: 'sp-end', text: 'END OF ' + lastAct })); lastAct = null; actN = 0; sp.append(el('p', { class: 'sp-ep', text: 'EPISODE ' + (S.ordinals.get(it.id) || '') + ((it.title || '').trim() ? ': ' + it.title.trim() : '') })); continue; }
     if (it.el === 'scene') sp.append(el('p', { class: 'sp-heading', text: sceneHeading(it) }));
     else if ((it.title || '').trim()) sp.append(el('p', { class: 'sp-heading', text: it.title.trim().toUpperCase() }));
-    for (const e of parseScript(it.body)) sp.append(el('p', { class: 'sp-' + e.t, text: e.text }));
+    for (const e of parseScript(it.body)) sp.append(...textWithAtts('p', 'sp-' + e.t, e.text, it));
   }
   if (lastAct) sp.append(el('p', { class: 'sp-end', text: 'END OF ' + lastAct }));
   r.append(sp);
@@ -2549,17 +2788,18 @@ async function deleteItem(iid) {
     try { await S.store.setItem(pid, iid, data); } catch (e) { toast(dbErrMsg(e)); }
   }, 8000);
   if (data.assetId) setTimeout(() => { if (!undone) S.store.deleteAsset(data.assetId); }, 9000);
+  if ((data.attachments || []).length) setTimeout(() => { if (!undone) for (const a of data.attachments) if (a.asset) S.store.deleteAsset(a.asset); }, 9000);
 }
-function exportEpisode(iid) {
+function exportEpisode(iid, withPhotos) {
   const all = threadItems().map(view);
   const e = episodesOf(all).find(x => x.ep && x.ep.id === iid); if (!e) return;
-  exportPdf([e.ep, ...e.items], ` – Episode ${e.n}`, e.n - 1);
+  exportPdf([e.ep, ...e.items], ` – Episode ${e.n}`, e.n - 1, withPhotos);
 }
 function openItemMenu(anchor, iid) {
   const idx = S.items.findIndex(i => i.id === iid);
   const it = S.items[idx];
   openMenu(anchor, [
-    ...(it && it.el === 'episode' ? [{ label: 'Export this episode as PDF', onClick: () => exportEpisode(iid) }] : []),
+    ...(it && it.el === 'episode' ? [{ label: 'Export this episode as PDF', onClick: () => exportEpisode(iid) }, { label: 'Export this episode with photos', onClick: () => exportEpisode(iid, true) }] : []),
     { label: 'Move up', disabled: idx <= 0, onClick: () => moveItem(iid, -1) },
     { label: 'Move down', disabled: idx < 0 || idx >= S.items.length - 1, onClick: () => moveItem(iid, 1) },
     { label: 'Delete', danger: true, onClick: () => deleteItem(iid) }
@@ -2860,6 +3100,7 @@ async function deleteCharacter(id) {
     } catch (e) { toast(dbErrMsg(e)); }
   }, 8000);
   if (data.portraitId) setTimeout(() => { if (!undone) S.store.deleteAsset(data.portraitId); }, 9000);
+  if ((data.attachments || []).length) setTimeout(() => { if (!undone) for (const a of data.attachments) if (a.asset) S.store.deleteAsset(a.asset); }, 9000);
 }
 
 /* portrait */
@@ -2949,11 +3190,14 @@ function buildCharDetail(id) {
     f.conns, f.formHost);
 
   const fields = el('div', { class: 'cd-fields' });
+  f.atts = el('div', { class: 'atts', hidden: true });
   for (const [field, label, ph, big] of CHAR_FIELDS) {
     const t = el('textarea', { class: 'inp' + (big ? ' big' : ''), id: 'cf-' + field, rows: big ? '5' : '2', placeholder: ph });
     bind(t, field); f[field] = t;
-    fields.append(el('div', { class: 'field' }, el('label', { for: 'cf-' + field, text: label }), t));
+    trackCaret(t, () => f.atts);
+    fields.append(el('div', { class: 'field' }, el('div', { class: 'label-row' }, el('label', { for: 'cf-' + field, text: label }), clipBtn('Attach a photo or file to ' + label.toLowerCase() + ', where your cursor is', () => startCharAttach(id, field))), t));
   }
+  fields.append(el('div', { class: 'field' }, el('span', { class: 'fieldlabel', text: 'Reference photos and files' }), el('p', { class: 'att-help', text: 'Tap a paperclip above to attach a photo or file at your cursor. A marker like [Photo 1] goes into the text.' }), f.atts));
   return { id, key, f, syncForm: null, root: el('div', { class: 'cdetail' }, top, head, connSec, fields) };
 }
 function applyChar() {
@@ -2970,6 +3214,7 @@ function applyChar() {
     }
   }
   fillPortrait(f.portrait, c);
+  fillAtts(f, charTarget(cd.id, 'notes'), v.attachments || []);
   const nm = charName(c);
   f.portrait.setAttribute('aria-label', v.portraitId ? `Photo of ${nm}: change or remove` : `Add a photo of ${nm}`);
   if (v.portraitId) f.portrait.setAttribute('aria-haspopup', 'menu'); else f.portrait.removeAttribute('aria-haspopup');
@@ -3177,6 +3422,7 @@ function wire() {
   $('#projMore').innerHTML = ICON('more');
   $('#lbClose').innerHTML = ICON('close');
   $('#backBtn').addEventListener('click', goBack);
+  $('#attachInput').addEventListener('change', e => onAttachFiles(e.target.files));
 
   $('#navBtn').addEventListener('click', () => $('#app').classList.contains('nav-open') ? closeNav() : openNav());
   $('#scrim').addEventListener('click', closeNav);
@@ -3202,7 +3448,8 @@ function wire() {
   $('#projMore').addEventListener('click', e => {
     e.stopPropagation();
     openMenu(e.currentTarget, [
-      { label: 'Export as PDF', onClick: exportPdf },
+      { label: 'Export as PDF', onClick: () => exportPdf() },
+      { label: 'Export as PDF with photos', onClick: () => exportPdf(null, '', 0, true) },
       { label: 'Type of writing: ' + ptypeName(curKind()), onClick: () => typeMenu($('#projMore')) },
       { label: 'Export as Markdown', onClick: exportProject },
       { label: 'Back up all projects', onClick: backupFlow },
